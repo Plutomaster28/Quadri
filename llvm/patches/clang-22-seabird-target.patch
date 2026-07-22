@@ -1,0 +1,53 @@
+diff --git a/clang/lib/Basic/CMakeLists.txt b/clang/lib/Basic/CMakeLists.txt
+index adfc6ee32..7b7e15c11 100644
+--- a/clang/lib/Basic/CMakeLists.txt
++++ b/clang/lib/Basic/CMakeLists.txt
+@@ -113,6 +113,7 @@ add_clang_library(clangBasic
+   Targets/OSTargets.cpp
+   Targets/PPC.cpp
+   Targets/RISCV.cpp
++  Targets/SeaBird.cpp
+   Targets/SPIR.cpp
+   Targets/Sparc.cpp
+   Targets/SystemZ.cpp
+diff --git a/clang/lib/Basic/Targets.cpp b/clang/lib/Basic/Targets.cpp
+index 263253918..f1b69155a 100644
+--- a/clang/lib/Basic/Targets.cpp
++++ b/clang/lib/Basic/Targets.cpp
+@@ -31,6 +31,7 @@
+ #include "Targets/OSTargets.h"
+ #include "Targets/PPC.h"
+ #include "Targets/RISCV.h"
++#include "Targets/SeaBird.h"
+ #include "Targets/SPIR.h"
+ #include "Targets/Sparc.h"
+ #include "Targets/SystemZ.h"
+@@ -116,6 +117,11 @@ std::unique_ptr<TargetInfo> AllocateTarget(const llvm::Triple &Triple,
+   default:
+     return nullptr;
+ 
++  case llvm::Triple::seabird32:
++    return std::make_unique<SeaBird32TargetInfo>(Triple, Opts);
++  case llvm::Triple::seabird64:
++    return std::make_unique<SeaBird64TargetInfo>(Triple, Opts);
++
+   case llvm::Triple::arc:
+     return std::make_unique<ARCTargetInfo>(Triple, Opts);
+ 
+diff --git a/clang/lib/Driver/ToolChains/CommonArgs.cpp b/clang/lib/Driver/ToolChains/CommonArgs.cpp
+index 10a1a412e..00845310c 100644
+--- a/clang/lib/Driver/ToolChains/CommonArgs.cpp
++++ b/clang/lib/Driver/ToolChains/CommonArgs.cpp
+@@ -787,6 +787,12 @@ std::string tools::getCPUName(const Driver &D, const ArgList &Args,
+   case llvm::Triple::riscv64:
+     return riscv::getRISCVTargetCPU(Args, T);
+ 
++  case llvm::Triple::seabird32:
++  case llvm::Triple::seabird64:
++    if (const Arg *A = Args.getLastArg(options::OPT_mcpu_EQ))
++      return A->getValue();
++    return "generic";
++
+   case llvm::Triple::bpfel:
+   case llvm::Triple::bpfeb:
+     if (const Arg *A = Args.getLastArg(options::OPT_mcpu_EQ))

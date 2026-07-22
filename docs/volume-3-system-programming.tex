@@ -1,0 +1,403 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=0.85in,includefoot]{geometry}
+\usepackage{graphicx,float,longtable,booktabs,enumitem,listings,xcolor,fancyhdr,titlesec,array,hyperref,etoolbox}
+\usepackage[strings]{underscore}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\arraybackslash}p{#1}}
+\setlength{\tabcolsep}{2pt}\renewcommand{\arraystretch}{1.1}
+\AtBeginEnvironment{longtable}{\footnotesize}\AtBeginEnvironment{table}{\footnotesize}
+\lstset{basicstyle=\ttfamily\small,breaklines=true,showstringspaces=false,frame=single,numbers=left,numberstyle=\tiny\color{gray},backgroundcolor=\color{gray!8}}
+\pagestyle{fancy}\fancyhf{}
+\fancyhead[L]{\small\sffamily SeaBird ISA Volume 3}\fancyhead[R]{\small\sffamily Version 3.0 RC1}
+\fancyfoot[C]{\thepage}\setlength{\headheight}{14pt}
+\titleformat{\section}{\Large\bfseries\sffamily}{\thesection}{0.8em}{}
+\titleformat{\subsection}{\large\bfseries\sffamily}{\thesubsection}{0.8em}{}
+\titleformat{\subsubsection}{\normalsize\bfseries\sffamily}{\thesubsubsection}{0.8em}{}
+\hypersetup{colorlinks=true,linkcolor=black,urlcolor=black}
+\sloppy\emergencystretch=1em
+\begin{document}
+\begin{titlepage}\centering\vspace*{2cm}
+{\Huge\bfseries SeaBird ISA\\[0.3cm]}{\LARGE Volume 3: System Programming\\[0.5cm]}
+{\Large Version 3.0 Release Candidate 1}\vfill
+{\large Machine-readable architecture revision 1\\June 27, 2026}\vfill
+\end{titlepage}
+\tableofcontents\clearpage
+\section{System Architecture}
+
+\subsection{Privilege Model}
+
+SeaBird defines four software privilege levels plus an optional virtualization host level. Lower numeric CPL values are more privileged.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}L{1.4cm}L{2.8cm}L{7.8cm}@{}}
+\toprule
+\textbf{Level} & \textbf{Name} & \textbf{Intended Use} \\ \midrule
+H & Hypervisor host & Optional virtualization root; controls guest stage-2 translation and interception. \\
+0 & Kernel & MMU, interrupt controller, system registers, scheduler, and device control. \\
+1 & Executive & Optional drivers or kernel services with restricted system-register access. \\
+2 & Supervisor & Optional sandboxed services; no page-table or interrupt-controller mutation. \\
+3 & User & Applications; no privileged instructions or privileged mappings. \\ \bottomrule
+\end{tabular}
+\end{table}
+
+Page permissions and privileged instructions check CPL. A gate may only transfer to the same or a more privileged level. Returning to a less privileged level validates the complete return frame before changing CPL. Rings 1 and 2 are optional; an implementation that omits them treats their descriptors as invalid and reports their absence through QUERY.
+
+SeaBird uses a flat virtual address model and has no general-purpose segmentation, segment limits, GDT, LDT, task gates, or hardware task switching. TPBASE and KPBASE provide efficient thread-local and per-processor addressing without segment semantics. Context switching is an operating-system operation performed by saving architectural state and loading a new address-space root, ASID, stack, and register context.
+
+\subsection{Reset and Initialization}
+
+After power-on reset, one bootstrap processor begins execution; all other processors remain in the WAIT state. The bootstrap state is Clownfish mode, CPL0, paging disabled, interrupts disabled, IP=0xCAFE, R0--R31=0, FLAGS=0, vector and mask state=0, FPCR at architectural defaults, and all translation caches invalid. The reset vector must reside in executable physical memory. RESET re-enters this state without requiring RAM contents to be preserved.
+
+Firmware may enter Tetra or Dragonet mode only after installing an aligned translation root and exception table, then setting the mode and paging enable controls with a serializing WRCR. Secondary processors are started by a platform START message containing a physical, naturally aligned entry address. They enter with the same reset state except IP is the supplied address and R0 contains the logical processor identifier.
+
+\subsection{System-Register Namespace}
+
+System registers are 16-bit numbered resources accessed by RDCR and WRCR. Numbers not reported by QUERY are reserved and raise INVALID\_OP. User access raises GPF. Unless stated otherwise, writes are serializing and reserved bits must be zero.
+
+\begin{longtable}{@{}L{1.7cm}L{2.8cm}L{7.4cm}@{}}
+\toprule
+\textbf{Number} & \textbf{Name} & \textbf{Purpose} \\ \midrule
+\endfirsthead
+\toprule
+\textbf{Number} & \textbf{Name} & \textbf{Purpose} \\ \midrule
+\endhead
+0x0000 & CR0 & Mode, paging, write-protect, alignment, and FP enable controls. \\
+0x0001 & CR1 & Extension-enable bitmap; each bit requires matching QUERY support. \\
+0x0002 & CR2 & Most recent page-fault virtual address; read-only to software. \\
+0x0003 & CR3 & Root page-table physical address and low ASID field. \\
+0x0004 & CR4 & Extended protection, global-page, and state-management controls. \\
+0x0005 & MODE & Current operating mode and target mode for serialized transitions. \\
+0x0006 & ASID & Current address-space identifier. \\
+0x0010 & IDTR & Interrupt descriptor table base; limit is held in IDTL. \\
+0x0011 & IDTL & Interrupt descriptor table byte limit. \\
+0x0012 & KSP0 & CPL0 stack pointer loaded on a privilege transition. \\
+0x0013 & KSP1 & Optional CPL1 stack pointer. \\
+0x0014 & KSP2 & Optional CPL2 stack pointer. \\
+0x0015 & TPBASE & User thread-local base, readable at CPL3. \\
+0x0016 & KPBASE & Per-processor privileged base. \\
+0x0017 & SYSENTRY & SYSCALL entry virtual address. \\
+0x0018 & SYSMASK & FLAGS bits cleared on SYSCALL entry. \\
+0x0019 & PID & Operating-system process identifier; CPL3 read-only. \\
+0x001A & TID & Operating-system thread identifier; CPL3 read-only. \\
+0x0020 & TIMER & Monotonic timer count. \\
+0x0021 & TIMERCMP & Local timer interrupt deadline. \\
+0x0022 & FREQ & Timer frequency in hertz; read-only. \\
+0x0023 & PSTATE & Requested performance and idle state. \\
+0x0024 & THERMAL & Temperature status and thermal interrupt controls. \\
+0x0030 & DBGCTL & Debug and single-step controls. \\
+0x0031--0x0038 & DB0--DB7 & Address/value breakpoints and watchpoints. \\
+0x0040--0x004F & PMC0--PMC15 & Optional performance event selectors and counters. \\
+0x0050--0x005F & MCA0--MCA15 & Optional machine-check status, address, and syndrome banks. \\
+0x0100--0x01FF & VM registers & Optional guest control, exit reason, stage-2 root, and injection state. \\
+0x0200--0x02FF & Security registers & Optional shadow-stack, branch-control, and measured-launch state. \\
+0x0300 & MPUCTRL & Region-MPU global enable and default-deny control. \\
+0x0301 & MPUINFO & Read-only MPU capabilities: region count and alignment granule. \\
+0x0310--0x033F & MPU descriptors & Sixteen three-register region descriptors: MPUBASE$n$, MPULIMIT$n$, and MPUATTR$n$. \\
+0x8000--0xFFFF & Vendor registers & Implementation-specific; never required by portable software. \\ \bottomrule
+\end{longtable}
+
+System registers replace an unstructured model-specific-register space. Standard numbers and bits are architecture-owned and stable. Vendor registers must be discoverable by vendor and implementation identifiers and must not alter base-ISA behavior when left at reset values.
+
+\subsubsection{Region-MPU Register Block}
+
+Implementations reporting the MPU feature use the architecture-owned register block at 0x0300--0x033F. MPUCTRL bit 0 is ENABLE and bit 1 is DEFAULT\_DENY; all other bits are reserved. MPUINFO is read-only: bits 7:0 contain the implemented region count (16 for the Tritium v1 profile), and bits 15:8 contain the base-2 logarithm of the minimum region granule in bytes. Reset clears MPUCTRL and every descriptor.
+
+For region $n$ in 0--15, MPUBASE$n$ is register $0x0310+3n$, MPULIMIT$n$ is $0x0311+3n$, and MPUATTR$n$ is $0x0312+3n$. BASE and LIMIT are inclusive physical byte addresses. Address bits below the granule are reserved and must be zero. LIMIT must be greater than or equal to BASE when the descriptor is enabled.
+
+MPUATTR bit 0 is REGION\_ENABLE; bits 1, 2, and 3 grant read, write, and execute access respectively; bits 5:4 encode privilege as 0=none, 1=user only, 2=privileged only, and 3=both; bits 7:6 encode memory type as 0=normal TCM, 1=normal scratchpad, 2=strongly ordered device, and 3=reserved; bit 8 is LOCK. Bits 63:9 are reserved and must be zero. A set LOCK bit makes all three registers of that descriptor immutable until reset; attempted writes raise GPF.
+
+Firmware must clear REGION\_ENABLE before changing an unlocked descriptor, write BASE and LIMIT, then write MPUATTR with REGION\_ENABLE set as the publishing operation. WRCR remains serializing. When multiple enabled regions match, the highest-numbered region wins. With MPUCTRL.ENABLE set, a complete fetch, load, or store must match one descriptor and satisfy its permissions; otherwise it raises the architecture's protection fault before any part of the access commits. DEFAULT\_DENY must be one for the Tritium v1 profile. MPU checks use physical addresses after translation, or the untranslated flat physical address when paging is absent.
+
+\subsection{Debug, Performance, Power, and Reliability}
+
+TF requests a DEBUG trap after each successfully retired instruction. DB0--DB7 may describe execute, load, store, or load/store breakpoints with power-of-two lengths from 1 to 16 bytes; execute breakpoints fault before the target instruction, while data watchpoints trap after the access retires. Debug state is per hardware thread and must be saved during context switches.
+
+The optional PMU provides up to 16 counters. QUERY enumerates counter width and architectural events. Counter overflow may request a local interrupt. PMU counts are not deterministic across implementations and must never change program semantics. RDPMC is unprivileged only when enabled by DBGCTL.
+
+WFI waits until an eligible interrupt or implementation event occurs. SLEEP requests a deeper platform idle state and may return early. PSTATE is a performance request rather than a frequency guarantee. TIMER continues monotonically across ordinary idle states, has the frequency reported by FREQ, and must not move backward.
+
+MACHINE\_CHECK records valid, uncorrected, processor-context-corrupt, address-valid, and syndrome-valid state in an MCA bank. Corrected errors may be logged without an exception. An uncorrected restartable error raises MACHINE\_CHECK as a fault; context-corrupt errors are aborts. Bank contents remain valid until privileged software clears them.
+
+\subsection{Memory Types and Cache Control}
+
+Every translated page has one effective memory type. If stage-1, stage-2, and physical-range attributes disagree, the most restrictive type wins in this order: DEVICE, UC, WC, WT, WB.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}L{1.7cm}L{10.2cm}@{}}
+\toprule
+\textbf{Type} & \textbf{Required Behavior} \\ \midrule
+WB & Write-back cacheable normal memory; coherent between processors. \\
+WT & Cacheable reads; writes propagate to the point of coherency before retirement. \\
+WC & Weakly ordered write-combining memory; reads are not speculated and fences drain buffers. \\
+UC & Uncacheable normal memory; accesses occur in program order for the issuing processor. \\
+DEVICE & Strongly ordered, non-speculative device memory; access size and count are preserved. \\ \bottomrule
+\end{tabular}
+\end{table}
+
+Cache capacity, associativity, replacement, and latency are implementation properties. Coherence, self-modifying-code rules, and memory-type behavior are architectural. After modifying executable memory, software must complete stores, execute FLUSH or an equivalent data-cache clean when required by QUERY, execute INVIC for affected instruction lines, and then execute ISYNC before the new instructions may be fetched.
+
+\subsection{Memory Ordering and Atomics}
+
+SeaBird normal WB memory follows total store order (TSO): loads are not reordered with older loads; stores are not reordered with older loads or stores; a load may pass an older store only when addresses differ. Stores from one processor become visible to all processors in one common order. Data dependencies are preserved. Instruction fetch ordering requires ISYNC.
+
+\begin{itemize}
+    \item \textbf{LFENCE} completes all older loads before younger loads execute.
+    \item \textbf{SFENCE} makes all older stores globally visible before younger stores.
+    \item \textbf{MFENCE} combines LFENCE and SFENCE and orders device accesses.
+    \item \textbf{ISYNC} discards stale prefetched instructions and serializes subsequent fetch.
+\end{itemize}
+
+XCHG, CAS, FAA, and the other atomic instructions perform one indivisible read-modify-write at the point of coherency and provide acquire+release ordering. A \texttt{.SC} encoding variant provides sequential consistency by adding a full fence before and after the operation. Atomicity is guaranteed for naturally aligned 1, 2, 4, 8, and 16-byte scalar accesses supported by QUERY. Ordinary aligned scalar loads and stores up to the reported atomic width are single-copy atomic. Vector loads and stores are not atomic.
+
+The optional transactional extension provides best-effort speculative regions. XBEGIN records a signed fallback target; XEND attempts commit; XABORT requests explicit abort. Capacity, conflict, interrupt, debug, unsupported-instruction, and explicit-abort reasons are reported by XSTATUS. No implementation may guarantee that a transaction eventually commits, so software must provide a non-transactional fallback. Transactions do not make device or UC accesses speculative; attempting either aborts before the access occurs.
+
+\subsection{Multiprocessor and Interrupt Controller Model}
+
+Each logical processor has a 32-bit processor ID, local timer, task-priority threshold, pending-interrupt bitmap, and in-service bitmap. A platform interrupt controller routes device interrupts to one processor, a processor set, or the lowest-priority eligible processor. Vectors 0x20--0xFE are externally routable; 0xFF is reserved as spurious.
+
+\texttt{SENDIPI target, vector, kind} sends FIXED, NMI, START, or INIT messages. FIXED delivery obeys IF and CR8 priority. NMI, INIT, and START do not. \texttt{EOI vector} completes an in-service interrupt. INIT returns the target to the secondary-processor WAIT state and clears local interrupt state without clearing ordinary RAM. Interrupt delivery is coherent with memory but is not a memory fence; communicating software must publish data with an atomic release or SFENCE before sending an IPI.
+
+\subsection{Optional Virtualization Extension}
+
+The \texttt{VIRT} extension adds host level H and a memory-resident Virtual Machine Control Block (VMCB). VMENTER validates and loads guest state, VMRESUME re-enters a previously exited guest, and VMEXIT is an implementation action that saves guest state and loads host state. The VMCB contains guest/host GPR and control state, feature masks, interrupt injection, interception bitmaps, a stage-2 page-table root, and an exit-information area.
+
+Stage-1 guest translation produces a GPA; stage-2 translation produces a PA. A stage-1 fault is delivered to the guest. A stage-2 fault causes VMEXIT with the GPA, access type, and qualification. Intercepted instructions have no guest architectural effect before exit. The extension must report save-area size and revision through QUERY; unknown VMCB revision values fail VMENTER without partial state change. VMREAD and VMWRITE encode their field selector as a trailing little-endian 16-bit immediate; ModR/M r/m identifies the value GPR and ModR/M.reg is zero.
+
+\subsection{Optional Security Extensions}
+
+\begin{itemize}
+    \item \textbf{Shadow stack (SHSTK):} CALL stores return addresses to both the ordinary stack and the protected shadow stack selected by SPTR. RET compares both values and raises CONTROL\_PROTECTION on mismatch. Only dedicated privileged instructions may create writable shadow-stack mappings.
+    \item \textbf{Indirect branch tracking (IBT):} Indirect CALL/BRR targets must begin with ENDBR when enabled for the current address space; otherwise CONTROL\_PROTECTION is raised. Direct branches are unaffected.
+    \item \textbf{Measured launch (MLAUNCH):} Optional firmware-rooted measurement initializes an isolated launch environment. Cryptographic algorithms, trust anchors, and attestation formats belong to the platform profile and are discoverable.
+\end{itemize}
+
+\section{Exception \& Interrupt Handling}
+
+\subsection{Exception Vector Table}
+
+The interrupt descriptor table is selected by IDTR/IDTL and contains handlers for system events. Address 0xCAFE is the reset entry, not a permanently fixed table base. Vectors 0x00--0x1F are architecture-owned; 0x20--0xFE are available to operating systems and devices.
+
+\begin{longtable}{@{}llll@{}}
+\toprule
+\textbf{Vector} & \textbf{Mnemonic} & \textbf{Type} & \textbf{Description} \\ \midrule
+\endfirsthead
+\toprule
+\textbf{Vector} & \textbf{Mnemonic} & \textbf{Type} & \textbf{Description} \\ \midrule
+\endhead
+0x00 & RESET & System & Power-on/reset \\
+0x01 & DIV\_ZERO & Fault & Division by zero \\
+0x02 & DEBUG & Trap & Debug/single-step \\
+0x03 & NMI & Interrupt & Non-maskable interrupt \\
+0x04 & BREAKPOINT & Trap & Software breakpoint \\
+0x05 & OVERFLOW & Trap & Arithmetic overflow \\
+0x06 & BOUND & Fault & Bounds check failure \\
+0x07 & INVALID\_OP & Fault & Invalid opcode \\
+0x08 & NO\_FPU & Fault & FPU not available \\
+0x09 & DOUBLE\_FAULT & Abort & Double fault \\
+0x0A & INVALID\_CONTEXT & Fault & Invalid saved context or return frame \\
+0x0B & GATE\_NOT\_PRESENT & Fault & Interrupt gate not present \\
+0x0C & STACK\_FAULT & Fault & Stack mapping, limit, or alignment fault \\
+0x0D & GPF & Fault & General protection fault \\
+0x0E & PAGE\_FAULT & Fault & Page fault \\
+0x0F & RESERVED & -- & Reserved \\
+0x10 & FPU\_ERROR & Fault & Floating-point error \\
+0x11 & ALIGN\_CHECK & Fault & Alignment check \\
+0x12 & MACHINE\_CHECK & Abort & Machine check \\
+0x13 & SIMD\_ERROR & Fault & SIMD floating-point \\
+0x14 & CONTROL\_PROTECTION & Fault & Shadow-stack or indirect-branch violation \\
+0x15 & VIRTUALIZATION & Fault/Exit & Virtualization configuration or guest event \\
+0x16--0x1F & RESERVED & -- & Reserved for future use \\
+0x20--0xFE & USER\_INT & Interrupt & External/software interrupts \\
+0xFF & SPURIOUS & Interrupt & Spurious local interrupt; no EOI required \\ \bottomrule
+\end{longtable}
+
+\subsection{Interrupt Descriptor Format}
+
+Each IDT entry is 32 bytes and naturally aligned. It contains a pointer-width handler address, target CPL, gate type, interrupt-stack selector, present bit, and required caller privilege for software TRAP. Gate types are \textbf{interrupt} (clears IF), \textbf{trap} (preserves IF), and \textbf{abort} (enters the machine-check stack). Reserved bits must be zero. Fetching an absent, malformed, out-of-limit, or non-canonical gate raises GPF; a fault while delivering GPF raises DOUBLE\_FAULT.
+
+The interrupt-stack selector chooses KSP0, KSP1, KSP2, or one of four implementation-reported emergency stacks. A privilege transition always switches to the target CPL stack before writing a frame. An interrupt may use an emergency stack without changing CPL.
+
+\subsection{Exception Handling Mechanism}
+
+Exceptions are classified as follows: a \textbf{fault} is restartable at the saved instruction, a \textbf{trap} is reported after retirement at the successor IP, and an \textbf{abort} does not guarantee restartability. When an exception or interrupt is accepted:
+
+\begin{enumerate}
+    \item The complete descriptor and target stack are validated.
+    \item If privilege changes, old SP and CPL are captured and the selected privileged stack is loaded.
+    \item In active pointer-width slots, hardware pushes old CPL, old SP, FLAGS, return IP, vector, and error code. Old CPL/SP are zero when no privilege change occurs.
+    \item CFAR receives the first byte of the responsible instruction plus decoded prefix metadata.
+    \item TF is cleared. IF is cleared only for an interrupt or abort gate.
+    \item CPL and IP are loaded from the descriptor and execution begins at the handler.
+\end{enumerate}
+
+IRET validates the complete frame, target privilege, target IP, and target stack before changing any state. Faults during initial delivery are promoted to DOUBLE\_FAULT. A fault during DOUBLE\_FAULT delivery causes a reset-class shutdown event.
+
+\subsection{Exception Error Codes}
+
+The error-code low bits are common: bit 0 indicates an external event; bit 1 indicates a write; bit 2 indicates user access; bit 3 indicates instruction fetch; bit 4 indicates a present-page protection failure; bit 5 indicates reserved page-table bits; bit 6 indicates stage-2 translation; bits 16--23 hold a source-specific reason. Unused bits are zero. CR2 receives the faulting VA for PAGE\_FAULT, even when the access spans pages. A virtualization exit additionally records the GPA in the VMCB.
+
+\subsection{Privilege Level Transitions}
+
+Exceptions may cause privilege level changes:
+
+\begin{itemize}
+    \item \textbf{User $\rightarrow$ Kernel:} On system call, page fault, or protection violation
+    \item \textbf{Kernel $\rightarrow$ Kernel:} On nested exceptions
+    \item \textbf{Kernel $\rightarrow$ User:} On IRET or SYSRET
+\end{itemize}
+
+Stack switching occurs automatically when privilege level changes, using KSP0--KSP2. SYSCALL enters CPL0 through SYSENTRY without an IDT lookup, records the user return IP and FLAGS in the standard exception frame, clears SYSMASK bits, and loads KSP0. SYSRET accepts only a frame originally created by SYSCALL and validates all user state before returning.
+
+\section{Control Registers}
+
+\subsection{System Control Registers}
+
+The architecture-wide system-register namespace is defined in the System Architecture section. CR0--CR4 are the low-numbered compatibility names used for core execution control:
+
+\begin{longtable}{@{}lll@{}}
+\toprule
+\textbf{Register} & \textbf{Name} & \textbf{Purpose} \\ \midrule
+\endfirsthead
+\toprule
+\textbf{Register} & \textbf{Name} & \textbf{Purpose} \\ \midrule
+\endhead
+CR0 & System Control & Protected mode, paging, FPU control \\
+CR1 & Extension Control & Architecturally enabled optional extensions \\
+CR2 & Page Fault Linear Address & Faulting address on page fault \\
+CR3 & Translation Root & Physical root address plus ASID \\
+CR4 & Extended Control & Additional CPU features \\
+CR8 & Task Priority & Local interrupt priority threshold \\ \bottomrule
+\end{longtable}
+
+\subsection{CR0 Bit Definitions}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Bit} & \textbf{Name} & \textbf{Description} \\ \midrule
+0 & PE & Protected Mode Enable \\
+1 & MP & Monitor Coprocessor \\
+2 & EM & Emulation (FPU emulation) \\
+3 & TS & Task Switched \\
+4 & ET & Extension Type \\
+5 & NE & Numeric Error \\
+16 & WP & Write Protect \\
+18 & AM & Alignment Mask \\
+29 & NW & Not Write-through \\
+30 & CD & Cache Disable \\
+31 & PG & Paging Enable \\ \bottomrule
+\end{tabular}
+\end{table}
+
+Attempts to set PG without a valid aligned CR3, to select an unsupported mode, or to enable an unsupported extension raise GPF and leave the register unchanged. Changing PE, PG, MODE, CR3, or executable-memory protection is serializing.
+
+\section{Memory Management}
+
+\subsection{Paging Mechanism}
+
+SeaBird uses 4 KiB translation tables containing 512 little-endian 64-bit entries. Every level therefore consumes nine VA bits. The same entry format is used in all paged modes, which keeps operating-system and virtualization code uniform.
+
+\thispagestyle{fancy}
+\textbf{Tetra Mode (32-bit):}
+\begin{itemize}
+    \item Two translated levels plus a two-bit root selector: VA[31:30], VA[29:21], VA[20:12], offset[11:0]
+    \item Page size: 4 KiB or 2 MiB
+    \item Virtual address space: 4 GB
+\end{itemize}
+
+\textbf{Dragonet Mode (64-bit):}
+\begin{itemize}
+    \item Four levels: VA[47:39], VA[38:30], VA[29:21], VA[20:12], offset[11:0]
+    \item Page size: 4 KiB, 2 MiB, or 1 GiB
+    \item 48-bit canonical virtual address space
+\end{itemize}
+
+\textbf{Droplet Mode (128-bit):}
+\begin{itemize}
+    \item Four or five translated levels selected by MODE; QUERY reports the implemented VA width
+    \item Implementations must support at least 48 VA bits and may support up to 57 VA bits in this revision
+    \item Bits above the implemented VA width must equal the highest implemented VA bit
+\end{itemize}
+
+CR3 contains the 4 KiB-aligned physical root address. In Tetra mode only root entries 0--3 are reachable. At each non-leaf level, PFN supplies the next table address. A leaf at the lowest level maps 4 KiB; PS at the next level maps 2 MiB; PS one level higher maps 1 GiB. PS in any other position is reserved and causes PAGE\_FAULT.
+
+\subsection{Page Table Entry Format}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Bits} & \textbf{Field} & \textbf{Description} \\ \midrule
+0 & P & Present \\
+1 & W & Writable \\
+2 & U & User-accessible \\
+3--5 & MT & Memory type: WB, WT, WC, UC, or DEVICE \\
+6 & A & Accessed; atomically set by hardware \\
+7 & D & Dirty; atomically set by hardware on a leaf write \\
+8 & PS & Large-page leaf at a legal intermediate level \\
+9 & G & Global; not tagged by ASID \\
+10--11 & SW & Available to operating-system software \\
+12--51 & PFN & Physical Frame Number \\
+52--58 & SW & Available to operating-system software \\
+59--62 & PKEY & Optional protection-key index \\
+63 & XD & Execute Disable \\ \bottomrule
+\end{tabular}
+\end{table}
+
+Permissions are intersected across every level: a write requires W=1 throughout; CPL3 access requires U=1 throughout; instruction fetch requires XD=0 throughout. CR0.WP determines whether CPL0 honors leaf write protection and must default to one. Reserved bits, misaligned table addresses, misaligned large-page PFNs, or physical addresses beyond the reported PA width cause PAGE\_FAULT with the reserved-bit error flag.
+
+Hardware sets A and D using coherent atomic updates before the associated access retires. If the update cannot be written, the original access raises PAGE\_FAULT. Implementations must not invent A/D updates for instructions that are squashed before retirement, except that A may be set by an architecturally valid speculative walk.
+
+\subsection{Translation Lookaside Buffer (TLB)}
+
+TLB size and organization are implementation properties. Architectural translations are tagged with the current ASID; global entries ignore ASID. Writing CR3 invalidates non-global entries for the newly selected ASID unless the no-flush control is set. \texttt{INVTLB va, asid} invalidates one mapping, \texttt{INVTLBASID asid} invalidates all non-global mappings for an address space, and \texttt{INVTLBALL} invalidates all local mappings. These instructions are privileged and complete only after older page-table stores are visible. Operating systems must issue shootdown IPIs and await acknowledgement before reusing a physical page whose translation may be cached by another processor.
+
+Page-table memory must be WB and naturally aligned. Software updates a live entry with one aligned 64-bit store, performs SFENCE, invalidates affected translations, and performs a second SFENCE before freeing or repurposing the old table or frame.
+
+\section{Implementation Notes}
+
+\subsection{Design Considerations for Implementers}
+
+\subsubsection{Frontend Decoder}
+
+\begin{itemize}
+    \item Complex instructions should decode to micro-op sequences in 1--2 cycles
+    \item Maintain micro-op cache for frequently-decoded instruction sequences
+    \item Support macro-op fusion (e.g., CMP + JZ $\rightarrow$ single micro-op)
+\end{itemize}
+
+\subsubsection{Execution Backend}
+
+\begin{itemize}
+    \item Minimum 4-wide superscalar for competitive performance
+    \item Out-of-order execution with register renaming
+    \item Unified reservation station or distributed scheduler
+    \item Memory disambiguation for load/store reordering
+\end{itemize}
+
+\subsubsection{Branch Prediction}
+
+\begin{itemize}
+    \item Two-level adaptive predictor recommended
+    \item BTB (Branch Target Buffer) with 4K--8K entries
+    \item Return stack buffer with 16--32 entries
+    \item Indirect branch predictor for virtual calls
+\end{itemize}
+
+\subsection{Compliance Levels}
+
+Conformance profiles describe architectural behavior, not pipeline width or performance. A profile implementation must pass the corresponding architectural test suite; superscalar width, out-of-order execution, cache size, and micro-op design remain implementation choices.
+
+\begin{itemize}
+    \item \textbf{SB-Base:} Clownfish execution, R0--R31, integer core, precise traps, QUERY, and little-endian physical memory.
+    \item \textbf{SB-System32:} SB-Base plus Tetra, privilege levels, 32-bit paging, atomics, IDT, timer, and SMP interfaces.
+    \item \textbf{SB-System64:} SB-System32 plus Dragonet, 48-bit virtual addressing, 64-bit ABI, and 16-byte atomics when reported.
+    \item \textbf{SB-Wide128:} SB-System64 plus Droplet register and pointer semantics. Implemented VA/PA and vector widths remain discoverable.
+    \item \textbf{Optional extensions:} FP, SIMD, AVX, CRYPTO, DSP, PIO, TXN, VIRT, PMU, SHSTK, IBT, BCD, and MLAUNCH are independently reported.
+\end{itemize}
+\end{document}

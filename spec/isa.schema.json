@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SeaBird instruction database",
+  "type": "object",
+  "required": ["schema_version", "architecture_version", "instructions"],
+  "properties": {
+    "schema_version": {"type": "integer", "minimum": 1},
+    "architecture_version": {"type": "string"},
+    "instructions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id", "mnemonic", "syntax", "category", "encoding", "feature",
+          "privilege", "modes", "description", "operation", "flags",
+          "memory_order", "exceptions", "status"
+        ],
+        "properties": {
+          "id": {"type": "string"},
+          "mnemonic": {"type": "string"},
+          "syntax": {"type": "string"},
+          "category": {"type": "string"},
+          "encoding": {
+            "type": "object",
+            "required": ["map", "opcode", "format", "operand_binding"],
+            "properties": {
+              "map": {"type": "string"},
+              "opcode": {"type": "array", "items": {"type": "integer", "minimum": 0, "maximum": 255}},
+              "format": {"type": "string"},
+              "operand_binding": {"type": "string"}
+            }
+          },
+          "feature": {"type": "string"},
+          "privilege": {"enum": ["user", "supervisor", "kernel", "host"]},
+          "modes": {"type": "array", "minItems": 1, "items": {"enum": ["Clownfish", "Tetra", "Dragonet", "Droplet"]}},
+          "description": {"type": "string"},
+          "operation": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+          "flags": {"type": "object"},
+          "memory_order": {"type": "string"},
+          "exceptions": {"type": "array", "items": {"type": "string"}},
+          "status": {"enum": ["normative", "provisional", "reserved", "alias"]}
+        }
+      }
+    }
+  }
+}

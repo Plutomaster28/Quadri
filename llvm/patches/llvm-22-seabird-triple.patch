@@ -1,0 +1,139 @@
+diff --git a/llvm/include/llvm/TargetParser/Triple.h b/llvm/include/llvm/TargetParser/Triple.h
+--- a/llvm/include/llvm/TargetParser/Triple.h
++++ b/llvm/include/llvm/TargetParser/Triple.h
+@@ -105,6 +105,8 @@ public:
+     kalimba,     // Kalimba: generic kalimba
+     shave,       // SHAVE: Movidius vector VLIW processors
+     lanai,       // Lanai: Lanai 32-bit
++    seabird32,   // SeaBird Tetra: 32-bit little-endian
++    seabird64,   // SeaBird Dragonet: 64-bit little-endian
+     wasm32,      // WebAssembly with 32-bit pointers
+     wasm64,      // WebAssembly with 64-bit pointers
+     renderscript32, // 32-bit RenderScript
+diff --git a/llvm/lib/TargetParser/Triple.cpp b/llvm/lib/TargetParser/Triple.cpp
+--- a/llvm/lib/TargetParser/Triple.cpp
++++ b/llvm/lib/TargetParser/Triple.cpp
+@@ -44,6 +44,8 @@ StringRef Triple::getArchTypeName(ArchType Kind) {
+   case hsail:          return "hsail";
+   case kalimba:        return "kalimba";
+   case lanai:          return "lanai";
++  case seabird32:      return "seabird32";
++  case seabird64:      return "seabird64";
+   case loongarch32:    return "loongarch32";
+   case loongarch64:    return "loongarch64";
+   case m68k:           return "m68k";
+@@ -240,6 +241,8 @@ StringRef Triple::getArchTypePrefix(ArchType Kind) {
+
+   case kalimba:     return "kalimba";
+   case lanai:       return "lanai";
++  case seabird32:
++  case seabird64:   return "seabird";
+   case shave:       return "shave";
+   case wasm32:
+   case wasm64:      return "wasm";
+@@ -507,6 +509,8 @@ Triple::ArchType Triple::getArchTypeForLLVMName(StringRef Name) {
+       .Case("spirv64", spirv64)
+       .Case("kalimba", kalimba)
+       .Case("lanai", lanai)
++      .Case("seabird32", seabird32)
++      .Case("seabird64", seabird64)
+       .Case("shave", shave)
+       .Case("wasm32", wasm32)
+       .Case("wasm64", wasm64)
+@@ -656,6 +659,8 @@ static Triple::ArchType parseArch(StringRef ArchName) {
+                  Triple::spirv64)
+           .StartsWith("kalimba", Triple::kalimba)
+           .Case("lanai", Triple::lanai)
++          .Case("seabird32", Triple::seabird32)
++          .Case("seabird64", Triple::seabird64)
+           .Case("renderscript32", Triple::renderscript32)
+           .Case("renderscript64", Triple::renderscript64)
+           .Case("shave", Triple::shave)
+@@ -998,6 +1002,8 @@ static Triple::ObjectFormatType getDefaultFormat(const Triple &T) {
+   case Triple::hsail:
+   case Triple::kalimba:
+   case Triple::lanai:
++  case Triple::seabird32:
++  case Triple::seabird64:
+   case Triple::loongarch32:
+   case Triple::loongarch64:
+   case Triple::m68k:
+@@ -1719,6 +1725,7 @@ unsigned Triple::getArchPointerBitWidth(llvm::Triple::ArchType Arch) {
+   case llvm::Triple::hsail:
+   case llvm::Triple::kalimba:
+   case llvm::Triple::lanai:
++  case llvm::Triple::seabird32:
+   case llvm::Triple::loongarch32:
+   case llvm::Triple::m68k:
+   case llvm::Triple::mips:
+@@ -1760,6 +1765,7 @@ unsigned Triple::getArchPointerBitWidth(llvm::Triple::ArchType Arch) {
+   case llvm::Triple::riscv64be:
+   case llvm::Triple::sparcv9:
+   case llvm::Triple::spirv:
++  case llvm::Triple::seabird64:
+   case llvm::Triple::spir64:
+   case llvm::Triple::spirv64:
+   case llvm::Triple::systemz:
+@@ -1839,6 +1845,7 @@ Triple Triple::get32BitArchVariant() const {
+   case Triple::hsail:
+   case Triple::kalimba:
+   case Triple::lanai:
++  case Triple::seabird32:
+   case Triple::loongarch32:
+   case Triple::m68k:
+   case Triple::mips:
+@@ -1871,6 +1878,7 @@ Triple Triple::get32BitArchVariant() const {
+   case Triple::amdil64:        T.setArch(Triple::amdil);   break;
+   case Triple::hsail64:        T.setArch(Triple::hsail);   break;
+   case Triple::loongarch64:    T.setArch(Triple::loongarch32); break;
++  case Triple::seabird64:      T.setArch(Triple::seabird32); break;
+   case Triple::mips64:
+     T.setArch(Triple::mips, getSubArch());
+     break;
+@@ -1939,6 +1947,7 @@ Triple Triple::get64BitArchVariant() const {
+   case Triple::riscv64be:
+   case Triple::sparcv9:
+   case Triple::spir64:
++  case Triple::seabird64:
+   case Triple::spirv64:
+   case Triple::systemz:
+   case Triple::ve:
+@@ -1955,6 +1964,7 @@ Triple Triple::get64BitArchVariant() const {
+   case Triple::armeb:           T.setArch(Triple::aarch64_be); break;
+   case Triple::hsail:           T.setArch(Triple::hsail64);    break;
+   case Triple::loongarch32:     T.setArch(Triple::loongarch64);    break;
++  case Triple::seabird32:       T.setArch(Triple::seabird64); break;
+   case Triple::mips:
+     T.setArch(Triple::mips64, getSubArch());
+     break;
+@@ -2110,6 +2118,8 @@ bool Triple::isLittleEndian() const {
+   case Triple::hsail64:
+   case Triple::hsail:
+   case Triple::kalimba:
++  case Triple::seabird32:
++  case Triple::seabird64:
+   case Triple::loongarch32:
+   case Triple::loongarch64:
+   case Triple::mips64el:
+@@ -2358,6 +2367,8 @@ ExceptionHandling Triple::getDefaultExceptionHandling() const {
+   case Triple::csky:
+   case Triple::hexagon:
+   case Triple::lanai:
++  case Triple::seabird32:
++  case Triple::seabird64:
+   case Triple::m68k:
+   case Triple::msp430:
+   case Triple::systemz:
+diff --git a/llvm/lib/TargetParser/TargetDataLayout.cpp b/llvm/lib/TargetParser/TargetDataLayout.cpp
+--- a/llvm/lib/TargetParser/TargetDataLayout.cpp
++++ b/llvm/lib/TargetParser/TargetDataLayout.cpp
+@@ -563,5 +563,9 @@ std::string Triple::computeDataLayout(StringRef ABIName) const {
+     return "e-m:e-p:32:32-i1:32-i8:8-i16:16-i32:32-i64:64-f16:16-"
+            "f32:32-f64:64-n8:16:32:64-v48:16:16-v96:32:32-v192:64:64";
++  case Triple::seabird32:
++    return "e-m:e-p:32:32-i64:64-n32-S128";
++  case Triple::seabird64:
++    return "e-m:e-p:64:64-i64:64-n64-S128";
+   case Triple::hexagon:
+     return "e-m:e-p:32:32:32-a:0-n16:32-"
+            "i64:64:64-i32:32:32-i16:16:16-i1:8:8-f32:32:32-f64:64:64-"

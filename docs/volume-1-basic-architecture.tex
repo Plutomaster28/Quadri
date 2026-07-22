@@ -1,0 +1,1240 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=0.85in,includefoot]{geometry}
+\usepackage{graphicx,float,longtable,booktabs,enumitem,listings,xcolor,fancyhdr,titlesec,array,hyperref,etoolbox}
+\usepackage[strings]{underscore}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\arraybackslash}p{#1}}
+\setlength{\tabcolsep}{2pt}\renewcommand{\arraystretch}{1.1}
+\AtBeginEnvironment{longtable}{\footnotesize}\AtBeginEnvironment{table}{\footnotesize}
+\lstset{basicstyle=\ttfamily\small,breaklines=true,showstringspaces=false,frame=single,numbers=left,numberstyle=\tiny\color{gray},backgroundcolor=\color{gray!8}}
+\pagestyle{fancy}\fancyhf{}
+\fancyhead[L]{\small\sffamily SeaBird ISA Volume 1}\fancyhead[R]{\small\sffamily Version 3.0 RC1}
+\fancyfoot[C]{\thepage}\setlength{\headheight}{14pt}
+\titleformat{\section}{\Large\bfseries\sffamily}{\thesection}{0.8em}{}
+\titleformat{\subsection}{\large\bfseries\sffamily}{\thesubsection}{0.8em}{}
+\titleformat{\subsubsection}{\normalsize\bfseries\sffamily}{\thesubsubsection}{0.8em}{}
+\hypersetup{colorlinks=true,linkcolor=black,urlcolor=black}
+\sloppy\emergencystretch=1em
+\begin{document}
+\begin{titlepage}\centering\vspace*{2cm}
+{\Huge\bfseries SeaBird ISA\\[0.3cm]}{\LARGE Volume 1: Basic Architecture\\[0.5cm]}
+{\Large Version 3.0 Release Candidate 1}\vfill
+{\large Machine-readable architecture revision 1\\June 27, 2026}\vfill
+\end{titlepage}
+\tableofcontents\clearpage
+\section{Introduction}
+
+The SeaBird ISA is a hybrid CISC/RISC architecture designed to:
+
+\begin{itemize}
+    \item Allow highly expressive instructions for compact, human-readable assembly.
+    \item Break CISC instructions into simple RISC-like micro-ops internally for high performance.
+    \item Support multiple operating modes:
+    \begin{itemize}
+        \item Clownfish (16-bit real mode)
+        \item Tetra (32-bit protected mode)
+        \item Dragonet (64-bit long mode)
+        \item Droplet (128-bit hypervisor / wide-precision mode)
+    \end{itemize}
+    \item Support vector and floating-point operations in addition to scalar operations.
+    \item Provide a flexible register naming scheme that allows both Intel-style semantic names and Rx numeric aliases.
+\end{itemize}
+
+The architecture is designed for modern CPU pipelines, allowing micro-op fusion, vectorization, and efficient memory addressing.
+
+\section{Operating Modes and Memory Model}
+
+\subsection{Operating Modes}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}lllL{7.2cm}@{}}
+\toprule
+\textbf{Mode} & \textbf{Bit Width} & \textbf{Purpose} & \textbf{Notes} \\ \midrule
+Clownfish & 16-bit & Legacy/boot real-mode & IP=16-bit, default operand and pointer width=16-bit \\
+Tetra & 32-bit & Protected mode & Supports 32-bit virtual memory, \\
+ &  &  & standard privilege rings \\
+Dragonet & 64-bit & Long mode & 64-bit registers, supports 64-bit \\
+ &  &  & addressing, IP-relative addressing \\
+Droplet & 128-bit & Hypervisor mode & Virtual wide precision mode \\ & & & for complex computing tasks\\ \bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Reset Vector:} 0xCAFE (physical bootstrap entry point)
+
+\subsection{Memory Model}
+
+\begin{itemize}
+    \item Flat linear memory in Tetra/Dragonet modes
+    \item Strict little-endian byte order for all instruction fetches, integer data, floating-point data, vector lanes, page-table entries, and stack objects
+    \item Memory protection and masking handled by the memory controller / MMU
+    \item Instructions are independent of mode; access faults occur via MMU if privileges are violated
+\end{itemize}
+
+\textbf{Endianness:} SeaBird is little-endian only. Multi-byte instruction immediates, displacements, memory operands, and saved machine state are encoded least-significant byte first. Big-endian execution is not an architectural mode.
+
+\subsubsection{Mode-Independent Instruction Set}
+
+\textbf{Critical Design Principle:} The SeaBird ISA is designed so that, where possible, instructions are mode-independent: the base encoding, mnemonics, and semantics remain stable across privilege levels and operating modes. Some optional extensions or mode-specific wide-register operations (for example, Droplet 128-bit operations) introduce additional instructions or encodings that are valid only in their respective modes or when the corresponding extension is enabled.
+
+\textbf{Examples:}
+
+\begin{lstlisting}
+LD  R1, [R2]              ; loads from memory (all modes)
+ST  [R3], R4              ; stores to memory (all modes)
+MOV R5, R6                ; register move (all modes)
+ADD R7, R8                ; arithmetic (all modes)
+JMP label                 ; jump (all modes)
+\end{lstlisting}
+
+Neither the instruction encoding nor the mnemonic changes; the instruction simply generates a memory request or operation.
+
+\subsubsection{Privilege Enforcement via MMU}
+
+The Memory Management Unit (MMU) / memory controller handles all permission checks \textit{after} instruction decode:
+
+\textbf{Process Flow:}
+
+\begin{enumerate}
+    \item Instruction decoded (e.g., LD R1, [0xFFFF0000])
+    \item Memory request issued to MMU
+    \item MMU checks:
+    \begin{itemize}
+        \item Current privilege level (user/kernel/hypervisor)
+        \item Address mapping validity
+        \item Access permissions (read/write/execute)
+        \item Protection attributes
+    \end{itemize}
+    \item MMU response:
+    \begin{itemize}
+        \item \textbf{Success:} Return data / complete operation
+        \item \textbf{Failure:} Trigger exception (access fault, page fault, or privilege violation)
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Example Scenarios:}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Mode} & \textbf{Instruction} & \textbf{Behavior} \\ \midrule
+User & LD R1, [0xFFFF0000] & \textbf{Fault} if kernel-only address \\
+User & ST [user\_data], R2 & \textbf{Success} if mapped \& writable \\
+Kernel & LD R1, [0xFFFF0000] & \textbf{Success} (kernel memory accessible) \\
+Kernel & ST [io\_port], R3 & \textbf{Success} (I/O access allowed) \\
+Hypervisor & LD R1, [guest\_mem] & \textbf{Success} (VM memory accessible) \\ \bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Mode Privilege Summary}
+
+\textbf{User Mode:}
+\begin{itemize}
+    \item Can execute all unprivileged instructions (LD, ST, ADD, JMP, etc.)
+    \item \textit{Cannot} access kernel memory, I/O ranges, page tables, or privileged control registers
+    \item Memory violations trigger exceptions handled by kernel
+\end{itemize}
+
+\textbf{Kernel Mode:}
+\begin{itemize}
+    \item Same instruction set as user mode
+    \item \textit{Can} access privileged memory regions, I/O ports, and control registers
+    \item Full access to system resources
+\end{itemize}
+
+\textbf{Hypervisor Mode (optional):}
+\begin{itemize}
+    \item Same instruction set as user/kernel modes
+    \item \textit{Can} access VM guest memory mappings and virtualization control structures
+    \item Highest privilege level
+\end{itemize}
+
+\textbf{Design Advantage:} One unified instruction set across all privilege levels. Mode determines \textit{whether access succeeds}, not \textit{what instructions are available}.
+
+\section{Registers}
+
+The SeaBird ISA provides a comprehensive register set with dual naming conventions, supporting both modern numeric naming (R0--R31) and legacy-style semantic aliases (AX, BX, etc.). All 32 general-purpose registers are architecturally visible in every operating mode. The operating mode selects the default operand width and pointer width; it does not hide registers.
+
+\subsection{General-Purpose Registers (GPRs)}
+
+\subsubsection{Primary GPRs (R0--R15)}
+
+Available in all modes:
+
+\begin{longtable}{@{}llll@{}}
+\toprule
+\textbf{Physical} & \textbf{SeaBird Name} & \textbf{Legacy Alias} & \textbf{Purpose Hint} \\ \midrule
+\endfirsthead
+\toprule
+\textbf{Physical} & \textbf{SeaBird Name} & \textbf{Legacy Alias} & \textbf{Purpose Hint} \\ \midrule
+\endhead
+R0 & A0 & AX & Primary accumulator \\
+R1 & A1 & BX & Base/index utility \\
+R2 & A2 & CX & Counter register \\
+R3 & A3 & DX & Data register \\
+R4 & B0 & SI & Source pointer / string ops \\
+R5 & B1 & DI & Destination pointer \\
+R6 & B2 & BP & Base pointer \\
+R7 & B3 & SP & Stack pointer \\
+R8 & C0 & R8W/R8D/R8 & Extra GPR \\
+R9 & C1 & R9 & Extra GPR \\
+R10 & C2 & R10 & Extra GPR \\
+R11 & C3 & R11 & Extra GPR \\
+R12 & D0 & R12 & Extra GPR \\
+R13 & D1 & R13 & Extra GPR \\
+R14 & D2 & R14 & Extra GPR \\
+R15 & D3 & R15 & Extra GPR \\ \bottomrule
+\end{longtable}
+
+\subsubsection{High General Registers (R16--R31)}
+
+Available in all modes. In Clownfish and Tetra mode these registers are still accessible, but their default operations use the active mode width unless an operand-size override or explicit subregister suffix is used.
+
+\begin{longtable}{@{}lll@{}}
+\toprule
+\textbf{Physical} & \textbf{SeaBird Name} & \textbf{Purpose} \\ \midrule
+\endfirsthead
+\toprule
+\textbf{Physical} & \textbf{SeaBird Name} & \textbf{Purpose} \\ \midrule
+\endhead
+R16 & E0 & Environment/exception scratch \\
+R17 & E1 & Syscall argument 0 \\
+R18 & E2 & Syscall argument 1 \\
+R19 & E3 & Syscall argument 2 \\
+R20 & F0 & FP scratch 0 \\
+R21 & F1 & FP scratch 1 \\
+R22 & F2 & FP scratch 2 \\
+R23 & F3 & FP scratch 3 \\
+R24 & G0 & General purpose \\
+R25 & G1 & General purpose \\
+R26 & G2 & General purpose \\
+R27 & G3 & General purpose \\
+R28 & T0 & Temporary (micro-op engine) \\
+R29 & T1 & Temporary (micro-op engine) \\
+R30 & T2 & Temporary (micro-op engine) \\
+R31 & T3 & Temporary (micro-op engine) \\ \bottomrule
+\end{longtable}
+
+\textbf{Note:} The T-class registers (R28--R31) are architecturally visible but reserved by the standard ABI as volatile translator and micro-op scratch registers. User programs may use them in bare-metal code, but hosted code must treat them as caller-saved and clobberable across calls, traps, and binary-translation boundaries.
+
+\subsection{Register Access Rules}
+
+\subsubsection{Dual Naming}
+
+All registers are accessible via multiple aliases:
+
+\begin{itemize}
+    \item \textbf{R0} = \textbf{A0} = \textbf{AX} (all refer to the same physical register)
+    \item \textbf{R3} = \textbf{A3} = \textbf{DX}
+    \item \textbf{R5} = \textbf{B1} = \textbf{DI}
+    \item \textbf{R7} = \textbf{B3} = \textbf{SP}
+\end{itemize}
+
+\subsubsection{Low-Mode Base Register Rule}
+
+Clownfish and Tetra mode keep the full R0--R31 architectural register file, but default source and destination widths are narrowed by mode. The base register number is unchanged:
+
+\begin{itemize}
+    \item In Clownfish mode, an unsuffixed GPR operand reads and writes the low 16-bit view of that register.
+    \item In Tetra mode, an unsuffixed GPR operand reads and writes the low 32-bit view of that register.
+    \item In Dragonet mode, an unsuffixed GPR operand reads and writes the low 64-bit view of that register.
+    \item In Droplet mode, an unsuffixed GPR operand reads and writes the full 128-bit view of that register.
+\end{itemize}
+
+Software that wants conventional 16-bit or 32-bit base-register behavior should use R0--R15 and their aliases. R16--R31 remain available for compilers, translators, interrupt handlers, and systems code even in Clownfish and Tetra mode.
+
+\subsubsection{Width Rules Across Operating Modes}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Mode} & \textbf{Register Width} & \textbf{Pointer Width} \\ \midrule
+Clownfish & 16-bit & 16-bit \\
+Tetra & 32-bit & 32-bit \\
+Dragonet & 64-bit & 64-bit \\
+Droplet & 128-bit & 128-bit \\\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Subregister Views}
+
+Similar to x86-64, registers support partial access:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}L{2.2cm}L{10cm}@{}}
+\toprule
+\textbf{Suffix} & \textbf{Meaning} \\ \midrule
+\textbf{A0B} & Lower 8 bits (byte) \\
+\textbf{A0W} & Lower 16 bits (word) \\
+\textbf{A0D} & Lower 32 bits (dword) \\
+\textbf{A0Q} & Lower 64 bits (qword) \\
+\textbf{A0} & Full default-width view for the active mode. In Dragonet this is 64 bits; in Droplet this is 128 bits. \\ \bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Subregister write rule:} All writes to a subregister zero-extend into the full architectural register. Writing A0B clears bits 8 and above. Writing A0W clears bits 16 and above. Writing A0D clears bits 32 and above. Writing A0Q clears bits 64 and above when the implementation is in Droplet mode. This rule removes partial-register dependencies and keeps binary translation simple.
+
+\textbf{Examples:}
+
+\begin{lstlisting}
+MOV A0W, #0x1234      ; move to lower 16 bits
+MOV A0D, #0xDEADBEEF  ; move to lower 32 bits
+MOV A0Q, #0xCAFEBABE  ; move to lower 64 bits, zero-extending in Droplet
+\end{lstlisting}
+
+In Clownfish mode (16-bit):
+\begin{itemize}
+    \item AX and unsuffixed R0 refer to the 16-bit view of R0
+\end{itemize}
+
+In Tetra mode (32-bit):
+\begin{itemize}
+    \item A0D, AX, and unsuffixed R0 refer to the 32-bit view of R0
+\end{itemize}
+
+In Dragonet mode (64-bit):
+\begin{itemize}
+    \item A0 refers to the full 64-bit view of R0
+\end{itemize}
+
+\subsection{Special Registers}
+
+These registers cannot be accessed as Rn and require special instructions (similar to x86 CR/DR registers):
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}L{2.3cm}L{9.8cm}@{}}
+\toprule
+\textbf{Name} & \textbf{Purpose} \\ \midrule
+IP & Instruction pointer (16/32/64/128-bit depending on mode) \\
+FLAGS & Status flags (zero, carry, overflow, sign, etc.) \\
+CFAR & CISC Frontend Address Register (IP + prefix info) \\
+UCF & Micro-op control flags \\
+VECCTL & Vector mode control \\
+SPTR & Shadow stack pointer (optional security feature) \\
+TPBASE & User thread-local storage base \\
+KPBASE & Privileged per-processor data base \\ \bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Access:} Special registers are manipulated via dedicated instructions such as RDCR/WRCR or implicit behavior during control flow operations.
+
+\subsection{Standard Calling Convention}
+
+SeaBird defines a standard ABI so compilers, operating systems, binary translators, and handwritten assembly can interoperate. The ABI is mode-scaled: stack slots, argument slots, return addresses, and saved GPR values use the active pointer width unless a wider ABI profile is explicitly selected.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}L{2.4cm}L{5.4cm}L{4.0cm}@{}}
+\toprule
+\textbf{Register(s)} & \textbf{ABI Role} & \textbf{Preservation Rule} \\ \midrule
+R0 & Return value 0 / argument 0 & Caller-saved \\
+R1 & Return value 1 / argument 1 & Caller-saved \\
+R2--R5 & Arguments 2--5 & Caller-saved \\
+R6 & Frame pointer (BP) & Callee-saved when used \\
+R7 & Stack pointer (SP) & Callee-preserved, always valid \\
+R8--R11 & Temporaries & Caller-saved \\
+R12--R15 & Saved registers & Callee-saved \\
+R16--R19 & Extended arguments 6--9 / syscall arguments & Caller-saved \\
+R20--R23 & Floating-point / vector transfer scratch & Caller-saved \\
+R24--R27 & Platform reserved / TLS / runtime use & Callee-saved unless platform ABI says otherwise \\
+R28--R31 & Translator and micro-op scratch (T0--T3) & Volatile, not preserved \\\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Floating-point and vector convention:}
+\begin{itemize}
+    \item Scalar FP and vector arguments use V0--V7; additional values are passed on the stack.
+    \item Scalar FP and vector return values use V0 and V1. K0--K3 are caller-saved; K4--K7 are callee-saved.
+    \item V0--V15 are caller-saved. V16--V31 are callee-saved at the enabled architectural vector width.
+    \item FPCR is callee-saved. FPSR exception flags are caller-saved. A public function must restore the caller's rounding mode.
+\end{itemize}
+
+\textbf{C/C++ data models:}
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}L{2.0cm}C{1.2cm}C{1.2cm}C{1.2cm}C{1.2cm}C{1.7cm}L{2.7cm}@{}}
+\toprule
+\textbf{ABI} & \textbf{char} & \textbf{short} & \textbf{int} & \textbf{long} & \textbf{pointer} & \textbf{Model} \\ \midrule
+SB16 & 8 & 16 & 16 & 32 & 16 & Small embedded; size in bits \\
+SB32 & 8 & 16 & 32 & 32 & 32 & ILP32 \\
+SB64 & 8 & 16 & 32 & 64 & 64 & LP64 \\
+SB128 & 8 & 16 & 32 & 64 & 128 & P128; 128-bit pointers \\ \bottomrule
+\end{tabular}
+\end{table}
+
+\texttt{long long} is 64 bits in every ABI and \texttt{\_BitInt(128)} / compiler \texttt{int128} is the native 128-bit integer type. \texttt{size\_t}, \texttt{ptrdiff\_t}, and object pointers have pointer width. Data alignment is the minimum of object size and 16 bytes, except vectors which align to their encoded width up to 64 bytes. Structures use declaration order, natural member alignment, tail padding to aggregate alignment, and no implicit bit-field allocation across the underlying declared type.
+
+\textbf{Function calls:}
+\begin{itemize}
+    \item Integer and pointer arguments are passed in R0--R5, then R16--R19, then on the stack from low address to high address.
+    \item Integer and pointer return values are placed in R0 and R1.
+    \item Aggregates of at most two pointer-width words are returned in R0/R1. Larger aggregates use a hidden result pointer in R0 and shift user arguments right by one register.
+    \item R7 is the architectural stack pointer. The stack grows downward.
+    \item The stack pointer must be aligned to 16 bytes at every public call boundary in Tetra and Dragonet mode, and to 32 bytes in Droplet mode. Clownfish code aligns to 2 bytes unless an operating environment requires more.
+    \item R6 may be used as a frame pointer. Leaf functions may omit it.
+    \item A call instruction pushes or otherwise records the return address using the active pointer width.
+    \item There is no red zone. Memory below SP may be overwritten by interrupts. Stack arguments are right-aligned in pointer-width slots and the caller removes them.
+    \item For a variadic function, named arguments use the ordinary rules above.
+    Unnamed arguments are passed on the stack in pointer-width slots after any
+    named stack arguments. The default C argument promotions apply. A
+    \texttt{va\_list} is a pointer to the next unnamed argument slot;
+    \texttt{va\_start} initializes it to the first such slot and each
+    \texttt{va\_arg} advances it by the argument's rounded slot size.
+    \item At function entry, SP addresses the return address. ENTER saves the old R6, establishes R6 as frame pointer, and allocates its rounded frame size.
+\end{itemize}
+
+\textbf{System calls:}
+\begin{itemize}
+    \item R0 contains the syscall number.
+    \item R1--R5 and R16--R19 contain syscall arguments.
+    \item R0 contains the return value after SYSRET or kernel return.
+    \item R28--R31, FLAGS condition bits, and all caller-saved registers may be clobbered by a syscall.
+\end{itemize}
+
+\textbf{Optional register windowing:} Implementations may provide a register-window or register-renaming mechanism beneath the architectural ABI. Windowing must be invisible to normal software: architectural R0--R31 names, caller/callee preservation rules, exception save/restore, and binary translation behavior remain exactly as specified. A windowed implementation must flush or materialize architectural register state before traps, interrupts, context switches, and debug visibility events.
+
+\section{Architectural Programming Model}
+
+\subsection{Normative Language and Conformance}
+
+The words \textbf{must}, \textbf{must not}, \textbf{required}, \textbf{shall}, and \textbf{shall not} state architectural requirements. \textbf{Should} states a recommendation. \textbf{May} states an allowed implementation choice. Behavior described as \textbf{reserved} must not be generated by software and must either be ignored on read or raise INVALID\_OP as stated by the containing definition. \textbf{Undefined} results may vary and must not be used to infer privileged or stale state.
+
+Architectural state is the state visible to conforming software: GPRs, IP, FLAGS, vector state, system registers, memory, and architecturally reported feature state. Caches, pipelines, physical registers, micro-ops, predictors, and register windows are not architectural unless a section explicitly says otherwise. Instructions retire in program order and exceptions are precise: no younger instruction may have an architectural effect when an older instruction faults.
+
+\subsection{Execution State and Address Spaces}
+
+Each hardware thread has an independent architectural context. At minimum it contains R0--R31, IP, FLAGS, V0--V31, K0--K7, FPCR, FPSR, current privilege level (CPL), current operating mode, and the control state required by enabled extensions.
+
+SeaBird distinguishes four address domains:
+\begin{itemize}
+    \item \textbf{Virtual address (VA):} Address produced by an instruction before translation.
+    \item \textbf{Physical address (PA):} Address produced by the active translation regime.
+    \item \textbf{I/O address:} Separate programmed-I/O namespace accessed only by IN and OUT.
+    \item \textbf{Guest physical address (GPA):} Optional virtualization intermediate address.
+\end{itemize}
+
+Instruction fetch, load, store, and atomic accesses use virtual addresses when paging is enabled and physical addresses otherwise. Address arithmetic wraps at the active address width before translation. Dragonet virtual addresses must be canonical: bits above bit 47 equal bit 47. Non-canonical addresses raise GPF before a page-table walk. Droplet address width is architecturally 128 bits, but an implementation reports its implemented VA and PA widths through QUERY; all unimplemented high bits must be canonical sign extension.
+
+IP names the first byte of the current instruction. For ordinary retirement, IP advances by the decoded instruction length. Relative branches add their signed displacement to the address immediately following the complete instruction. A fault saves the address of the faulting instruction; a trap saves the address of the next instruction. Instruction encodings may not exceed 32 bytes. A longer prefix or instruction sequence raises INVALID\_OP.
+
+\subsection{Data Types and Alignment}
+
+\begin{longtable}{@{}L{2.8cm}L{2.7cm}L{6.4cm}@{}}
+\toprule
+\textbf{Type} & \textbf{Widths} & \textbf{Architectural Rule} \\ \midrule
+\endfirsthead
+\toprule
+\textbf{Type} & \textbf{Widths} & \textbf{Architectural Rule} \\ \midrule
+\endhead
+Unsigned integer & 8, 16, 32, 64, 128 & Pure binary integer; overflow wraps unless a saturating instruction is used. \\
+Signed integer & 8, 16, 32, 64, 128 & Two's-complement representation. \\
+Pointer & 16, 32, 64, 128 & Unsigned virtual address at the active address width. \\
+Binary floating point & 16, 32, 64, 128 & IEEE 754 binary16, binary32, binary64, and binary128. \\
+Packed integer/float & 8--128-bit lanes & Contiguous little-endian lanes held in V registers. Lane zero occupies the least-significant bits. \\
+Predicate mask & 1--64 bits & One K-register bit per active vector lane. Inactive high mask bits read as zero. \\
+Character/string & 8-bit units & Byte sequence; text encoding is an ABI or file-format decision, not an ISA property. \\
+BCD & Packed/unpacked bytes & Optional \texttt{BCD} extension only; absent from the base ISA. \\ \bottomrule
+\end{longtable}
+
+Naturally aligned scalar accesses have an address divisible by their byte size. Vector accesses are naturally aligned to their encoded vector width. Ordinary LD/ST operations permit unaligned accesses, but an implementation may split them; AC=1 at user privilege converts a misaligned access into ALIGN\_CHECK. Atomic read-modify-write operations must be naturally aligned and wholly contained in one cache line, otherwise they raise ALIGN\_CHECK. An access crossing a page boundary is checked independently for every touched page and has no partial architectural destination update on fault.
+
+\subsection{Vector and Floating-Point State}
+
+SeaBird does not expose x87-style stack registers or a separate MMX register file. Scalar floating-point, SIMD, DSP, and wide arithmetic share 32 architectural vector registers V0--V31. Each register has a maximum architectural width of 1024 bits; QUERY reports the maximum implemented vector length. Implementations with a narrower datapath must preserve the complete enabled architectural width across context switches and may execute an instruction in multiple internal beats.
+
+Scalar floating-point instructions operate on the low 16, 32, 64, or 128 bits of a V register and zero all destination bits above the scalar result. Vector instructions select 128, 256, 512, or 1024 bits through VectorCtl. K0--K7 are 64-bit predicate registers. K0 encodes an unmasked operation when no explicit mask is present. Merge masking leaves inactive destination lanes unchanged; zero masking clears them. Loads and stores process lanes in increasing lane order only for fault reporting; they remain a single precise architectural instruction.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}L{2.5cm}L{9.7cm}@{}}
+\toprule
+\textbf{Register} & \textbf{Definition} \\ \midrule
+FPCR & Rounding mode (nearest-even, toward zero, toward $+\infty$, toward $-\infty$), exception masks, flush-to-zero, and default-NaN controls. \\
+FPSR & Sticky invalid, divide-by-zero, overflow, underflow, inexact, and input-denormal status bits. \\
+VECCTL & Default vector length, lane width, and mask behavior used when the instruction does not override them. \\ \bottomrule
+\end{tabular}
+\end{table}
+
+IEEE exceptions set FPSR sticky bits. An unmasked exception raises FPU\_ERROR or SIMD\_ERROR before destination writeback. The default is gradual underflow, round-to-nearest ties-to-even, and quiet-NaN propagation. Signaling NaNs raise invalid and are quieted. Fused operations perform exactly one final rounding.
+
+\subsection{Feature Discovery}
+
+\texttt{QUERY leaf, subleaf} is unprivileged and is the sole architectural feature-discovery interface. Unknown leaves return zero in all result registers. QUERY returns R0--R3 as a four-register result and does not modify FLAGS.
+
+\begin{longtable}{@{}L{2.0cm}L{3.2cm}L{6.8cm}@{}}
+\toprule
+\textbf{Leaf} & \textbf{Name} & \textbf{Result} \\ \midrule
+\endfirsthead
+\toprule
+\textbf{Leaf} & \textbf{Name} & \textbf{Result} \\ \midrule
+\endhead
+0x0000 & Vendor and maximum leaf & R0 maximum basic leaf; R1--R3 twelve ASCII vendor bytes in little-endian order. \\
+0x0001 & Base features & Mode support, paging, atomics, FP, SIMD, I/O, debug, and system-register capability bits. \\
+0x0002 & Widths and topology & Implemented VA/PA widths, maximum vector width, cache-line bytes, logical thread and core identifiers. \\
+0x0003 & Extended features & Crypto, DSP, transactions, virtualization, shadow stack, indirect-branch tracking, and BCD. \\
+0x0004 & Cache description & Deterministic cache type, level, line size, sets, and ways indexed by subleaf. \\
+0x0005 & State components & XSAVE component bitmap, required size, alignment, and component offset indexed by subleaf. \\
+0x80000000 & Maximum extended leaf & Maximum supported extended leaf. \\
+0x80000001 & Architecture identity & Architecture revision, microarchitecture identifier, and implementation revision. \\ \bottomrule
+\end{longtable}
+
+Software must test a feature bit before executing an optional instruction. Executing an unsupported extension raises INVALID\_OP. Feature bits are stable for the lifetime of a hardware thread after reset unless virtualization explicitly masks them.
+
+\subsection{Programmed I/O}
+
+The optional \texttt{PIO} extension provides an independent 16-bit I/O address
+space. \texttt{IN dst, port} and \texttt{OUT port, src} transfer 8, 16, or 32
+bits. The port is encoded as a trailing little-endian 16-bit immediate; ModR/M
+r/m identifies the source or destination GPR and ModR/M.reg is zero. They are
+serializing with respect to other I/O instructions but do not imply a full
+memory fence. Access requires CPL at least as privileged as FLAGS.IOPL or
+permission in the current task I/O bitmap; otherwise GPF is raised. Platforms
+should prefer memory-mapped I/O for new devices.
+
+\subsection{Architectural State Save and Restore}
+
+\texttt{XSAVE [mem], mask} and \texttt{XRSTOR [mem], mask} save and restore enabled extended state components in the offsets reported by QUERY leaf 5. Component zero contains FPCR, FPSR, V0--V31, and K0--K7. The memory area must be 64-byte aligned. Unsupported mask bits raise GPF. XRSTOR validates the complete requested image before changing architectural state. Operating systems must use this interface for task switching when any extended state feature is enabled.
+
+\section{Instruction Syntax}
+
+\subsection{Core Syntax Rules}
+
+\begin{lstlisting}[language={[x86masm]Assembler}]
+MNEMONIC  operand1, operand2, operand3
+\end{lstlisting}
+
+\textbf{General Syntax Rules:}
+
+\begin{itemize}
+    \item \textbf{Mnemonics} are case-insensitive (ADD, add, AdD are identical)
+    \item \textbf{Operands} are separated by commas
+    \item \textbf{Registers} begin with R:
+    \begin{itemize}
+        \item R0--R31 are valid in all modes
+        \item R0--R15 are the conventional base registers used by 16-bit and 32-bit compatibility-oriented code
+        \item Semantic names also supported (AX, BX, SI, DI, etc.)
+    \end{itemize}
+    \item \textbf{Immediate values:}
+    \begin{itemize}
+        \item Decimal: 42
+        \item Hex: 0x2A, 0xFF
+        \item Binary: 0b101010, 0b1010
+        \item Character: 'A'
+    \end{itemize}
+    \item \textbf{Comments:} ; this is a comment
+    \item \textbf{Labels} end with a colon: loop\_start:
+    \item \textbf{Directives} begin with . (see Assembler Directives section)
+    \item \textbf{Whitespace} is ignored except inside strings
+\end{itemize}
+
+\subsection{Canonical Mnemonics and Aliases}
+
+The assembler must emit canonical instruction names in listings and object metadata. Aliases are accepted for programmer convenience but are not distinct instructions.
+
+Scalar floating-point mnemonics use an explicit \texttt{.s} suffix for the
+IEEE binary32 encoding and \texttt{.q} for IEEE binary128, for example
+\texttt{FADD.S}, \texttt{FLD.Q}, and \texttt{FCVTI.Q}. An unsuffixed scalar
+floating-point mnemonic denotes the binary64 form. The suffix selects the
+corresponding operand-width or scalar lane-width prefix and is part of the
+canonical assembly spelling, not a separate architectural instruction.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Canonical} & \textbf{Accepted Alias(es)} & \textbf{Meaning} \\ \midrule
+LD & LOAD & Load from memory \\
+ST & STORE & Store to memory \\
+JE & JZ & Branch if ZF=1 \\
+JNE & JNZ & Branch if ZF=0 \\
+BRR & JMPR & Branch to register target \\ \bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Syntax Examples}
+
+\begin{lstlisting}
+; Case-insensitive mnemonics
+ADD R1, R2
+add r1, r2            ; equivalent to above
+
+; Immediate values
+MOVI R0, #42          ; decimal
+MOVI R1, #0x2A        ; hexadecimal
+MOVI R2, #0b101010    ; binary
+MOVI R3, #'A'         ; character literal
+
+; Labels and jumps
+loop_start:
+    ADD R1, R2
+    DEC R4
+    JNZ loop_start    ; jump if not zero
+
+; Comments
+MOV R0, R1            ; copy R1 to R0
+\end{lstlisting}
+
+\section{Addressing Modes}
+
+The SeaBird ISA uses CISC-style addressing modes in the programmer-visible frontend, which are internally decomposed into RISC-like micro-ops by the backend execution engine. This unified addressing model is available across all operating modes.
+
+\begin{longtable}{@{}lll@{}}
+\toprule
+\textbf{Mode} & \textbf{Syntax} & \textbf{Description} \\ \midrule
+\endfirsthead
+\toprule
+\textbf{Mode} & \textbf{Syntax} & \textbf{Description} \\ \midrule
+\endhead
+Register Direct & R1 & Operand in register \\
+Immediate & \#42, \#0xFF & Constant value (decimal, hex, binary) \\
+Register Indirect & [R2] & Memory pointed by register \\
+Register + Offset & [R2+16], [R7+0x20] & Base + immediate displacement \\
+Base + Index (Scaled) & [R1+R3*4], [R2+R6*8] & Base + scaled index (typical array access) \\
+Base + Index + Displacement & [R4+R5*2+32] & Full complex addressing \\
+PC-relative & label, label(IP) & Signed PC-relative address in every mode \\
+Absolute Address & [0x9000] & Direct memory address (primarily Clownfish/Tetra) \\ \bottomrule
+\end{longtable}
+
+\subsection{Addressing Mode Examples}
+
+\begin{lstlisting}
+; Register Direct
+MOV R1, R2                ; copy R2 to R1
+
+; Immediate
+MOVI R3, #42              ; load immediate value 42
+ADDI R4, #0xFF            ; add 255 to R4
+
+; Register Indirect
+LD R5, [R6]               ; load from address in R6
+ST [R7], R8               ; store R8 to address in R7
+
+; Register + Offset
+LD R1, [R2+16]            ; load from R2 + 16
+ST [R4+0x20], R3          ; store to R4 + 32
+
+; Base + Index (Scaled)
+LD R0, [R1+R3*4]          ; array access: base + index*4
+ST [R2+R6*8], R5          ; store with 8-byte stride
+
+; Base + Index + Displacement
+LD R7, [R4+R5*2+32]       ; complex: base + index*2 + 32
+
+; PC-relative (all modes)
+JMP forward               ; relative to current IP
+CALL function(IP)         ; IP-relative call
+
+; Absolute Address (Clownfish/Tetra)
+LD R1, [0x9000]           ; load from fixed address
+ST [0xFFFF], R2           ; store to fixed address
+
+forward:
+    RET
+\end{lstlisting}
+
+\subsection{Micro-Op Decomposition}
+
+Complex addressing modes are transparently broken into micro-ops:
+
+\begin{lstlisting}
+; Programmer writes:
+LD R1, [R2+R3*4+32]
+
+; Internal micro-op decomposition:
+uMUL  Rtmp, R3, #4        ; scale index
+uADD  Rtmp, R2, Rtmp      ; add base
+uADD  Rtmp, Rtmp, #32     ; add displacement
+uLOAD R1, [Rtmp]          ; perform load
+\end{lstlisting}
+
+\section{Instruction Formats}
+
+The SeaBird ISA presents compact, expressive CISC-style instruction formats to the programmer. Internally, the backend decomposes these into RISC-like micro-ops during execution.
+
+\subsection{CISC Frontend Formats}
+
+\begin{longtable}{@{}lll@{}}
+\toprule
+\textbf{Format} & \textbf{Syntax} & \textbf{Usage} \\ \midrule
+\endfirsthead
+\toprule
+\textbf{Format} & \textbf{Syntax} & \textbf{Usage} \\ \midrule
+\endhead
+R-type & MNEMONIC Rdst, Rsrc & Register-only operations \\
+ &  & (arithmetic, logic, compare, bitwise) \\
+I-type & MNEMONIC Rdst, \#imm & Immediate arithmetic / logic \\
+M-type & MNEMONIC Rdst, [mem] & Memory access (load/store) \\
+ & MNEMONIC [mem], Rsrc & \\
+B-type & BCOND label & Branches and jumps \\
+ & JMP label / JZ label & (conditional/unconditional) \\
+S-type & MNEMONIC sysop & System / control instructions \\
+ &  & (interrupts, mode-switch, flags) \\
+V-type & VADD V0, V1, V2 & Vector/matrix operations \\
+ & VMUL V3, V1, \#5 & \\
+X-type & MNEMONIC extended & Extended / microcoded instructions \\
+ &  & (multi-micro-op guaranteed expansion) \\ \bottomrule
+\end{longtable}
+
+\subsection{Detailed Format Descriptions}
+
+\subsubsection{R-Type (Register Only)}
+
+Register-to-register operations for arithmetic, logic, comparison, and bitwise operations.
+
+\begin{lstlisting}
+ADD   R1, R2              ; R1 = R1 + R2
+SUB   R4, R5              ; R4 = R4 - R5
+AND   R7, R8              ; R7 = R7 & R8
+CMP   R1, R2              ; compare R1 and R2
+MAX   R3, R4              ; R3 = max(R3, R4)
+\end{lstlisting}
+
+Assemblers may accept three-operand R-type pseudo-forms such as \texttt{ADD R1, R2, R3}; these expand to \texttt{MOV R1, R2} followed by \texttt{ADD R1, R3}.
+
+\subsubsection{I-Type (Immediate)}
+
+Operations involving immediate (constant) values.
+
+\begin{lstlisting}
+ADDI  R1, #42             ; R1 = R1 + 42
+MOVI  R3, #0xFF           ; R3 = 255
+CMPI  R4, #100            ; compare R4 with 100
+SUBI  R5, #8              ; R5 = R5 - 8
+\end{lstlisting}
+
+\subsubsection{M-Type (Memory Access)}
+
+Load and store operations with various addressing modes.
+
+\begin{lstlisting}
+LOAD  R1, [R2]            ; load from [R2]
+LOAD  R1, [R2+4]          ; load from [R2+4]
+LOAD  R1, [R2+R3*4]       ; load from [R2+R3*4]
+STORE [R4], R5            ; store R5 to [R4]
+STORE [R4+R5*2+32], R6    ; complex addressing
+\end{lstlisting}
+
+\subsubsection{B-Type (Branch / Jump)}
+
+Control flow operations, both conditional and unconditional.
+
+The canonical relative B-type form is one opcode byte followed by a signed
+32-bit little-endian displacement. The displacement is added to the address
+immediately following the complete five-byte instruction. This rel32 form is
+available in every operating mode. R\_SB\_PCREL8 and R\_SB\_PCREL16 are reserved
+for explicitly defined compact fields and must not be inferred from distance;
+version 3 assemblers do not relax a canonical B-type instruction to a different
+size without an encoding that explicitly selects that size.
+
+\begin{lstlisting}
+JMP   label               ; unconditional jump
+JZ    loop_start          ; jump if zero
+JNZ   exit                ; jump if not zero
+JG    greater             ; jump if greater
+CALL  function            ; call subroutine
+RET                       ; return from subroutine
+\end{lstlisting}
+
+\subsubsection{S-Type (System / Control)}
+
+System-level operations for interrupts, mode switching, and privileged operations.
+
+\begin{lstlisting}
+SYSCALL                   ; system call
+HLT                       ; halt processor
+CLI                       ; clear interrupts
+STI                       ; set interrupts
+RDCR  R1, CR0             ; read control register
+WRCR  CR2, R3             ; write control register
+\end{lstlisting}
+
+\subsubsection{V-Type (Vector / Matrix)}
+
+SIMD and vector operations operating on vector registers.
+
+\begin{lstlisting}
+VADD  V0, V1, V2          ; vector add
+VMUL  V3, V4, V5          ; vector multiply
+VSUB  V6, V7, V8          ; vector subtract
+VDIV  V0, V1, V2          ; vector divide
+VADD  V3, V1, #5          ; vector-scalar add
+\end{lstlisting}
+
+\subsubsection{X-Type (Extended / Microcoded)}
+
+Special instructions guaranteed to expand into multiple micro-ops. Used for complex operations.
+
+\begin{lstlisting}
+PUSHA                     ; push all GPRs (microcoded)
+POPA                      ; pop all GPRs (microcoded)
+ENTER #16                 ; create stack frame
+LEAVE                     ; destroy stack frame
+CPYB  R1, R2, #256        ; copy 256 bytes (microcoded loop)
+\end{lstlisting}
+
+\section{Instruction Encoding}
+
+\subsection{Binary Encoding Overview}
+
+The SeaBird ISA uses an x86-style modular binary encoding format. All instructions follow this layout:
+
+\begin{center}
+\texttt{[Prefix][Opcode][ModR/M][SIB][OREX][VectorCtl][Displacement/Immediate]}
+\end{center}
+
+Each instruction may consist of the following components:
+
+\begin{enumerate}
+    \item \textbf{Prefix bytes} (optional, 0 or 2+ bytes) - Width overrides, extended register bits, vector selectors
+    \item \textbf{Opcode byte(s)} (1--3 bytes) - Instruction identifier
+    \item \textbf{ModR/M byte} (optional) - Register/memory operand encoding
+    \item \textbf{SIB byte} (optional) - Scaled index addressing
+    \item \textbf{OREX / Vector Control} (optional) - Full R0--R31 and vector/mask metadata
+    \item \textbf{Immediate / Displacement} (0, 1, 2, 4, 8, or 16 bytes) - Constants and offsets
+\end{enumerate}
+
+This encoding scheme is:
+\begin{itemize}
+    \item \textbf{CISC-friendly:} Compact representation for programmers
+    \item \textbf{Mode-independent:} Same opcode meanings work across 16/32/64/128-bit modes
+    \item \textbf{Extensible:} Easy to add vector and system instructions
+    \item \textbf{RISC-backend compatible:} Decomposes cleanly into micro-ops
+\end{itemize}
+
+\subsection{Instruction Prefixes}
+
+SeaBird prefixes are encoded using explicit escape bytes so the decoder can always distinguish a prefix from an opcode.
+
+\begin{itemize}
+    \item \textbf{No prefix:} instruction uses the current mode default widths and only low register numbers R0--R7 in ModR/M and SIB fields.
+    \item \textbf{0xFE primary prefix:} followed by one prefix control byte. This prefix is used for width overrides, vector-width selection, and extended register encoding.
+    \item \textbf{0xFF extension opcode prefix:} starts an extended opcode stream for AVX-style, cryptographic, DSP, and future extension groups.
+\end{itemize}
+
+\subsubsection{Primary Prefix Control Byte}
+
+When an instruction begins with 0xFE, the next byte is interpreted as follows:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Bits} & \textbf{Purpose} & \textbf{Notes} \\ \midrule
+7 & OREX present & One Operand Register Extension byte follows ModR/M/SIB \\
+6 & VEC present & One Vector Control byte follows OREX, if OREX is present \\
+5-3 & Operand width & 000=default, 001=8, 010=16, 011=32, 100=64, 101=128 \\
+2-0 & Address width & 000=default, 001=16, 010=32, 011=64, 100=128 \\ \bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Usage:} If an instruction uses only default widths and registers R0--R7, the primary prefix is omitted. If an instruction names R8--R31 in ModR/M or SIB fields, bit 7 must be set and an OREX byte must be emitted. Width override fields change the width of this instruction only; they do not change the current operating mode.
+
+\subsubsection{Operand Register Extension (OREX) Byte}
+
+The OREX byte extends the 3-bit register fields in ModR/M and SIB to the full R0--R31 register file.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Bit(s)} & \textbf{Meaning} \\ \midrule
+1-0 & High bits of ModR/M.reg: bit0=reg[3], bit1=reg[4] \\
+3-2 & High bits of ModR/M.r/m: bit2=rm[3], bit3=rm[4] \\
+5-4 & High bits of SIB.index: bit4=index[3], bit5=index[4] \\
+7-6 & High bits of SIB.base: bit6=base[3], bit7=base[4] \\ \bottomrule
+\end{tabular}
+\end{table}
+
+If no SIB byte is present, the SIB extension bits must be zero. If OREX is absent, all high register bits are zero and the encoded registers are R0--R7.
+
+\subsubsection{Vector Control Byte}
+
+The Vector Control byte is present when the primary prefix has bit 6 set. It is used by vector and matrix instructions:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Bits} & \textbf{Meaning} \\ \midrule
+2-0 & Vector width: 000=128, 001=256, 010=512, 011=1024, others reserved \\
+5-3 & Lane width: 000=8, 001=16, 010=32, 011=64, 100=128, others reserved \\
+7-6 & Mask mode: 00=unmasked, 01=merge masked, 10=zero masked, 11=reserved \\ \bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Opcode Bytes (1--3 bytes)}
+
+Opcodes are organized by functional class for efficient decoding:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}L{3.2cm}L{2.5cm}L{4.5cm}L{1.5cm}@{}}
+\toprule
+\textbf{Class} & \textbf{Opcode Range} & \textbf{Count} & \textbf{Bytes} \\ \midrule
+Data movement & 0x00--0x1F & 24 instructions & 1--2 \\
+Arithmetic & 0x20--0x3F & 26 instructions & 1 \\
+Logic/Bit & 0x40--0x51 & 18 instructions & 1 \\
+Comparison & 0x52--0x5B & 10 instructions & 1 \\
+Branch/Control & 0x5C--0x71 & 20 instructions & 1--2 \\
+Memory extensions & 0x72--0x7D & 12 instructions & 2 \\
+System & 0x7E--0x8C & 15 instructions & 2--3 \\
+Stack/Call & 0x8D--0x96 & 10 instructions & 1--2 \\
+SIMD/Vector & 0x97--0xA5 & 15 instructions & 2 \\
+Floating Point & 0xA6--0xAF & 10 base instructions & 2--3 \\
+Atomic \& Synchronization & 0xB0--0xBF & 16 instructions & 1--2 \\
+Bit Manipulation (BMI-style) & 0xC0--0xCF & 16 instructions & 1--2 \\
+Transactional Memory & 0xD0--0xD7 & 8 instructions & 1 \\
+Reserved base opcodes & 0xD8--0xFD & 38 reserved values & 1 \\
+Primary prefix escape & 0xFE & Prefix control & 2+ \\
+Extension stream escape & 0xFF & Five extension groups & 3+ \\\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Encoding Strategy:}
+\begin{itemize}
+    \item 1 byte: Basic arithmetic, logic, comparison, stack operations
+    \item 2 bytes: Memory operations, vector operations
+    \item 3 bytes: System, privileged, complex CISC instructions (e.g., LEAS, PUSHA/POPA)
+\end{itemize}
+
+\subsection{Extension Opcode Encoding}
+
+Large extension groups (Advanced Vector, Cryptographic, DSP) use a dedicated extension prefix scheme to avoid collisions with the base opcode space and to allow rich sub-opcode sets. The canonical encoding is:
+
+\begin{center}
+\texttt{[0xFF][ExtGroupID][Sub-Opcode][ModR/M][SIB][OREX][VectorCtl][Imm/Disp]}
+\end{center}
+
+Where:
+\begin{itemize}
+    \item \textbf{Extension-Prefix (0xFF)}: Reserved prefix indicating an extended opcode stream.
+    \item \textbf{ExtGroupID}: 1 byte identifying the extension group (0x01 = AVX, 0x02 = CRYPTO, 0x03 = DSP, 0x04 = SYSX, 0x05 = FPX, others reserved).
+    \item \textbf{Sub-Opcode}: 1 byte selecting the instruction within the extension group.
+    \item Remaining fields follow the normal ModR/M/SIB/OREX/VectorCtl/Immediate rules.
+\end{itemize}
+
+This scheme permits arbitrarily many instructions in each extension group without colliding with the core 1--3 byte opcode encodings. Extended instructions may still use the 0xFE primary prefix before 0xFF when they require OREX, width overrides, or vector control.
+
+\paragraph{Extension Sub-Opcode Assignment}
+To make extension encodings deterministic, each extension group is assigned a contiguous sub-opcode space: 
+\begin{itemize}
+    \item \textbf{AVX (ExtGroupID = 0x01):} sub-opcodes `0x00`..`0x2A` (43 entries) mapped to the AVX instruction list in the order shown in the Advanced Vector table. Reserved AVX sub-opcodes 0x2B--0x2F are held for future widening so the group remains naturally aligned.
+    \item \textbf{CRYPTO (ExtGroupID = 0x02):} sub-opcodes `0x00`..`0x17` (24 entries) mapped to the Crypto table.
+    \item \textbf{DSP (ExtGroupID = 0x03):} sub-opcodes `0x00`..`0x1C` (29 entries) mapped to the DSP table.
+    \item \textbf{SYSX (ExtGroupID = 0x04):} assigned sub-opcodes in `0x00`..`0x1A` are mapped by the architectural system-extension table; unlisted values are reserved.
+    \item \textbf{FPX (ExtGroupID = 0x05):} sub-opcodes `0x00`..`0x0F` encode the sixteen extended scalar floating-point operations in table order.
+\end{itemize}
+
+\noindent Example encoding (VFMADD):
+\begin{center}
+\texttt{0xFF 0x01 0x00 [ModR/M ...]} \quad // Extension-Prefix, AVX group, sub-opcode 0x00 (VFMADD)
+\end{center}
+
+\noindent Example encoding (AESENC):
+\begin{center}
+\texttt{0xFF 0x02 0x00 [ModR/M ...]} \quad // Extension-Prefix, CRYPTO group, sub-opcode 0x00 (AESENC)
+\end{center}
+
+\subsection{ModR/M Byte (Optional)}
+
+The ModR/M byte encodes register and memory operands, similar to x86 but simplified.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Bits} & \textbf{Meaning} \\ \midrule
+7-6 & mod (addressing mode) \\
+5-3 & reg[2:0] (register operand or opcode extension) \\
+2-0 & r/m[2:0] (register/memory operand) \\ \bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{mod Field Values:}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{mod} & \textbf{Addressing Mode} \\ \midrule
+00 & [Rbase] - register indirect, except special r/m encodings below \\
+01 & [Rbase + disp8] - base + signed 8-bit displacement \\
+10 & [Rbase + disp32] - base + signed 32-bit displacement \\
+11 & Register direct (no memory access) \\ \bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Special r/m encodings when mod=00:}
+
+\begin{itemize}
+    \item r/m=100: a SIB byte follows.
+    \item r/m=101: absolute displacement follows. The displacement width is the active address width, with 16/32/64/128-bit forms encoded little-endian.
+    \item Other r/m values encode [Rbase]. If a program needs [R4] or [R5] without ambiguity, it may encode the access using SIB form or mod=01 with disp8=0.
+\end{itemize}
+
+\textbf{Register numbering:} The low three bits come from ModR/M. High bits come from OREX when present. This makes R0--R31 encodable in every operating mode.
+
+\subsection{SIB Byte (Optional)}
+
+The SIB (Scale-Index-Base) byte enables scaled index addressing for array and structure access.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Bits} & \textbf{Meaning} \\ \midrule
+7-6 & scale (00=1, 01=2, 10=4, 11=8) \\
+5-3 & index[2:0] register field \\
+2-0 & base[2:0] register field \\ \bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Usage:} A SIB byte is present when ModR/M.mod is not 11 and ModR/M.r/m is 100, or when the instruction format explicitly requires indexed addressing. OREX extends both SIB fields to R0--R31. SIB.index=100 with the corresponding OREX index high bits clear means ``no index''. SIB.base=101 with mod=00 means no base and an absolute displacement follows.
+
+\subsection{Canonical Operand Forms}
+
+Core integer ALU, logic, compare, and move instructions use a canonical two-operand destructive form:
+
+\begin{lstlisting}
+ADD Rdst, Rsrc        ; Rdst = Rdst + Rsrc
+SUB Rdst, Rsrc        ; Rdst = Rdst - Rsrc
+ADDI Rdst, #imm       ; Rdst = Rdst + imm
+\end{lstlisting}
+
+Assemblers may accept human-friendly three-operand forms as pseudo-instructions:
+
+\begin{lstlisting}
+ADD Rdst, Ra, Rb      ; expands to MOV Rdst, Ra; ADD Rdst, Rb
+ADDI Rdst, Ra, #imm   ; expands to MOV Rdst, Ra; ADDI Rdst, #imm
+\end{lstlisting}
+
+Instructions that are truly three-source operations, such as fused multiply-add and selected vector instructions, must define their extra operand bytes in their instruction entry. No core two-operand instruction implicitly consumes an undocumented third register field.
+
+\subsubsection{Canonical Operand Binding and XOP Bytes}
+
+Version 3 uses one deterministic operand-binding rule. For a register destination followed by a register or memory source, ModR/M.reg encodes operand 0 and ModR/M.r/m encodes operand 1. If operand 0 is memory, ModR/M.r/m encodes operand 0 and ModR/M.reg encodes operand 1. For a destination plus immediate, ModR/M.r/m encodes the destination, ModR/M.reg is zero, and the immediate follows the operand stream. Unary register operations use ModR/M.r/m with ModR/M.reg zero. OREX extends every ModR/M and SIB register field to five bits.
+
+RDCR and WRCR are the system-register exception to the ordinary two-register binding rule. Both use ModR/M.mod=11, ModR/M.reg=000, and ModR/M.r/m for their sole GPR operand. A mandatory unsigned 16-bit little-endian system-register number follows ModR/M and the optional OREX byte. OREX extends only the GPR. The canonical lengths are four bytes without a prefix and seven bytes with \texttt{FE}, its control byte, and OREX; no short CR encoding exists.
+
+Every explicit register operand after the two ModR/M operands is encoded by one Additional Operand (XOP) byte, in source order:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}L{2.0cm}L{9.8cm}@{}}
+\toprule
+\textbf{Bits} & \textbf{Meaning} \\ \midrule
+7--5 & Register class: 000=GPR, 001=vector, 010=mask, 011=system/control; 100--111 reserved \\
+4--0 & Architectural register number 0--31 \\ \bottomrule
+\end{tabular}
+\end{table}
+
+XOP bytes appear after ModR/M, SIB, OREX, and VectorCtl and before displacement or immediate data. An instruction may contain at most two XOP bytes in this revision. Extra memory operands are not encodable; pair and gather/scatter instructions derive their additional addresses from their one encoded memory operand. Reserved XOP classes or a register class illegal for the instruction raise INVALID\_OP.
+
+\subsection{Displacement / Immediate (0, 1, 2, 4, 8, or 16 bytes)}
+
+Variable-length field for constants and memory offsets.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Size} & \textbf{Usage} & \textbf{Example} \\ \midrule
+0 bytes & No immediate/displacement & ADD R1, R2 \\
+1 byte & Signed small displacement/immediate & LD R1, [R2+16] \\
+2 bytes & 16-bit immediate/address field & MOVI R0, \#0x1234 (Clownfish override) \\
+4 bytes & 32-bit displacement/immediate & ADDI R3, \#0x12345678 (Tetra) \\
+8 bytes & 64-bit displacement/immediate & MOVI R4, \#0xCAFEBABE (Dragonet) \\
+16 bytes & 128-bit immediate & MOVI R4, \#wide128 (Droplet) \\ \bottomrule
+\end{tabular}
+\end{table}
+
+Immediate operands are encoded little-endian. Arithmetic immediates are sign-extended to the operation width unless the instruction name explicitly says zero-extension, such as MOVZX or a future zero-extending immediate variant. MOVI zero-extends positive immediates and preserves the literal bit pattern for immediates whose encoded width equals the operation width.
+
+\subsection{Addressing Modes Summary}
+
+\begin{longtable}{@{}lll@{}}
+\toprule
+\textbf{Mode} & \textbf{Syntax} & \textbf{Description} \\ \midrule
+\endfirsthead
+\toprule
+\textbf{Mode} & \textbf{Syntax} & \textbf{Description} \\ \midrule
+\endhead
+Register direct & Rdst & Simple register to register \\
+Memory absolute & [addr] & Direct memory access \\
+Register indirect & [Rbase] & Load/store through base register \\
+Base + offset & [Rbase + imm] & Small/large displacement \\
+Indexed & [Rbase + Rindex*scale + imm] & For arrays / structures \\
+Stack & PUSH/POP & Special SP-relative addressing \\ \bottomrule
+\end{longtable}
+
+\subsection{Encoding Examples}
+
+\subsubsection{Example 1: Simple Arithmetic}
+
+\begin{lstlisting}
+ADD R1, R2        ; 16-bit Clownfish mode
+\end{lstlisting}
+
+\textbf{Binary Encoding:}
+\begin{itemize}
+    \item No prefix (default mode)
+    \item Opcode: 0x20
+    \item ModR/M: mod=11 (register), reg=R2 (010), r/m=R1 (001)
+    \item Total: 2 bytes
+\end{itemize}
+
+\subsubsection{Example 2: Complex Addressing}
+
+\begin{lstlisting}
+LEAS R4, [R5+R6*4+16]    ; 32-bit Tetra mode
+\end{lstlisting}
+
+\textbf{Binary Encoding:}
+\begin{itemize}
+    \item No prefix required if Tetra is the current mode and all registers are R0--R7
+    \item Opcode: 0x1E (LEAS)
+    \item ModR/M: mod=10 (32-bit disp), reg=R4 (100), r/m=R5 (101)
+    \item SIB: scale=10 (4x), index=R6 (110), base=R5 (101)
+    \item Displacement: 4 bytes (0x00000010)
+    \item Total: 7 bytes
+\end{itemize}
+
+\subsubsection{Example 2b: Extended Register Encoding}
+
+\begin{lstlisting}
+ADD R17, R24              ; uses R16+ registers
+\end{lstlisting}
+
+\textbf{Binary Encoding:}
+\begin{itemize}
+    \item Primary prefix: 0xFE 0x80 (OREX present, default widths)
+    \item Opcode: 0x20
+    \item ModR/M: mod=11, reg=R24 low bits 000, r/m=R17 low bits 001
+    \item OREX: reg[4:3]=11, r/m[4:3]=10, SIB extension bits zero
+    \item Total: 4 bytes
+\end{itemize}
+
+\subsubsection{Example 3: Vector Operation}
+
+\begin{lstlisting}
+VADD V0, V1, V2          ; 128-bit vector
+\end{lstlisting}
+
+\textbf{Binary Encoding:}
+\begin{itemize}
+    \item Primary prefix: 0xFE with VEC-present bit set if the vector width is not the current vector default
+    \item Vector Control: vector width=128-bit, lane width chosen by instruction suffix or assembler mode
+    \item Opcode: 0x97 (VADD)
+    \item Operands: encoded by the V-type operand format for vector registers
+\end{itemize}
+
+\subsubsection{Example 4: Immediate Load}
+
+\begin{lstlisting}
+MOVI R3, #0xDEADBEEF     ; 32-bit immediate
+\end{lstlisting}
+
+\textbf{Binary Encoding:}
+\begin{itemize}
+    \item No prefix (default operand size)
+    \item Opcode: 0x01 (MOVI)
+    \item ModR/M: mod=11, reg=000 (unused), r/m=R3 (011)
+    \item Immediate: 4 bytes (0xDEADBEEF)
+    \item Total: 6 bytes
+\end{itemize}
+
+\subsection{Encoding Legend}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Column} & \textbf{Meaning} \\ \midrule
+Instr & Mnemonic (with operands) \\
+Class & Instruction class (data/arithmetic/etc.) \\
+Opcode & Primary opcode byte(s) \\
+ModR/M & ModR/M byte usage (if applicable) \\
+SIB & SIB byte usage (if applicable) \\
+Imm/Disp & Immediate/displacement byte size \\
+Micro-Ops & Micro-op breakdown, internal RISC-like ops \\ \bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Notes:}
+
+\begin{itemize}
+    \item Rdst, Rsrc denote registers (R0--R31)
+    \item [mem] denotes memory operand
+    \item 0xFE primary prefix is optional and is used for width overrides, OREX, and vector control
+    \item 0xFF extension prefix starts an extended opcode group
+\end{itemize}
+
+\section{FLAGS Register}
+
+\subsection{Status Flags}
+
+The FLAGS register contains condition codes and processor state. Bits are arranged as follows:
+
+\begin{longtable}{@{}llll@{}}
+\toprule
+\textbf{Bit} & \textbf{Name} & \textbf{Symbol} & \textbf{Description} \\ \midrule
+\endfirsthead
+\toprule
+\textbf{Bit} & \textbf{Name} & \textbf{Symbol} & \textbf{Description} \\ \midrule
+\endhead
+0 & Carry & CF & Carry out of MSB or borrow \\
+1 & Reserved & -- & Must be 0 \\
+2 & Parity & PF & Even parity of low byte \\
+3 & Reserved & -- & Must be 0 \\
+4 & Auxiliary Carry & AF & Carry from bit 3 to bit 4 \\
+5 & Reserved & -- & Must be 0 \\
+6 & Zero & ZF & Result is zero \\
+7 & Sign & SF & Sign bit of result (MSB) \\
+8 & Trap & TF & Single-step debugging \\
+9 & Interrupt Enable & IF & Interrupts enabled \\
+10 & Direction & DF & String operation direction \\
+11 & Overflow & OF & Signed arithmetic overflow \\
+12--13 & I/O Privilege Level & IOPL & I/O privilege (0--3) \\
+14 & Nested Task & NT & Nested task flag \\
+15 & Reserved & -- & Must be 0 \\
+16 & Resume & RF & Resume flag \\
+17 & Virtual 8086 & VM & Virtual 8086 mode \\
+18 & Alignment Check & AC & Alignment check enabled \\
+19 & Virtual Interrupt & VIF & Virtual interrupt flag \\
+20 & Virtual Int Pending & VIP & Virtual interrupt pending \\
+21 & ID & ID & CPUID support \\
+22--31 & Reserved & -- & Must be 0 \\ \bottomrule
+\end{longtable}
+
+\subsection{Flag Modification}
+
+All integer flag results are computed at the active operation width after subregister width selection and immediate extension. Bits above the active width do not participate in flag generation.
+
+\begin{itemize}
+    \item \textbf{ZF:} Set when the result is zero.
+    \item \textbf{SF:} Set to the most-significant bit of the active-width result.
+    \item \textbf{PF:} Set when the low byte of the result has even parity.
+    \item \textbf{AF:} Set when an add/subtract carries or borrows between bits 3 and 4.
+    \item \textbf{CF for addition:} Set on unsigned carry out of the active width.
+    \item \textbf{CF for subtraction/compare:} Set on unsigned borrow.
+    \item \textbf{OF for addition:} Set when the signed operands have the same sign and the signed result has the opposite sign.
+    \item \textbf{OF for subtraction/compare:} Set when the signed operands have different signs and the signed result sign differs from the left operand.
+\end{itemize}
+
+\begin{itemize}
+    \item \textbf{ADD, ADDI, SUB, SUBI, CMP, CMPI:} Define CF, ZF, SF, OF, PF, and AF by the rules above.
+    \item \textbf{INC and DEC:} Define ZF, SF, OF, PF, and AF. CF is unchanged.
+    \item \textbf{AND, OR, XOR, TST:} Clear CF and OF, define ZF/SF/PF from the logical result, and leave AF undefined.
+    \item \textbf{NOT, MOV, MOVI, LD, ST, LEA, PUSH, POP:} Do not modify FLAGS.
+    \item \textbf{SHL/SHR/SAR/ROL/ROR:} Define CF as the last bit shifted or rotated out. For a one-bit shift, OF follows the conventional signed overflow rule for that shift; for counts greater than one, OF is undefined. ZF/SF/PF are defined from the result for shifts and unchanged for rotates.
+    \item \textbf{MUL/UMUL/MULH:} Define ZF/SF/PF from the low active-width result. CF and OF are set when significant high bits are discarded; otherwise they are cleared. AF is undefined.
+    \item \textbf{DIV/UDIV/MOD:} Define ZF/SF/PF from the quotient or remainder result. CF, OF, and AF are undefined. Division by zero raises DIV\_ZERO before writing the destination.
+    \item \textbf{Branches:} Read FLAGS but do not modify FLAGS.
+\end{itemize}
+\end{document}

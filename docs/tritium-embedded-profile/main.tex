@@ -1,0 +1,334 @@
+\documentclass[10pt,letterpaper]{article}
+
+\usepackage[letterpaper,margin=0.72in,headheight=18pt]{geometry}
+\usepackage{microtype}
+\microtypesetup{expansion=false}
+\usepackage[table]{xcolor}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{tabularx}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{hyperref}
+
+\input{profile-config.tex}
+
+\definecolor{ProfileNavy}{HTML}{132A3A}
+\definecolor{ProfileTeal}{HTML}{087E8B}
+\definecolor{ProfileGold}{HTML}{E0A12B}
+\definecolor{ProfileInk}{HTML}{1B252C}
+\definecolor{ProfileMuted}{HTML}{5D6B73}
+\definecolor{ProfilePale}{HTML}{EAF3F4}
+\definecolor{ProfileLight}{HTML}{F4F6F7}
+\definecolor{ProfileRule}{HTML}{BCC8CD}
+
+\hypersetup{colorlinks=true,linkcolor=ProfileTeal,urlcolor=ProfileTeal,
+  pdftitle={\ProfileName},pdfsubject={SeaBird embedded implementation profile}}
+\color{ProfileInk}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+\setlist[itemize]{leftmargin=1.3em,itemsep=2pt,topsep=3pt}
+\renewcommand{\arraystretch}{1.25}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+\titleformat{\section}{\Large\bfseries\color{ProfileNavy}}{\thesection.}{0.5em}{}
+\titleformat{\subsection}{\large\bfseries\color{ProfileTeal}}{\thesubsection}{0.5em}{}
+\titlespacing*{\section}{0pt}{12pt}{5pt}
+\titlespacing*{\subsection}{0pt}{9pt}{3pt}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\scriptsize\bfseries\color{ProfileNavy}SEABIRD -- TRITIUM EMBEDDED PROFILE}
+\fancyfoot[R]{\scriptsize\color{ProfileMuted}\ProfileRevision\enspace|\enspace Page \thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{ProfileRule}\leaders\hrule height \headrulewidth\hfill}}
+
+\newcommand{\ProfileHeaderRow}{\rowcolor{ProfileNavy}\color{white}\bfseries}
+\newcommand{\ProfileTableHeader}{\color{white}\bfseries}
+\newenvironment{profiletable}[1]{%
+  \rowcolors{2}{white}{ProfileLight}%
+  \tabularx{\textwidth}{#1}\hline
+}{\endtabularx}
+\newcommand{\callout}[1]{%
+  \par\medskip\noindent
+  \colorbox{ProfilePale}{\parbox{\dimexpr\textwidth-2\fboxsep}{\color{ProfileNavy}\bfseries #1}}
+  \par\medskip
+}
+
+\begin{document}
+
+\begin{titlepage}
+\pagecolor{ProfileNavy}\color{white}
+\vspace*{0.55in}
+{\bfseries\color{ProfileGold}MEISEI PROCESSOR ARCHITECTURE\par}
+\vspace{0.35in}
+{\fontsize{32}{36}\selectfont\bfseries SeaBird Tritium\\Embedded Profile\par}
+\vspace{0.18in}
+{\large\color{ProfilePale}A deterministic, safety-oriented 32-bit subset for the Tritium v1 processor\par}
+\vspace{0.5in}
+\begin{tabularx}{\textwidth}{>{\bfseries}L{1.45in}Y}
+\arrayrulecolor{ProfileTeal}\hline
+Profile & \ProfileID\\\hline
+Parent ISA & \ParentISA\\\hline
+Execution mode & Tetra (32-bit), little-endian\\\hline
+Target core & In-order, single-issue, 5-stage, dual lockstep\\\hline
+Memory model & TCM + scratchpad + region MPU; no cache or paging\\\hline
+Document status & \ProfileRevision{} -- \ProfileDate\\\hline
+\end{tabularx}
+\vspace{0.35in}
+{\large\color{ProfilePale}This profile is a conforming implementation subset, not a new instruction set.
+Software built for \ProfileID{} uses standard SeaBird encodings and can run on a full SeaBird Tetra implementation.\par}
+\end{titlepage}
+\nopagecolor\color{ProfileInk}
+
+\section{Purpose and Conformance}
+The Tritium profile defines the minimum SeaBird architectural behavior required for a deterministic embedded processor aimed at industrial, automotive, and aerospace control. It removes implementation features that complicate worst-case execution-time analysis while preserving the SeaBird programming model, object format, calling convention, exception precision, and toolchain compatibility.
+
+\callout{A processor conforms when every required feature in this document is implemented exactly, excluded instructions trap as INVALID\_OP, QUERY reports the profile accurately, and the implementation passes the profile test suite.}
+
+\subsection{Design Goals}
+\begin{itemize}
+\item Bounded instruction and interrupt timing suitable for WCET analysis.
+\item A small verifiable in-order implementation with no speculative architectural effects.
+\item Source and binary compatibility with SeaBird Tetra software within the advertised feature set.
+\item First-class MPU, ECC, lockstep fault reporting, and deterministic recovery hooks.
+\item Enough integer, atomic, system, and debug functionality for bare metal and an MPU-aware RTOS.
+\end{itemize}
+
+\subsection{Profile Rules}
+\begin{profiletable}{L{1.2in}Y}
+\ProfileHeaderRow Qualification & \ProfileTableHeader Rule\\\hline
+Required & Must be implemented in every Tritium v1 core.\\
+Optional & May be implemented only when QUERY exposes the corresponding feature bit.\\
+Excluded & Must decode as unsupported and raise INVALID\_OP before side effects.\\
+Platform-defined & Specified by the Tritium SoC/board binding, not by instruction semantics.\\
+\end{profiletable}
+
+\section{Hardware Mapping}
+\begin{profiletable}{L{1.7in}Y}
+\ProfileHeaderRow Tritium feature & \ProfileTableHeader SeaBird profile consequence\\\hline
+Tetra 32-bit mode & 32-bit GPR operations, pointers, PC, stack slots, and return addresses.\\
+5-stage in-order pipeline & Precise retirement; no younger instruction retires after an older fault.\\
+No speculation & No speculative external bus transaction, CSR write, or interrupt claim.\\
+Fixed-latency multiply/divide & MUL, DIV, MOD and signed/unsigned variants have published cycle counts.\\
+TCM only & No cache-control dependency; instructions execute from TCM and bus arbitration tables.\\
+Region MPU & Full 32-bit address space with region permission checks; paging instructions excluded.\\
+Dual-core lockstep & One logical CPU context; comparator checks architectural commit state.\\
+SEC-DED ECC & Corrected and uncorrectable events enter the machine-check supervisor path.\\
+\end{profiletable}
+
+\subsection{Conceptual Datapath}
+Both lockstep lanes execute the same complete pipeline. A comparator is placed at the architectural commit boundary. A mismatch prevents both lanes from committing the divergent result.
+
+\subsection{Determinism Contract}
+Each implemented instruction has a documented core-cycle latency and issue occupancy. No instruction latency depends on secret data except DIV/MOD only when a separately reported variable-latency option is enabled. TCM accesses have fixed latency; scratchpad and peripheral accesses use platform-published bounds. Interrupt recognition, pipeline drain, and vector fetch occur at published timing arcs. Frequency is fixed for v1; software-visible clock transitions are excluded.
+
+\section{Architectural State}
+\begin{profiletable}{L{1.2in}L{1.0in}Y}
+\ProfileHeaderRow State & \ProfileTableHeader Status & \ProfileTableHeader Profile rule\\\hline
+R0--R31 & Required & All architectural names remain visible; no reduced-register encoding.\\
+PC & Required, 32-bit & Flat Tetra instruction address.\\
+FLAGS & Required & CF, ZF, SF, OF and interrupt-enable controls used by profile instructions.\\
+R7 / SP & Required & Downward-growing stack; valid at all public boundaries.\\
+R6 / FP & Required by ABI & Compiler may use as frame pointer.\\
+MPU control & Required & Region descriptors exposed through Tritium control registers.\\
+Cycle/time counter & Required & Monotonic fixed-frequency counter for diagnostics and RTOS timing.\\
+Fault supervisor state & Required & Reason, PC, status, timestamp, stage, retry-window count.\\
+V0--V31, MASK & Excluded in base & Optional FP/SIMD derivative must advertise and save complete state.\\
+Paging/TLB & Excluded & MPU replaces translation and page tables.\\
+Virtualization & Excluded & Virtualization, TSX-style transactions, shadow stack not in v1.\\
+\end{profiletable}
+
+\subsection{Register and Encoding Compatibility}
+Tritium implements all 32 SeaBird GPRs. OR32 remains required because R8--R31 are architecturally visible in Tetra mode. MOVHI, SIB, register displacement, and wide-prefix rules are unchanged. Subregister writes zero-extend into the 32-bit Tetra GPR.
+
+\callout{A smaller physical implementation may use a compact register-file macro, but it may not hide registers or reinterpret their encodings.}
+
+\section{Required Instruction Subset}
+The following families form the \ProfileID{} mandatory software target. Generic LD/ST select the active Tetra width; explicit LDQ/STQ and PUSHQ/POPQ are excluded because they require 64-bit architectural data paths.
+
+\begin{profiletable}{L{1.45in}Y}
+\ProfileHeaderRow Family & \ProfileTableHeader Required mnemonics\\\hline
+Data movement & MOV MOVI MOVZX MOVSX MOVHI MOVLO MOVSWP LDI LDB LDH LDW STB STH STW LEA LEAS XCHG\\
+Arithmetic & ADD ADDI SUB SUBI MUL MULI DIV DIVI MOD MODI NEG INC DEC MULH UMUL UDIV ADDS ADDU SUBS SUBU ABS CLZ CTZ POPC\\
+Logic and shifts & AND OR XOR NOT NAND NOR XNOR SHL SHR SAR ROL ROR BSET BCLR BTOG BTST MASK EXT\\
+Compare & CMP CMPI CMPS CMPU TST TSTI MAX MIN SLT SGT\\
+Control flow & JMP JMPA CALL CALLA RET JE JNE JG JGE JL JLE JC JNC JO JNO JS JNS JZR JNZR BRR TRAP YIELD\\
+Stack & PUSH POP ENTER LEAVE PUSHF POPF\\
+Atomic and ordering & XCHG CMPXCHG ATADD ATSUB ATAND ATOR ATXOR LL SC FENCE LFENCE SFENCE MFENCE\\
+System & HLT RESET RDCR WRCR IRET CLI STI WFI RDTIME RDTS SLEEP QUERY EOI SAVECTX LOADCTX GETCPL\\
+\end{profiletable}
+
+\subsection{Required Semantic Properties}
+\begin{itemize}
+\item Integer divide by zero raises the architected arithmetic exception before destination write.
+\item Unaligned ordinary accesses follow the parent ISA; the profile may require alignment through MPU/FLAGS policy for WCET simplicity.
+\item Atomic operations are fixed-latency for TCM and must be naturally aligned.
+\item FENCE variants have published completion bounds and order DMA-visible memory according to the SoC binding.
+\item QUERY returns zero for unsupported leaves and reports TRITIUM32, MPU, atomics, ECC diagnostics, and implemented counters.
+\end{itemize}
+
+\section{Optional and Excluded Features}
+\begin{profiletable}{L{1.45in}L{1.1in}Y}
+\ProfileHeaderRow Feature & \ProfileTableHeader Classification & \ProfileTableHeader Rationale / rule\\\hline
+Scalar FP & Optional derivative & If absent, all FP/FPX opcodes raise INVALID\_OP; compiler uses soft-float.\\
+SIMD/vector/mask & Excluded & V, K, VectorEX, gather/scatter, AMX and matrix operations unavailable.\\
+64-bit/Octa state & Excluded & Diagnostic/supervisor records are explicit-width platform structures.\\
+Paging/TLB/ASID & Excluded & MPU/flat memory only; translation/cache-control instructions unavailable.\\
+Caches & Excluded & PREFETCH/flush/invalidate/WCET cache operations are absent.\\
+SMP & Excluded & Lockstep lanes are not software CPUs; SENDIPI unavailable.\\
+Virtualization & Excluded & VM control instructions raise INVALID\_OP.\\
+Transactions & Excluded & Transactional memory opcodes raise INVALID\_OP.\\
+Cryptographic/DSP extensions & Optional future SKU & Must be fixed-latency or documented for WCET and independently advertised.\\
+Dynamic frequency & Excluded & No runtime frequency-changing interface in v1.\\
+\end{profiletable}
+
+\section{Memory and MPU Profile}
+Tritium exposes a flat 32-bit physical address space. Instruction TCM, data TCM, the on-package scratchpad, and MMIO windows occupy platform-defined regions. Every fetch, load, and store is checked by the region MPU before commit.
+
+\subsection{Minimum MPU Descriptor}
+\begin{profiletable}{L{1.7in}Y}
+\ProfileHeaderRow Field & \ProfileTableHeader Minimum behavior\\\hline
+BASE / LIMIT & 32-bit inclusive region bounds; naturally aligned implementation granule.\\
+ENABLE & Disabled descriptors never match.\\
+R / W / X & Independent permissions for load, store, and instruction fetch.\\
+PRIV & User, privileged, or both.\\
+MEMTYPE & TCM/scratchpad normal memory or strongly ordered device memory.\\
+LOCK & Prevents modification until reset when enabled by safety firmware.\\
+ECC policy & Correct-and-report or fail-stop behavior selected by platform safety policy.\\
+\end{profiletable}
+
+\subsection{Region Resolution}
+Tritium v1 implements 16 regions through the native SeaBird system-register block at 0x0300--0x033F. MPUCTRL is 0x0300 and MPUINFO is 0x0301. For region $n$, MPUBASE$n$ is $0x0310+3n$, MPULIMIT$n$ is $0x0311+3n$, and MPUATTR$n$ is $0x0312+3n$. MPUATTR contains REGION\_ENABLE, R/W/X, PRIV, MEMTYPE, and LOCK using the bit assignments in the parent System-Register volume.
+
+The highest-numbered matching region wins and MPUCTRL.DEFAULT\_DENY must be set before unprivileged execution. A complete multi-byte access must be permitted by one winning descriptor; no partial store may occur when any covered byte fails checking. Firmware updates a descriptor by clearing REGION\_ENABLE, writing BASE and LIMIT, and finally publishing MPUATTR. LOCK prevents modification of all three descriptor registers until reset.
+
+\subsection{Memory Timing Classes}
+\begin{profiletable}{L{1.8in}Y}
+\ProfileHeaderRow Class & \ProfileTableHeader Required timing publication\\\hline
+Instruction TCM & Fixed fetch latency and branch refill cost.\\
+Data TCM & Fixed load/store latency, including atomic operations.\\
+Scratchpad die & Read/write bounds including bridge arbitration and ECC correction.\\
+MMIO & Peripheral-specific maximum response or bus-timeout exception.\\
+ECC event & Correction penalty and uncorrectable-error delivery bound.\\
+\end{profiletable}
+
+\section{Interrupt and Exception Profile}
+Tritium v1 uses fixed-priority vectored interrupts. The implementation target is a 12-cycle worst-case interrupt latency; the guaranteed figure becomes normative only after post-synthesis analysis and must be published per clock and memory configuration.
+
+\begin{profiletable}{L{1.35in}Y}
+\ProfileHeaderRow Property & \ProfileTableHeader Profile rule\\\hline
+Priority & Fixed and platform-published; ties resolved deterministically.\\
+Nesting & Disabled or fixed by profile; future nesting must be explicit.\\
+Recognition & At an architecturally precise retirement boundary.\\
+Saved state & PC, privilege, FLAGS, interrupt state, and implementation-defined retry data.\\
+Vector table & Naturally aligned, MPU-protected, validated before interrupts are enabled.\\
+EOI & Required for external interrupt-controller completion.\\
+Return & IRET validates and atomically restores the saved context.\\
+\end{profiletable}
+
+\subsection{Exception Priority}
+Tritium preserves parent SeaBird exception order. Invalid encoding or unavailable feature is checked before privilege, address, alignment, translation/protection, arithmetic, and debug conditions. MPU denial occupies the protection/address stage; paging exceptions cannot occur because paging is absent.
+
+\subsection{RTOS Expectations}
+V1 requires a deterministic interrupt-safe state without changing clock frequency. SAVECTX/LOADCTX may accelerate an RTOS switch only when their exact memory image and timing are implemented. The RTOS programs an MPU context before returning to an unprivileged task.
+
+\section{Lockstep and Fault Supervisor}
+The dual pipelines form one architectural processor. Software cannot schedule them independently. Before commit, the comparator checks destination register value, memory request, next PC, FLAGS, privilege changes, interrupt acceptance, and architecturally visible control-state updates.
+
+\begin{profiletable}{L{1.7in}Y}
+\ProfileHeaderRow Comparator match & \ProfileTableHeader Commit once and continue.\\\hline
+Comparator mismatch & Freeze commit on both lanes, discard in-flight work, latch diagnostics, assert FAULT\_OUT.\\
+Correctable ECC & Correct data; increment/log diagnostic counter according to policy.\\
+Uncorrectable ECC & Prevent corrupted commit and enter the fault-supervisor path.\\
+First recoverable mismatch & Software may clear state and request discard-and-refetch from latched PC.\\
+Second fault in policy window & Enter safe mode immediately; no unbounded retry loop.\\
+\end{profiletable}
+
+\subsection{Minimum Latched Diagnostic Record}
+FAULT\_REASON, FAULT\_PC, FAULT\_FLAGS, FAULT\_STAGE, lane-comparison syndrome, ECC syndrome when applicable, retry-window count, and a validation indicator. The SoC binding assigns control-register or MMIO addresses.
+
+\subsection{Recovery Ordering}
+The software supervisor must first place outputs in a safe state, snapshot diagnostics, clear or reinitialize affected architectural state, then issue the platform recovery command. FAULT\_OUT remains asserted until an explicit acknowledged clear. Recovery uses discard-and-refetch; resume-in-place is not supported in v1.
+
+\section{SB32 Embedded ABI}
+\begin{profiletable}{L{1.55in}Y}
+\ProfileHeaderRow Item & \ProfileTableHeader Rule\\\hline
+Data model & ILP32: int, long, and pointers are 32 bits; long long is 64 bits in software pairs.\\
+Arguments & R0--R5, then R16--R19, then 4-byte stack slots from low to high addresses.\\
+Returns & R0 and R1; larger aggregates use a hidden pointer.\\
+Stack & R7, grows downward, 16-byte aligned at public call boundaries, no red zone.\\
+Frame pointer & R6 when used.\\
+Callee-saved & R6, R12--R15, R24--R27.\\
+Volatile & R0--R5, R8--R11, R16--R23, R28--R31, condition flags.\\
+FP ABI & Soft-float for the base profile; no V-register argument convention is used.\\
+Object format & Little-endian ELF32 SeaBird profile; static linking is required for safety builds.\\
+\end{profiletable}
+
+\subsection{Toolchain Profile}
+Recommended target identity: \texttt{\TargetTriple}, CPU \texttt{tritium-v1}. The feature bundle is
+\nolinkurl{+tetra,+mpu,+atomics,+fixed-muldiv,-fp,-simd,-paging}. These names describe required LLVM work; they are not claimed as already shipped.
+
+Safety builds should disable dynamic linking, exceptions that require an unwinder unless the unwinder is qualified, and transformations whose timing model is not represented in the WCET tool. Linker scripts place vectors and critical code/data in TCM.
+
+\section{Reset and Boot Sequence}
+\begin{enumerate}[leftmargin=1.6em]
+\item Reset enters Tetra profile bootstrap state at the platform reset vector with interrupts disabled.
+\item Perform BIST and inspect lockstep/ECC reset diagnostics.
+\item Initialize SP, TCM contents, data, BSS, and optional scratchpad test.
+\item Program default-deny MPU regions; then lock safety-critical descriptors.
+\item Install the vector table and configure fixed interrupt priorities.
+\item Initialize fault-supervisor policy and FAULT\_OUT handling.
+\item Initialize RTOS or call the application entry point.
+\item Enable interrupts only after all protected state is valid.
+\end{enumerate}
+
+\subsection{Safe-State Requirements}
+The board profile must define safe output values, watchdog behavior, external supervisor interaction, and whether a fault response may reset the core or must remain diagnosable until an external controller acknowledges it.
+
+\section{Verification and Conformance}
+\begin{profiletable}{L{1.45in}Y}
+\ProfileHeaderRow Domain & \ProfileTableHeader Required evidence\\\hline
+Decode & Every required opcode and reserved/unsupported encoding; malformed prefix priority.\\
+Arithmetic & Boundary vectors, divide faults, flags, fixed-latency assertions.\\
+Memory/MPU & All overlap priorities, cross-region accesses, execute protection, device ordering.\\
+Interrupts & Every vector/priority, masked arrival, exact saved frame, measured worst case.\\
+Lockstep & Injected register, control, address, data, timing, and ECC divergence before commit.\\
+ECC & Single-bit correction and all supported double-bit detection paths.\\
+Software & Compiler ABI tests, RTOS context switching, atomic litmus tests, linker placement checks.\\
+Formal & Fault-supervisor state machine, no divergent commit property, precise exception property.\\
+\end{profiletable}
+
+\section{Implementation Checklist}
+\begin{profiletable}{L{1.4in}Y}
+\ProfileHeaderRow Gate & \ProfileTableHeader Exit criterion\\\hline
+Architecture & Profile feature list frozen; QUERY leaves and control registers assigned.\\
+RTL & Scalar pipeline, MPU, TCM, atomics, interrupt path, lockstep comparator complete.\\
+Timing & Instruction table and interrupt WCET derived from post-synthesis configuration.\\
+Safety & Fault injection demonstrates no divergent commit and correct escalation policy.\\
+Toolchain & SeaBird32/Tritium target, assembler, disassembler, linker script, soft-float libraries.\\
+Firmware & Boot, MPU setup, vector table, diagnostics, safe mode, watchdog integration.\\
+RTOS & MPU-aware task model and bounded context-switch path.\\
+Release & Profile conformance corpus passes on RTL and gate-level simulation.\\
+\end{profiletable}
+
+\section{Open Decisions}
+\begin{itemize}
+\item Finalize guaranteed interrupt latency after synthesis; retain 12 cycles as a target until then.
+\item Choose the implementation granule reported by MPUINFO for each Tritium SKU.
+\item Assign concrete fault-supervisor CSR/MMIO addresses and diagnostic syndrome format.
+\item Publish board memory map, vector-table base, timer, interrupt controller, watchdog, and FAULT\_OUT protocol.
+\item Decide whether the first SKU includes optional scalar FP or remains soft-float only.
+\item Select certification objectives and diagnostic coverage for ISO 26262 or DO-178C programs.
+\end{itemize}
+
+\subsection*{Recommended Profile Identifier}
+\texttt{\ProfileID{} / \ParentISA{} / Tetra / deterministic safety subset}
+
+\subsection*{Source Basis}
+Meisei Tritium Embedded Processor Preliminary Datasheet v1 Draft; SeaBird v3.0 RC2 machine-readable specification and architecture manuals in this repository. This document defines an implementation profile and does not override parent instruction semantics.
+
+\end{document}

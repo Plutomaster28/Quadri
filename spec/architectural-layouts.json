@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "architecture_version": "3.0-rc2",
+  "feature_bits": {
+    "basic_r0": {
+      "CLOWNFISH": 0, "TETRA": 1, "DRAGONET": 2, "DROPLET": 3,
+      "MMU": 4, "ATOMICS": 5, "FP": 6, "SIMD": 7, "PIO": 8,
+      "SMP": 9, "XSTATE": 10, "DEBUG": 11, "PMU": 12, "MCA": 13
+    },
+    "extended_r0": {
+      "AVX": 0, "CRYPTO": 1, "DSP": 2, "TXN": 3, "VIRT": 4,
+      "SHSTK": 5, "IBT": 6, "BCD": 7, "MLAUNCH": 8, "RNG": 9,
+      "ATOMIC128": 10, "RINGS12": 11
+    }
+  },
+  "control_registers": {
+    "CR0": {"width": 64, "fields": {"PE": [0,1], "MP": [1,1], "EM": [2,1], "TS": [3,1], "NE": [5,1], "WP": [16,1], "AM": [18,1], "PG": [31,1]}},
+    "CR1": {"width": 64, "fields": {"FP": [0,1], "SIMD": [1,1], "AVX": [2,1], "CRYPTO": [3,1], "DSP": [4,1], "TXN": [5,1], "PIO": [6,1], "VIRT": [7,1], "PMU": [8,1], "SHSTK": [9,1], "IBT": [10,1], "RNG": [11,1]}},
+    "CR3": {"width": 64, "fields": {"ASID": [0,12], "ROOT_PFN": [12,40], "NO_FLUSH": [63,1]}},
+    "CR4": {"width": 64, "fields": {"GLOBAL_PAGES": [0,1], "ASID_ENABLE": [1,1], "PKEY_ENABLE": [2,1], "USER_ALIGN": [3,1], "SHSTK_ENABLE": [4,1], "IBT_ENABLE": [5,1], "XSTATE_ENABLE": [6,1], "STAGE2_ENABLE": [7,1]}},
+    "MODE": {"width": 64, "fields": {"EXECUTION_MODE": [0,2], "VA_LEVELS_MINUS_4": [2,1]}}
+  },
+  "query_leaves": {
+    "0x0000": "maximum basic leaf and 12-byte vendor ID",
+    "0x0001": "basic feature bitmap in R0; extension-control capability bitmap in R1",
+    "0x0002": "R0[7:0]=VA bits, R0[15:8]=PA bits, R0[31:16]=max vector bits; R1[15:0]=cache-line bytes; R2=thread ID; R3=core ID",
+    "0x0003": "extended feature bitmap in R0",
+    "0x0004": "deterministic cache descriptor indexed by subleaf",
+    "0x0005": "xstate component descriptor indexed by subleaf",
+    "0x80000000": "maximum extended leaf",
+    "0x80000001": "R0 architecture revision; R1 microarchitecture ID; R2 implementation revision; R3 reserved"
+  },
+  "structures": {
+    "IDT_ENTRY": {"size": 32, "alignment": 32, "fields": {"handler_low": [0,8], "handler_high": [8,8], "target_cpl": [16,1], "gate_type": [17,1], "stack_selector": [18,1], "caller_cpl": [19,1], "present": [20,1], "reserved": [21,11]}},
+    "CORE_CONTEXT": {"size": 1024, "alignment": 64, "fields": {"magic": [0,4], "revision": [4,2], "mode": [6,1], "cpl": [7,1], "image_size": [8,4], "flags": [16,16], "ip": [32,16], "gpr_r0_r31": [64,512], "fpcr": [576,8], "fpsr": [584,8], "k0_k7": [592,64], "system_state": [656,112], "reserved": [768,256]}},
+    "XSTATE_HEADER": {"size": 64, "alignment": 64, "fields": {"magic": [0,4], "revision": [4,2], "header_size": [6,2], "total_size": [8,4], "present_mask": [16,16], "enabled_mask": [32,16], "checksum": [48,8], "reserved": [56,8]}},
+    "VMCB": {"size": 4096, "alignment": 4096, "fields": {"magic": [0,4], "revision": [4,2], "header_size": [6,2], "total_size": [8,4], "flags": [16,8], "stage2_root": [24,8], "guest_asid": [32,4], "intercept_bitmap": [64,64], "guest_context": [128,1024], "host_context": [1152,1024], "exit_reason": [2176,4], "exit_qualification": [2184,8], "exit_gpa": [2192,16], "injection": [2208,32], "reserved": [2240,1856]}}
+  },
+  "xstate_components": {
+    "0": {"name": "FP_MASK", "alignment": 64, "description": "FPCR, FPSR, and K0-K7"},
+    "1": {"name": "VECTOR", "alignment": 64, "description": "V0-V31 at enabled vector width"},
+    "2": {"name": "DEBUG", "alignment": 64, "description": "DBGCTL and DB0-DB7"},
+    "3": {"name": "PMU", "alignment": 64, "description": "enabled performance-monitor state"},
+    "4": {"name": "TXN", "alignment": 64, "description": "transaction status; no live transaction may be saved"},
+    "5": {"name": "VIRT", "alignment": 64, "description": "virtualization host state"}
+  },
+  "elf": {
+    "class_by_abi": {"SB16": 32, "SB32": 32, "SB64": 64, "SB128": 64},
+    "experimental_e_machine": 21314,
+    "relocations": {
+      "R_SB_NONE": 0, "R_SB_ABS16": 1, "R_SB_ABS32": 2, "R_SB_ABS64": 3,
+      "R_SB_ABS128": 4, "R_SB_PCREL8": 5, "R_SB_PCREL16": 6,
+      "R_SB_PCREL32": 7, "R_SB_GOT32": 8, "R_SB_GOT64": 9,
+      "R_SB_PLT32": 10, "R_SB_TLS_GD": 11, "R_SB_TLS_IE": 12,
+      "R_SB_TLS_LE": 13, "R_SB_RELATIVE": 14, "R_SB_JUMP_SLOT": 15,
+      "R_SB_GLOB_DAT": 16
+    }
+  },
+  "dwarf_registers": {
+    "R0-R31": [0,31], "IP": 32, "FLAGS": 33, "SPTR": 34, "TPBASE": 35,
+    "KPBASE": 36, "FPCR": 37, "FPSR": 38, "V0-V31": [64,95], "K0-K7": [96,103]
+  },
+  "unwind": {"return_address_register": 32, "cfa_register": 7, "augmentation": "zSB", "data_alignment": -8}
+}

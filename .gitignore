@@ -1,0 +1,34 @@
+# Local builds and packaged release artifacts
+/build/
+/dist/
+/output/
+/tmp/
+*.exe
+*.o
+*.obj
+*.a
+*.so
+*.dll
+
+# Generated LaTeX build products and imported reference PDFs
+*.aux
+*.log
+*.out
+*.toc
+*.pdf
+missfont.log
+
+# Python and editor state
+__pycache__/
+*.py[cod]
+.DS_Store
+*~
+
+# Windows download metadata and local translator samples
+*:Zone.Identifier
+/sample_out.*
+/sample_x86.bin
+
+# Superseded import/extraction sources retained only in the local migration tree
+/main (3).*
+/seabird_isa_extracted.txt

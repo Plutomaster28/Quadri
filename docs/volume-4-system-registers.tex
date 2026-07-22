@@ -1,0 +1,138 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=0.85in,includefoot]{geometry}
+\usepackage{graphicx,float,longtable,booktabs,enumitem,listings,xcolor,fancyhdr,titlesec,array,hyperref,etoolbox}
+\usepackage[strings]{underscore}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\arraybackslash}p{#1}}
+\setlength{\tabcolsep}{2pt}\renewcommand{\arraystretch}{1.1}
+\AtBeginEnvironment{longtable}{\footnotesize}\AtBeginEnvironment{table}{\footnotesize}
+\lstset{basicstyle=\ttfamily\small,breaklines=true,showstringspaces=false,frame=single,numbers=left,numberstyle=\tiny\color{gray},backgroundcolor=\color{gray!8}}
+\pagestyle{fancy}\fancyhf{}
+\fancyhead[L]{\small\sffamily SeaBird ISA Volume 4}\fancyhead[R]{\small\sffamily Version 3.0 RC1}
+\fancyfoot[C]{\thepage}\setlength{\headheight}{14pt}
+\titleformat{\section}{\Large\bfseries\sffamily}{\thesection}{0.8em}{}
+\titleformat{\subsection}{\large\bfseries\sffamily}{\thesubsection}{0.8em}{}
+\titleformat{\subsubsection}{\normalsize\bfseries\sffamily}{\thesubsubsection}{0.8em}{}
+\hypersetup{colorlinks=true,linkcolor=black,urlcolor=black}
+\sloppy\emergencystretch=1em
+\begin{document}
+\begin{titlepage}\centering\vspace*{2cm}
+{\Huge\bfseries SeaBird ISA\\[0.3cm]}{\LARGE Volume 4: System Registers\\[0.5cm]}
+{\Large Version 3.0 Release Candidate 1}\vfill
+{\large Machine-readable architecture revision 1\\June 27, 2026}\vfill
+\end{titlepage}
+\tableofcontents\clearpage
+\subsection{System-Register Namespace}
+
+System registers are 16-bit numbered resources accessed by RDCR and WRCR. Numbers not reported by QUERY are reserved and raise INVALID\_OP. User access raises GPF. Unless stated otherwise, writes are serializing and reserved bits must be zero.
+
+\begin{longtable}{@{}L{1.7cm}L{2.8cm}L{7.4cm}@{}}
+\toprule
+\textbf{Number} & \textbf{Name} & \textbf{Purpose} \\ \midrule
+\endfirsthead
+\toprule
+\textbf{Number} & \textbf{Name} & \textbf{Purpose} \\ \midrule
+\endhead
+0x0000 & CR0 & Mode, paging, write-protect, alignment, and FP enable controls. \\
+0x0001 & CR1 & Extension-enable bitmap; each bit requires matching QUERY support. \\
+0x0002 & CR2 & Most recent page-fault virtual address; read-only to software. \\
+0x0003 & CR3 & Root page-table physical address and low ASID field. \\
+0x0004 & CR4 & Extended protection, global-page, and state-management controls. \\
+0x0005 & MODE & Current operating mode and target mode for serialized transitions. \\
+0x0006 & ASID & Current address-space identifier. \\
+0x0010 & IDTR & Interrupt descriptor table base; limit is held in IDTL. \\
+0x0011 & IDTL & Interrupt descriptor table byte limit. \\
+0x0012 & KSP0 & CPL0 stack pointer loaded on a privilege transition. \\
+0x0013 & KSP1 & Optional CPL1 stack pointer. \\
+0x0014 & KSP2 & Optional CPL2 stack pointer. \\
+0x0015 & TPBASE & User thread-local base, readable at CPL3. \\
+0x0016 & KPBASE & Per-processor privileged base. \\
+0x0017 & SYSENTRY & SYSCALL entry virtual address. \\
+0x0018 & SYSMASK & FLAGS bits cleared on SYSCALL entry. \\
+0x0019 & PID & Operating-system process identifier; CPL3 read-only. \\
+0x001A & TID & Operating-system thread identifier; CPL3 read-only. \\
+0x0020 & TIMER & Monotonic timer count. \\
+0x0021 & TIMERCMP & Local timer interrupt deadline. \\
+0x0022 & FREQ & Timer frequency in hertz; read-only. \\
+0x0023 & PSTATE & Requested performance and idle state. \\
+0x0024 & THERMAL & Temperature status and thermal interrupt controls. \\
+0x0030 & DBGCTL & Debug and single-step controls. \\
+0x0031--0x0038 & DB0--DB7 & Address/value breakpoints and watchpoints. \\
+0x0040--0x004F & PMC0--PMC15 & Optional performance event selectors and counters. \\
+0x0050--0x005F & MCA0--MCA15 & Optional machine-check status, address, and syndrome banks. \\
+0x0100--0x01FF & VM registers & Optional guest control, exit reason, stage-2 root, and injection state. \\
+0x0200--0x02FF & Security registers & Optional shadow-stack, branch-control, and measured-launch state. \\
+0x0300 & MPUCTRL & Region-MPU global enable and default-deny control. \\
+0x0301 & MPUINFO & Read-only MPU capabilities: region count and alignment granule. \\
+0x0310--0x033F & MPU descriptors & Sixteen three-register region descriptors: MPUBASE$n$, MPULIMIT$n$, and MPUATTR$n$. \\
+0x8000--0xFFFF & Vendor registers & Implementation-specific; never required by portable software. \\ \bottomrule
+\end{longtable}
+
+System registers replace an unstructured model-specific-register space. Standard numbers and bits are architecture-owned and stable. Vendor registers must be discoverable by vendor and implementation identifiers and must not alter base-ISA behavior when left at reset values.
+
+\subsubsection{Region-MPU Register Block}
+
+Implementations reporting the MPU feature use the architecture-owned register block at 0x0300--0x033F. MPUCTRL bit 0 is ENABLE and bit 1 is DEFAULT\_DENY; all other bits are reserved. MPUINFO is read-only: bits 7:0 contain the implemented region count (16 for the Tritium v1 profile), and bits 15:8 contain the base-2 logarithm of the minimum region granule in bytes. Reset clears MPUCTRL and every descriptor.
+
+For region $n$ in 0--15, MPUBASE$n$ is register $0x0310+3n$, MPULIMIT$n$ is $0x0311+3n$, and MPUATTR$n$ is $0x0312+3n$. BASE and LIMIT are inclusive physical byte addresses. Address bits below the granule are reserved and must be zero. LIMIT must be greater than or equal to BASE when the descriptor is enabled.
+
+MPUATTR bit 0 is REGION\_ENABLE; bits 1, 2, and 3 grant read, write, and execute access respectively; bits 5:4 encode privilege as 0=none, 1=user only, 2=privileged only, and 3=both; bits 7:6 encode memory type as 0=normal TCM, 1=normal scratchpad, 2=strongly ordered device, and 3=reserved; bit 8 is LOCK. Bits 63:9 are reserved and must be zero. A set LOCK bit makes all three registers of that descriptor immutable until reset; attempted writes raise GPF.
+
+Firmware must clear REGION\_ENABLE before changing an unlocked descriptor, write BASE and LIMIT, then write MPUATTR with REGION\_ENABLE set as the publishing operation. WRCR remains serializing. When multiple enabled regions match, the highest-numbered region wins. With MPUCTRL.ENABLE set, a complete fetch, load, or store must match one descriptor and satisfy its permissions; otherwise it raises the architecture's protection fault before any part of the access commits. DEFAULT\_DENY must be one for the Tritium v1 profile. MPU checks use physical addresses after translation, or the untranslated flat physical address when paging is absent.
+
+\subsection{Debug, Performance, Power, and Reliability}
+
+TF requests a DEBUG trap after each successfully retired instruction. DB0--DB7 may describe execute, load, store, or load/store breakpoints with power-of-two lengths from 1 to 16 bytes; execute breakpoints fault before the target instruction, while data watchpoints trap after the access retires. Debug state is per hardware thread and must be saved during context switches.
+
+The optional PMU provides up to 16 counters. QUERY enumerates counter width and architectural events. Counter overflow may request a local interrupt. PMU counts are not deterministic across implementations and must never change program semantics. RDPMC is unprivileged only when enabled by DBGCTL.
+
+WFI waits until an eligible interrupt or implementation event occurs. SLEEP requests a deeper platform idle state and may return early. PSTATE is a performance request rather than a frequency guarantee. TIMER continues monotonically across ordinary idle states, has the frequency reported by FREQ, and must not move backward.
+
+MACHINE\_CHECK records valid, uncorrected, processor-context-corrupt, address-valid, and syndrome-valid state in an MCA bank. Corrected errors may be logged without an exception. An uncorrected restartable error raises MACHINE\_CHECK as a fault; context-corrupt errors are aborts. Bank contents remain valid until privileged software clears them.
+
+\section{Control Registers}
+
+\subsection{System Control Registers}
+
+The architecture-wide system-register namespace is defined in the System Architecture section. CR0--CR4 are the low-numbered compatibility names used for core execution control:
+
+\begin{longtable}{@{}lll@{}}
+\toprule
+\textbf{Register} & \textbf{Name} & \textbf{Purpose} \\ \midrule
+\endfirsthead
+\toprule
+\textbf{Register} & \textbf{Name} & \textbf{Purpose} \\ \midrule
+\endhead
+CR0 & System Control & Protected mode, paging, FPU control \\
+CR1 & Extension Control & Architecturally enabled optional extensions \\
+CR2 & Page Fault Linear Address & Faulting address on page fault \\
+CR3 & Translation Root & Physical root address plus ASID \\
+CR4 & Extended Control & Additional CPU features \\
+CR8 & Task Priority & Local interrupt priority threshold \\ \bottomrule
+\end{longtable}
+
+\subsection{CR0 Bit Definitions}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Bit} & \textbf{Name} & \textbf{Description} \\ \midrule
+0 & PE & Protected Mode Enable \\
+1 & MP & Monitor Coprocessor \\
+2 & EM & Emulation (FPU emulation) \\
+3 & TS & Task Switched \\
+4 & ET & Extension Type \\
+5 & NE & Numeric Error \\
+16 & WP & Write Protect \\
+18 & AM & Alignment Mask \\
+29 & NW & Not Write-through \\
+30 & CD & Cache Disable \\
+31 & PG & Paging Enable \\ \bottomrule
+\end{tabular}
+\end{table}
+
+Attempts to set PG without a valid aligned CR3, to select an unsupported mode, or to enable an unsupported extension raise GPF and leave the register unchanged. Changing PE, PG, MODE, CR3, or executable-memory protection is serializing.
+\end{document}

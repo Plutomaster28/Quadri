@@ -1,0 +1,9004 @@
+{
+  "schema_version": 1,
+  "architecture_version": "3.0-rc2",
+  "vectors": [
+    {
+      "instruction_id": "SB-BASE-MOV-001-AE65A4",
+      "mnemonic": "MOV",
+      "category": "Data Movement",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-MOVI-001-362505",
+      "mnemonic": "MOVI",
+      "category": "Data Movement",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-MOVZX-001-8F1BE2",
+      "mnemonic": "MOVZX",
+      "category": "Data Movement",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-MOVSX-001-32DF3A",
+      "mnemonic": "MOVSX",
+      "category": "Data Movement",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-MOVHI-001-552437",
+      "mnemonic": "MOVHI",
+      "category": "Data Movement",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-MOVLO-001-222869",
+      "mnemonic": "MOVLO",
+      "category": "Data Movement",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-MOVSWP-001-66D12C",
+      "mnemonic": "MOVSWP",
+      "category": "Data Movement",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-LD-001-4E0B76",
+      "mnemonic": "LD",
+      "category": "Data Movement",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "memory:LD"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-ST-001-F0201A",
+      "mnemonic": "ST",
+      "category": "Data Movement",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "memory:ST"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-LDI-001-9541F9",
+      "mnemonic": "LDI",
+      "category": "Data Movement",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "memory:LDI"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-LDB-001-C8AEE5",
+      "mnemonic": "LDB",
+      "category": "Data Movement",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "memory:LDB"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-LDH-001-CFF238",
+      "mnemonic": "LDH",
+      "category": "Data Movement",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "memory:LDH"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-LDW-001-12BDCD",
+      "mnemonic": "LDW",
+      "category": "Data Movement",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "memory:LDW"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-LDQ-001-9F083E",
+      "mnemonic": "LDQ",
+      "category": "Data Movement",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "memory:LDQ"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-STB-001-689416",
+      "mnemonic": "STB",
+      "category": "Data Movement",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "memory:STB"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-STH-001-F5DC8A",
+      "mnemonic": "STH",
+      "category": "Data Movement",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "memory:STH"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-STW-001-7E9144",
+      "mnemonic": "STW",
+      "category": "Data Movement",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "memory:STW"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-STQ-001-B0B6A1",
+      "mnemonic": "STQ",
+      "category": "Data Movement",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "memory:STQ"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-LDP-001-731431",
+      "mnemonic": "LDP",
+      "category": "Data Movement",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "memory:LDP"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-STP-001-96D7CC",
+      "mnemonic": "STP",
+      "category": "Data Movement",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "memory:STP"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-LEA-001-FCF6C3",
+      "mnemonic": "LEA",
+      "category": "Data Movement",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-LEAS-001-133BB7",
+      "mnemonic": "LEAS",
+      "category": "Data Movement",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-XCHG-001-FD62CB",
+      "mnemonic": "XCHG",
+      "category": "Data Movement",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-ADD-001-B7D114",
+      "mnemonic": "ADD",
+      "category": "Arithmetic",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-ADDI-001-1CAA92",
+      "mnemonic": "ADDI",
+      "category": "Arithmetic",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-SUB-001-8261ED",
+      "mnemonic": "SUB",
+      "category": "Arithmetic",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-SUBI-001-CF02D7",
+      "mnemonic": "SUBI",
+      "category": "Arithmetic",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-MUL-001-E5AD4A",
+      "mnemonic": "MUL",
+      "category": "Arithmetic",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-MULI-001-53512D",
+      "mnemonic": "MULI",
+      "category": "Arithmetic",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-DIV-001-539731",
+      "mnemonic": "DIV",
+      "category": "Arithmetic",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "fault",
+        "fault": "DIV_ZERO"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-DIVI-001-B111EF",
+      "mnemonic": "DIVI",
+      "category": "Arithmetic",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "fault",
+        "fault": "DIV_ZERO"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-MOD-001-1E12B8",
+      "mnemonic": "MOD",
+      "category": "Arithmetic",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "fault",
+        "fault": "DIV_ZERO"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-MODI-001-1AC6C8",
+      "mnemonic": "MODI",
+      "category": "Arithmetic",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "fault",
+        "fault": "DIV_ZERO"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-NEG-001-9E141C",
+      "mnemonic": "NEG",
+      "category": "Arithmetic",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-INC-001-CBAFBD",
+      "mnemonic": "INC",
+      "category": "Arithmetic",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-DEC-001-CCFA82",
+      "mnemonic": "DEC",
+      "category": "Arithmetic",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-MULH-001-A25A70",
+      "mnemonic": "MULH",
+      "category": "Arithmetic",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-UMUL-001-9A9BDA",
+      "mnemonic": "UMUL",
+      "category": "Arithmetic",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-UDIV-001-A261AE",
+      "mnemonic": "UDIV",
+      "category": "Arithmetic",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "fault",
+        "fault": "DIV_ZERO"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-ADDS-001-45CF43",
+      "mnemonic": "ADDS",
+      "category": "Arithmetic",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-ADDU-001-B36D34",
+      "mnemonic": "ADDU",
+      "category": "Arithmetic",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-SUBS-001-3B158A",
+      "mnemonic": "SUBS",
+      "category": "Arithmetic",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-SUBU-001-0303E2",
+      "mnemonic": "SUBU",
+      "category": "Arithmetic",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-ABS-001-A94D39",
+      "mnemonic": "ABS",
+      "category": "Arithmetic",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-CLZ-001-3BEF53",
+      "mnemonic": "CLZ",
+      "category": "Arithmetic",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 64
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-CTZ-001-666F7E",
+      "mnemonic": "CTZ",
+      "category": "Arithmetic",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 64
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-POPC-001-16C8DB",
+      "mnemonic": "POPC",
+      "category": "Arithmetic",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-AND-001-78B311",
+      "mnemonic": "AND",
+      "category": "Logic & Bit Operations",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-OR-001-ED8B5A",
+      "mnemonic": "OR",
+      "category": "Logic & Bit Operations",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-XOR-001-3731DA",
+      "mnemonic": "XOR",
+      "category": "Logic & Bit Operations",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-NOT-001-7B0728",
+      "mnemonic": "NOT",
+      "category": "Logic & Bit Operations",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-NAND-001-8C4691",
+      "mnemonic": "NAND",
+      "category": "Logic & Bit Operations",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-NOR-001-A42487",
+      "mnemonic": "NOR",
+      "category": "Logic & Bit Operations",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-XNOR-001-05E022",
+      "mnemonic": "XNOR",
+      "category": "Logic & Bit Operations",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-SHL-001-C554FA",
+      "mnemonic": "SHL",
+      "category": "Logic & Bit Operations",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-SHR-001-681B74",
+      "mnemonic": "SHR",
+      "category": "Logic & Bit Operations",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-SAR-001-5FB392",
+      "mnemonic": "SAR",
+      "category": "Logic & Bit Operations",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-ROL-001-E2ACF2",
+      "mnemonic": "ROL",
+      "category": "Logic & Bit Operations",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-ROR-001-C967F5",
+      "mnemonic": "ROR",
+      "category": "Logic & Bit Operations",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-BSET-001-8E09CE",
+      "mnemonic": "BSET",
+      "category": "Logic & Bit Operations",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-BCLR-001-CAE2EB",
+      "mnemonic": "BCLR",
+      "category": "Logic & Bit Operations",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-BTOG-001-4188DF",
+      "mnemonic": "BTOG",
+      "category": "Logic & Bit Operations",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-BTST-001-17FC5A",
+      "mnemonic": "BTST",
+      "category": "Logic & Bit Operations",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-MASK-001-4CE3CD",
+      "mnemonic": "MASK",
+      "category": "Logic & Bit Operations",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-EXT-001-A72C1F",
+      "mnemonic": "EXT",
+      "category": "Logic & Bit Operations",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-PDEP-001-EDEA14",
+      "mnemonic": "PDEP",
+      "category": "Bit Manipulation Extensions (BMI-style)",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-PEXT-001-B9A827",
+      "mnemonic": "PEXT",
+      "category": "Bit Manipulation Extensions (BMI-style)",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-LZCNT-001-B49082",
+      "mnemonic": "LZCNT",
+      "category": "Bit Manipulation Extensions (BMI-style)",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 64
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-TZCNT-001-623794",
+      "mnemonic": "TZCNT",
+      "category": "Bit Manipulation Extensions (BMI-style)",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 64
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-POPCNT-001-2A468E",
+      "mnemonic": "POPCNT",
+      "category": "Bit Manipulation Extensions (BMI-style)",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-BEXTR-001-5A288C",
+      "mnemonic": "BEXTR",
+      "category": "Bit Manipulation Extensions (BMI-style)",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-BINSERT-001-957ECA",
+      "mnemonic": "BINSERT",
+      "category": "Bit Manipulation Extensions (BMI-style)",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-BLSI-001-F132CF",
+      "mnemonic": "BLSI",
+      "category": "Bit Manipulation Extensions (BMI-style)",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-BLSMSK-001-E7B720",
+      "mnemonic": "BLSMSK",
+      "category": "Bit Manipulation Extensions (BMI-style)",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 18446744073709551615
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-BLSR-001-029C71",
+      "mnemonic": "BLSR",
+      "category": "Bit Manipulation Extensions (BMI-style)",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-RORX-001-1F09FE",
+      "mnemonic": "RORX",
+      "category": "Bit Manipulation Extensions (BMI-style)",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-SHLX-001-03CE27",
+      "mnemonic": "SHLX",
+      "category": "Bit Manipulation Extensions (BMI-style)",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-SHRX-001-62E5FA",
+      "mnemonic": "SHRX",
+      "category": "Bit Manipulation Extensions (BMI-style)",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-ANDN-001-BE23BB",
+      "mnemonic": "ANDN",
+      "category": "Bit Manipulation Extensions (BMI-style)",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-BZHI-001-45BCF6",
+      "mnemonic": "BZHI",
+      "category": "Bit Manipulation Extensions (BMI-style)",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-TZCNTV-001-F0FD6C",
+      "mnemonic": "TZCNTV",
+      "category": "Bit Manipulation Extensions (BMI-style)",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 64
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-CMP-001-5B559E",
+      "mnemonic": "CMP",
+      "category": "Comparison",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-CMPI-001-FEAA63",
+      "mnemonic": "CMPI",
+      "category": "Comparison",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-CMPS-001-3705B7",
+      "mnemonic": "CMPS",
+      "category": "Comparison",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-CMPU-001-679F00",
+      "mnemonic": "CMPU",
+      "category": "Comparison",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-TST-001-408E38",
+      "mnemonic": "TST",
+      "category": "Comparison",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-TSTI-001-24289B",
+      "mnemonic": "TSTI",
+      "category": "Comparison",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-MAX-001-00423A",
+      "mnemonic": "MAX",
+      "category": "Comparison",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-MIN-001-4227E9",
+      "mnemonic": "MIN",
+      "category": "Comparison",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-SLT-001-1CF708",
+      "mnemonic": "SLT",
+      "category": "Comparison",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-SGT-001-24AAE1",
+      "mnemonic": "SGT",
+      "category": "Comparison",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-JMP-001-122B35",
+      "mnemonic": "JMP",
+      "category": "Branch / Control Flow",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "control",
+        "event": "JMP",
+        "next_ip": 4100,
+        "target": 4112
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-JMPA-001-DDC1B7",
+      "mnemonic": "JMPA",
+      "category": "Branch / Control Flow",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "control",
+        "event": "JMPA",
+        "next_ip": 4100,
+        "target": 4112
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-CALL-001-424E5D",
+      "mnemonic": "CALL",
+      "category": "Branch / Control Flow",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "control",
+        "event": "CALL",
+        "next_ip": 4100,
+        "target": 4112
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-CALLA-001-B411B0",
+      "mnemonic": "CALLA",
+      "category": "Branch / Control Flow",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "control",
+        "event": "CALLA",
+        "next_ip": 4100,
+        "target": 4112
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-RET-001-33CD56",
+      "mnemonic": "RET",
+      "category": "Branch / Control Flow",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "control",
+        "event": "RET",
+        "next_ip": 4100,
+        "target": 4112
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-JE-001-EE49C5",
+      "mnemonic": "JE",
+      "category": "Branch / Control Flow",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "control",
+        "event": "JE",
+        "next_ip": 4100,
+        "target": 4112
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-JNE-001-E2574A",
+      "mnemonic": "JNE",
+      "category": "Branch / Control Flow",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "control",
+        "event": "JNE",
+        "next_ip": 4100,
+        "target": 4112
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-JG-001-3FDEF7",
+      "mnemonic": "JG",
+      "category": "Branch / Control Flow",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "control",
+        "event": "JG",
+        "next_ip": 4100,
+        "target": 4112
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-JGE-001-91E832",
+      "mnemonic": "JGE",
+      "category": "Branch / Control Flow",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "control",
+        "event": "JGE",
+        "next_ip": 4100,
+        "target": 4112
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-JL-001-0EF1CD",
+      "mnemonic": "JL",
+      "category": "Branch / Control Flow",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "control",
+        "event": "JL",
+        "next_ip": 4100,
+        "target": 4112
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-JLE-001-45C845",
+      "mnemonic": "JLE",
+      "category": "Branch / Control Flow",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "control",
+        "event": "JLE",
+        "next_ip": 4100,
+        "target": 4112
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-JC-001-C050DC",
+      "mnemonic": "JC",
+      "category": "Branch / Control Flow",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "control",
+        "event": "JC",
+        "next_ip": 4100,
+        "target": 4112
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-JNC-001-27F7A3",
+      "mnemonic": "JNC",
+      "category": "Branch / Control Flow",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "control",
+        "event": "JNC",
+        "next_ip": 4100,
+        "target": 4112
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-JO-001-E4BE06",
+      "mnemonic": "JO",
+      "category": "Branch / Control Flow",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "control",
+        "event": "JO",
+        "next_ip": 4100,
+        "target": 4112
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-JNO-001-9C598E",
+      "mnemonic": "JNO",
+      "category": "Branch / Control Flow",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "control",
+        "event": "JNO",
+        "next_ip": 4100,
+        "target": 4112
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-JS-001-5DDF24",
+      "mnemonic": "JS",
+      "category": "Branch / Control Flow",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "control",
+        "event": "JS",
+        "next_ip": 4100,
+        "target": 4112
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-JNS-001-B8D5E8",
+      "mnemonic": "JNS",
+      "category": "Branch / Control Flow",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "control",
+        "event": "JNS",
+        "next_ip": 4100,
+        "target": 4112
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-JZR-001-17BA35",
+      "mnemonic": "JZR",
+      "category": "Branch / Control Flow",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "control",
+        "event": "JZR",
+        "next_ip": 4100,
+        "target": 4112
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-JNZR-001-7A15A9",
+      "mnemonic": "JNZR",
+      "category": "Branch / Control Flow",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "control",
+        "event": "JNZR",
+        "next_ip": 4100,
+        "target": 4112
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-BRR-001-6B89F0",
+      "mnemonic": "BRR",
+      "category": "Branch / Control Flow",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "control",
+        "event": "BRR",
+        "next_ip": 4100,
+        "target": 4112
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-TRAP-001-9D8292",
+      "mnemonic": "TRAP",
+      "category": "Branch / Control Flow",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "control",
+        "event": "TRAP",
+        "next_ip": 4100,
+        "target": 4112
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-YIELD-001-C75408",
+      "mnemonic": "YIELD",
+      "category": "Branch / Control Flow",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "control",
+        "event": "YIELD",
+        "next_ip": 4100,
+        "target": 4112
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-PREFETCH-001-C477B1",
+      "mnemonic": "PREFETCH",
+      "category": "Memory / Addressing Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "memory:PREFETCH"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-FLUSH-001-8F1203",
+      "mnemonic": "FLUSH",
+      "category": "Memory / Addressing Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "memory:FLUSH"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-INVIC-001-FB46F2",
+      "mnemonic": "INVIC",
+      "category": "Memory / Addressing Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "memory:INVIC"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-INVDC-001-E7D848",
+      "mnemonic": "INVDC",
+      "category": "Memory / Addressing Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "memory:INVDC"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-LDX-001-2D4E41",
+      "mnemonic": "LDX",
+      "category": "Memory / Addressing Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "memory:LDX"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-STX-001-337C57",
+      "mnemonic": "STX",
+      "category": "Memory / Addressing Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "memory:STX"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-LDN-001-4E2AD0",
+      "mnemonic": "LDN",
+      "category": "Memory / Addressing Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "memory:LDN"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-STN-001-103DDC",
+      "mnemonic": "STN",
+      "category": "Memory / Addressing Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "memory:STN"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-CPYB-001-0D2EF2",
+      "mnemonic": "CPYB",
+      "category": "Memory / Addressing Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "memory:CPYB"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-CPYW-001-9ED267",
+      "mnemonic": "CPYW",
+      "category": "Memory / Addressing Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "memory:CPYW"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-MEMFILL-001-72D7FA",
+      "mnemonic": "MEMFILL",
+      "category": "Memory / Addressing Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "memory:MEMFILL"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-XCHG-002-CDFAC7",
+      "mnemonic": "XCHG",
+      "category": "Atomic & Synchronization",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "atomic:XCHG"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-CMPXCHG-001-B83EBB",
+      "mnemonic": "CMPXCHG",
+      "category": "Atomic & Synchronization",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "atomic:CMPXCHG"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-ATADD-001-1E18C1",
+      "mnemonic": "ATADD",
+      "category": "Atomic & Synchronization",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "atomic:ATADD"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-ATSUB-001-16C451",
+      "mnemonic": "ATSUB",
+      "category": "Atomic & Synchronization",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "atomic:ATSUB"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-ATAND-001-470E22",
+      "mnemonic": "ATAND",
+      "category": "Atomic & Synchronization",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "atomic:ATAND"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-ATOR-001-A39363",
+      "mnemonic": "ATOR",
+      "category": "Atomic & Synchronization",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "atomic:ATOR"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-ATXOR-001-ED0CAB",
+      "mnemonic": "ATXOR",
+      "category": "Atomic & Synchronization",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "atomic:ATXOR"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-LL-001-E14FDB",
+      "mnemonic": "LL",
+      "category": "Atomic & Synchronization",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "atomic:LL"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-SC-001-BA5AF7",
+      "mnemonic": "SC",
+      "category": "Atomic & Synchronization",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "atomic:SC"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-FENCE-001-402CAB",
+      "mnemonic": "FENCE",
+      "category": "Atomic & Synchronization",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "atomic:FENCE"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-LFENCE-001-F195F0",
+      "mnemonic": "LFENCE",
+      "category": "Atomic & Synchronization",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "atomic:LFENCE"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-SFENCE-001-49FF06",
+      "mnemonic": "SFENCE",
+      "category": "Atomic & Synchronization",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "atomic:SFENCE"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-MFENCE-001-706F5A",
+      "mnemonic": "MFENCE",
+      "category": "Atomic & Synchronization",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "atomic:MFENCE"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-XCHG128-001-5888A3",
+      "mnemonic": "XCHG128",
+      "category": "Atomic & Synchronization",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "atomic:XCHG128"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-XBEGIN-001-26F343",
+      "mnemonic": "XBEGIN",
+      "category": "Transactional Memory",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "transaction:XBEGIN"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-XBEGINA-001-272A9D",
+      "mnemonic": "XBEGINA",
+      "category": "Transactional Memory",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "transaction:XBEGINA"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-XEND-001-A12213",
+      "mnemonic": "XEND",
+      "category": "Transactional Memory",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "transaction:XEND"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-XABORT-001-3963FA",
+      "mnemonic": "XABORT",
+      "category": "Transactional Memory",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "transaction:XABORT"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-XABORT-002-C55CE0",
+      "mnemonic": "XABORT",
+      "category": "Transactional Memory",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "transaction:XABORT"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-XTEST-001-82A66D",
+      "mnemonic": "XTEST",
+      "category": "Transactional Memory",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "transaction:XTEST"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-XSTATUS-001-BE699F",
+      "mnemonic": "XSTATUS",
+      "category": "Transactional Memory",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "transaction:XSTATUS"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-HLT-001-81C05B",
+      "mnemonic": "HLT",
+      "category": "System & Privileged",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "system:HLT"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-RESET-001-7C7BA0",
+      "mnemonic": "RESET",
+      "category": "System & Privileged",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "system:RESET"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-RDCR-001-3D89DA",
+      "mnemonic": "RDCR",
+      "category": "System & Privileged",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "system:RDCR"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-WRCR-001-A353F5",
+      "mnemonic": "WRCR",
+      "category": "System & Privileged",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "system:WRCR"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-SYSCALL-001-9DDB5A",
+      "mnemonic": "SYSCALL",
+      "category": "System & Privileged",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "system:SYSCALL"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-SYSRET-001-F551FE",
+      "mnemonic": "SYSRET",
+      "category": "System & Privileged",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "system:SYSRET"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-IRET-001-11165E",
+      "mnemonic": "IRET",
+      "category": "System & Privileged",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "system:IRET"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-CLI-001-8B0281",
+      "mnemonic": "CLI",
+      "category": "System & Privileged",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "system:CLI"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-STI-001-2937EF",
+      "mnemonic": "STI",
+      "category": "System & Privileged",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "system:STI"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-WFI-001-349384",
+      "mnemonic": "WFI",
+      "category": "System & Privileged",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "system:WFI"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-RDTIME-001-24D30A",
+      "mnemonic": "RDTIME",
+      "category": "System & Privileged",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "system:RDTIME"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-RDTS-001-93A2E4",
+      "mnemonic": "RDTS",
+      "category": "System & Privileged",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "system:RDTS"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-SLEEP-001-2F358C",
+      "mnemonic": "SLEEP",
+      "category": "System & Privileged",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "system:SLEEP"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-GETPID-001-4B2542",
+      "mnemonic": "GETPID",
+      "category": "System & Privileged",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "system:GETPID"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-GETTID-001-CB4501",
+      "mnemonic": "GETTID",
+      "category": "System & Privileged",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "system:GETTID"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-PUSH-001-A42D46",
+      "mnemonic": "PUSH",
+      "category": "Stack & Call Frame",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "stack:PUSH"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-POP-001-C68869",
+      "mnemonic": "POP",
+      "category": "Stack & Call Frame",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "stack:POP"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-PUSHA-001-B28FD0",
+      "mnemonic": "PUSHA",
+      "category": "Stack & Call Frame",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "stack:PUSHA"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-POPA-001-00F4E4",
+      "mnemonic": "POPA",
+      "category": "Stack & Call Frame",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "stack:POPA"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-ENTER-001-E37018",
+      "mnemonic": "ENTER",
+      "category": "Stack & Call Frame",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "stack:ENTER"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-LEAVE-001-263A8F",
+      "mnemonic": "LEAVE",
+      "category": "Stack & Call Frame",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "stack:LEAVE"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-PUSHF-001-DB5486",
+      "mnemonic": "PUSHF",
+      "category": "Stack & Call Frame",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "stack:PUSHF"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-POPF-001-397FCF",
+      "mnemonic": "POPF",
+      "category": "Stack & Call Frame",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "stack:POPF"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-PUSHQ-001-BA4D9A",
+      "mnemonic": "PUSHQ",
+      "category": "Stack & Call Frame",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "stack:PUSHQ"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-POPQ-001-F4EB1E",
+      "mnemonic": "POPQ",
+      "category": "Stack & Call Frame",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "stack:POPQ"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-VADD-001-86D518",
+      "mnemonic": "VADD",
+      "category": "SIMD / Vector",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-VSUB-001-0B29E7",
+      "mnemonic": "VSUB",
+      "category": "SIMD / Vector",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-VMUL-001-89C2AB",
+      "mnemonic": "VMUL",
+      "category": "SIMD / Vector",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-VDIV-001-C6CFF7",
+      "mnemonic": "VDIV",
+      "category": "SIMD / Vector",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-VAND-001-B0692D",
+      "mnemonic": "VAND",
+      "category": "SIMD / Vector",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-VOR-001-D44337",
+      "mnemonic": "VOR",
+      "category": "SIMD / Vector",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-VXOR-001-8B1B79",
+      "mnemonic": "VXOR",
+      "category": "SIMD / Vector",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-VSHL-001-F13925",
+      "mnemonic": "VSHL",
+      "category": "SIMD / Vector",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-VSHR-001-3B288C",
+      "mnemonic": "VSHR",
+      "category": "SIMD / Vector",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-VDUP-001-5130DC",
+      "mnemonic": "VDUP",
+      "category": "SIMD / Vector",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-VLD-001-48C7B3",
+      "mnemonic": "VLD",
+      "category": "SIMD / Vector",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-VST-001-2CC67D",
+      "mnemonic": "VST",
+      "category": "SIMD / Vector",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-VABS-001-39CA62",
+      "mnemonic": "VABS",
+      "category": "SIMD / Vector",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-VMAX-001-CEA1D0",
+      "mnemonic": "VMAX",
+      "category": "SIMD / Vector",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-VMIN-001-D5B21F",
+      "mnemonic": "VMIN",
+      "category": "SIMD / Vector",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-FADD-001-F2F7A4",
+      "mnemonic": "FADD",
+      "category": "Floating Point",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "fp",
+        "value": "+zero"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-FSUB-001-F34F11",
+      "mnemonic": "FSUB",
+      "category": "Floating Point",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "fp",
+        "value": "+zero"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-FMUL-001-8BDFA6",
+      "mnemonic": "FMUL",
+      "category": "Floating Point",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "fp",
+        "value": "+zero"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-FDIV-001-4BD6F4",
+      "mnemonic": "FDIV",
+      "category": "Floating Point",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "fp",
+        "value": "nan"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-FSQRT-001-47AFE5",
+      "mnemonic": "FSQRT",
+      "category": "Floating Point",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "fp",
+        "value": "+zero"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-FCMP-001-D67F55",
+      "mnemonic": "FCMP",
+      "category": "Floating Point",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "fp",
+        "value": {
+          "ZF": 1,
+          "PF": 0,
+          "CF": 0
+        }
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-FCVTI-001-5611EE",
+      "mnemonic": "FCVTI",
+      "category": "Floating Point",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "fp",
+        "value": "+zero"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-FCVTS-001-AAB18C",
+      "mnemonic": "FCVTS",
+      "category": "Floating Point",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "fp",
+        "value": "+zero"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-FNEG-001-420048",
+      "mnemonic": "FNEG",
+      "category": "Floating Point",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "fp",
+        "value": "-zero"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-FABS-001-7B16C1",
+      "mnemonic": "FABS",
+      "category": "Floating Point",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "fp",
+        "value": "+zero"
+      }
+    },
+    {
+      "instruction_id": "SB-FPX-FMADD-001-284B7B",
+      "mnemonic": "FMADD",
+      "category": "Floating Point",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "fp",
+        "value": "+zero"
+      }
+    },
+    {
+      "instruction_id": "SB-FPX-FMSUB-001-AB7D05",
+      "mnemonic": "FMSUB",
+      "category": "Floating Point",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "fp",
+        "value": "+zero"
+      }
+    },
+    {
+      "instruction_id": "SB-FPX-FNMADD-001-7BA631",
+      "mnemonic": "FNMADD",
+      "category": "Floating Point",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "fp",
+        "value": "+zero"
+      }
+    },
+    {
+      "instruction_id": "SB-FPX-FNMSUB-001-4BC56E",
+      "mnemonic": "FNMSUB",
+      "category": "Floating Point",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "fp",
+        "value": "+zero"
+      }
+    },
+    {
+      "instruction_id": "SB-FPX-FMIN-001-FB3760",
+      "mnemonic": "FMIN",
+      "category": "Floating Point",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "fp",
+        "value": "+zero"
+      }
+    },
+    {
+      "instruction_id": "SB-FPX-FMAX-001-83292E",
+      "mnemonic": "FMAX",
+      "category": "Floating Point",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "fp",
+        "value": "+zero"
+      }
+    },
+    {
+      "instruction_id": "SB-FPX-FRECIP-001-231DA0",
+      "mnemonic": "FRECIP",
+      "category": "Floating Point",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "fp",
+        "value": "+inf"
+      }
+    },
+    {
+      "instruction_id": "SB-FPX-FRSQRT-001-00BDEC",
+      "mnemonic": "FRSQRT",
+      "category": "Floating Point",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "fp",
+        "value": "+inf"
+      }
+    },
+    {
+      "instruction_id": "SB-FPX-FRND-001-67E182",
+      "mnemonic": "FRND",
+      "category": "Floating Point",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "fp",
+        "value": "+zero"
+      }
+    },
+    {
+      "instruction_id": "SB-FPX-FRNDZ-001-6EB040",
+      "mnemonic": "FRNDZ",
+      "category": "Floating Point",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "fp",
+        "value": "+zero"
+      }
+    },
+    {
+      "instruction_id": "SB-FPX-FCVT.S2D-001-5623A0",
+      "mnemonic": "FCVT.S2D",
+      "category": "Floating Point",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "fp",
+        "value": "+zero"
+      }
+    },
+    {
+      "instruction_id": "SB-FPX-FCVT.D2S-001-BE0CB7",
+      "mnemonic": "FCVT.D2S",
+      "category": "Floating Point",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "fp",
+        "value": "+zero"
+      }
+    },
+    {
+      "instruction_id": "SB-FPX-FCVTINT-001-0F2574",
+      "mnemonic": "FCVTINT",
+      "category": "Floating Point",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "fp",
+        "value": "+zero"
+      }
+    },
+    {
+      "instruction_id": "SB-FPX-FCLASS-001-9A82A0",
+      "mnemonic": "FCLASS",
+      "category": "Floating Point",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "fp",
+        "value": 8
+      }
+    },
+    {
+      "instruction_id": "SB-FPX-FCHS-001-BF47A5",
+      "mnemonic": "FCHS",
+      "category": "Floating Point",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "fp",
+        "value": "-zero"
+      }
+    },
+    {
+      "instruction_id": "SB-FPX-FTEST-001-D9F746",
+      "mnemonic": "FTEST",
+      "category": "Floating Point",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "fp",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-AVX-VFMADD-001-050BB5",
+      "mnemonic": "VFMADD",
+      "category": "Advanced Vector Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-AVX-VFMSUB-001-A8225B",
+      "mnemonic": "VFMSUB",
+      "category": "Advanced Vector Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-AVX-VFNMADD-001-857ADB",
+      "mnemonic": "VFNMADD",
+      "category": "Advanced Vector Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-AVX-VFMADD_ROUND-001-2C6421",
+      "mnemonic": "VFMADD_ROUND",
+      "category": "Advanced Vector Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-AVX-VPERMUTE-001-39809E",
+      "mnemonic": "VPERMUTE",
+      "category": "Advanced Vector Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-AVX-VSHUFFLE-001-EE4394",
+      "mnemonic": "VSHUFFLE",
+      "category": "Advanced Vector Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-AVX-VBLEND-001-EC1938",
+      "mnemonic": "VBLEND",
+      "category": "Advanced Vector Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-AVX-VTEST-001-B8E5B6",
+      "mnemonic": "VTEST",
+      "category": "Advanced Vector Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-AVX-VPMADD-001-AE6313",
+      "mnemonic": "VPMADD",
+      "category": "Advanced Vector Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-AVX-VREDUCE_ADD-001-74730C",
+      "mnemonic": "VREDUCE_ADD",
+      "category": "Advanced Vector Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-AVX-VREDUCE_MUL-001-DDFF67",
+      "mnemonic": "VREDUCE_MUL",
+      "category": "Advanced Vector Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-AVX-VCOMPARE_LT-001-94F459",
+      "mnemonic": "VCOMPARE_LT",
+      "category": "Advanced Vector Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-AVX-VCOMPARE_GT-001-D45ACE",
+      "mnemonic": "VCOMPARE_GT",
+      "category": "Advanced Vector Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-AVX-VINSERT-001-504DA8",
+      "mnemonic": "VINSERT",
+      "category": "Advanced Vector Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-AVX-VEXTRACT-001-5D1DD0",
+      "mnemonic": "VEXTRACT",
+      "category": "Advanced Vector Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-AVX-VGATHER-001-3DC1C6",
+      "mnemonic": "VGATHER",
+      "category": "Advanced Vector Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-AVX-VSCATTER-001-24AA1B",
+      "mnemonic": "VSCATTER",
+      "category": "Advanced Vector Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-AVX-VALIGN-001-9A9906",
+      "mnemonic": "VALIGN",
+      "category": "Advanced Vector Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-AVX-VBSWAP-001-6AC685",
+      "mnemonic": "VBSWAP",
+      "category": "Advanced Vector Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-AVX-VPACK-001-B00D89",
+      "mnemonic": "VPACK",
+      "category": "Advanced Vector Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-AVX-VUNPACK-001-ED602A",
+      "mnemonic": "VUNPACK",
+      "category": "Advanced Vector Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-AVX-VPMUL-001-A5E860",
+      "mnemonic": "VPMUL",
+      "category": "Advanced Vector Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-AVX-VPERM2-001-4F1B84",
+      "mnemonic": "VPERM2",
+      "category": "Advanced Vector Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-AVX-VCOMPRESS-001-CC6C2E",
+      "mnemonic": "VCOMPRESS",
+      "category": "Advanced Vector Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-AVX-VEXPAND-001-6E2E17",
+      "mnemonic": "VEXPAND",
+      "category": "Advanced Vector Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-AVX-VROUND-001-5A8E12",
+      "mnemonic": "VROUND",
+      "category": "Advanced Vector Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-AVX-VRECIP_EST-001-D34D50",
+      "mnemonic": "VRECIP_EST",
+      "category": "Advanced Vector Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          "+inf",
+          "+inf",
+          "+inf",
+          "+inf"
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-AVX-VRSQRT_EST-001-CC9CBD",
+      "mnemonic": "VRSQRT_EST",
+      "category": "Advanced Vector Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          "+inf",
+          "+inf",
+          "+inf",
+          "+inf"
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-AVX-VFMADD_SUB-001-1E5EFD",
+      "mnemonic": "VFMADD_SUB",
+      "category": "Advanced Vector Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-AVX-VZEROUPPER-001-9F5A86",
+      "mnemonic": "VZEROUPPER",
+      "category": "Advanced Vector Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-AVX-VZEROALL-001-6C7570",
+      "mnemonic": "VZEROALL",
+      "category": "Advanced Vector Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-AVX-VPMAX-001-D56854",
+      "mnemonic": "VPMAX",
+      "category": "Advanced Vector Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-AVX-VPMIN-001-733F6C",
+      "mnemonic": "VPMIN",
+      "category": "Advanced Vector Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-AVX-VGATHERQ-001-091CDD",
+      "mnemonic": "VGATHERQ",
+      "category": "Advanced Vector Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-AVX-VSCATTERQ-001-C19347",
+      "mnemonic": "VSCATTERQ",
+      "category": "Advanced Vector Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-AVX-VFPCLASS-001-F1D39F",
+      "mnemonic": "VFPCLASS",
+      "category": "Advanced Vector Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          8,
+          8,
+          8,
+          8
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-AVX-VREDUCE_MAX-001-BF5A46",
+      "mnemonic": "VREDUCE_MAX",
+      "category": "Advanced Vector Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-AVX-VREDUCE_MIN-001-B2E13B",
+      "mnemonic": "VREDUCE_MIN",
+      "category": "Advanced Vector Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-AVX-VMULADDSUB-001-D55EA3",
+      "mnemonic": "VMULADDSUB",
+      "category": "Advanced Vector Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-CRYPTO-AESENC-001-7011C5",
+      "mnemonic": "AESENC",
+      "category": "Cryptographic Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "bytes",
+        "hex": "63636363636363636363636363636363"
+      }
+    },
+    {
+      "instruction_id": "SB-CRYPTO-AESDEC-001-B731DC",
+      "mnemonic": "AESDEC",
+      "category": "Cryptographic Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "bytes",
+        "hex": "52525252525252525252525252525252"
+      }
+    },
+    {
+      "instruction_id": "SB-CRYPTO-AESIMC-001-31EBD1",
+      "mnemonic": "AESIMC",
+      "category": "Cryptographic Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "bytes",
+        "hex": "00000000000000000000000000000000"
+      }
+    },
+    {
+      "instruction_id": "SB-CRYPTO-PCLMULQDQ-001-16F93E",
+      "mnemonic": "PCLMULQDQ",
+      "category": "Cryptographic Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "bytes",
+        "hex": "00000000000000000000000000000000"
+      }
+    },
+    {
+      "instruction_id": "SB-CRYPTO-GHASH-001-5D3453",
+      "mnemonic": "GHASH",
+      "category": "Cryptographic Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "bytes",
+        "hex": "00000000000000000000000000000000"
+      }
+    },
+    {
+      "instruction_id": "SB-CRYPTO-SHA1_MSG1-001-DC41E3",
+      "mnemonic": "SHA1_MSG1",
+      "category": "Cryptographic Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "bytes",
+        "hex": "00000000000000000000000000000000"
+      }
+    },
+    {
+      "instruction_id": "SB-CRYPTO-SHA1_MSG2-001-EEB766",
+      "mnemonic": "SHA1_MSG2",
+      "category": "Cryptographic Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "bytes",
+        "hex": "00000000000000000000000000000000"
+      }
+    },
+    {
+      "instruction_id": "SB-CRYPTO-SHA256_SIG0-001-651E4C",
+      "mnemonic": "SHA256_SIG0",
+      "category": "Cryptographic Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "bytes",
+        "hex": "00000000000000000000000000000000"
+      }
+    },
+    {
+      "instruction_id": "SB-CRYPTO-SHA256_SIG1-001-BA052F",
+      "mnemonic": "SHA256_SIG1",
+      "category": "Cryptographic Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "bytes",
+        "hex": "00000000000000000000000000000000"
+      }
+    },
+    {
+      "instruction_id": "SB-CRYPTO-POLY_MUL-001-2701E0",
+      "mnemonic": "POLY_MUL",
+      "category": "Cryptographic Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "bytes",
+        "hex": "00000000000000000000000000000000"
+      }
+    },
+    {
+      "instruction_id": "SB-DSP-MAC32-001-C1EC29",
+      "mnemonic": "MAC32",
+      "category": "Digital Signal Processing (DSP) Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-DSP-MAC64-001-93E51B",
+      "mnemonic": "MAC64",
+      "category": "Digital Signal Processing (DSP) Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-DSP-MACS-001-80D419",
+      "mnemonic": "MACS",
+      "category": "Digital Signal Processing (DSP) Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-DSP-MSUB-001-558345",
+      "mnemonic": "MSUB",
+      "category": "Digital Signal Processing (DSP) Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-DSP-SATSUB-001-FB0805",
+      "mnemonic": "SATSUB",
+      "category": "Digital Signal Processing (DSP) Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-DSP-SATADD-001-13986C",
+      "mnemonic": "SATADD",
+      "category": "Digital Signal Processing (DSP) Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-DSP-FIXED_MUL-001-92AA3B",
+      "mnemonic": "FIXED_MUL",
+      "category": "Digital Signal Processing (DSP) Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-DSP-FIXED_ADD-001-CF95DE",
+      "mnemonic": "FIXED_ADD",
+      "category": "Digital Signal Processing (DSP) Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-DSP-CMPLX_MUL-001-B05B27",
+      "mnemonic": "CMPLX_MUL",
+      "category": "Digital Signal Processing (DSP) Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-DSP-BITREV-001-4D6D6B",
+      "mnemonic": "BITREV",
+      "category": "Digital Signal Processing (DSP) Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-DSP-PACK_SAT-001-BA5980",
+      "mnemonic": "PACK_SAT",
+      "category": "Digital Signal Processing (DSP) Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-DSP-UNPACK_EXP-001-175289",
+      "mnemonic": "UNPACK_EXP",
+      "category": "Digital Signal Processing (DSP) Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-DSP-CLAMP-001-4B0A0D",
+      "mnemonic": "CLAMP",
+      "category": "Digital Signal Processing (DSP) Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-DSP-ACCUMULATE-001-917B0B",
+      "mnemonic": "ACCUMULATE",
+      "category": "Digital Signal Processing (DSP) Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-DSP-DOTP-001-33015B",
+      "mnemonic": "DOTP",
+      "category": "Digital Signal Processing (DSP) Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-DSP-SUMDOTP-001-2AF17F",
+      "mnemonic": "SUMDOTP",
+      "category": "Digital Signal Processing (DSP) Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-DSP-RSHIFT_ROUND-001-93D0A9",
+      "mnemonic": "RSHIFT_ROUND",
+      "category": "Digital Signal Processing (DSP) Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-DSP-LSHIFT-001-BBC84F",
+      "mnemonic": "LSHIFT",
+      "category": "Digital Signal Processing (DSP) Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-DSP-SLLV-001-D4A61E",
+      "mnemonic": "SLLV",
+      "category": "Digital Signal Processing (DSP) Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-DSP-SRLV-001-56C9AA",
+      "mnemonic": "SRLV",
+      "category": "Digital Signal Processing (DSP) Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-DSP-SRAV-001-6417D0",
+      "mnemonic": "SRAV",
+      "category": "Digital Signal Processing (DSP) Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-DSP-RNDQ-001-3738B5",
+      "mnemonic": "RNDQ",
+      "category": "Digital Signal Processing (DSP) Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-DSP-CLZ_FAST-001-61BEE5",
+      "mnemonic": "CLZ_FAST",
+      "category": "Digital Signal Processing (DSP) Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 64
+      }
+    },
+    {
+      "instruction_id": "SB-DSP-TZCNT_FAST-001-CA0225",
+      "mnemonic": "TZCNT_FAST",
+      "category": "Digital Signal Processing (DSP) Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 64
+      }
+    },
+    {
+      "instruction_id": "SB-DSP-MAD32-001-19118A",
+      "mnemonic": "MAD32",
+      "category": "Digital Signal Processing (DSP) Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-SYSX-QUERY-001-FFAD8F",
+      "mnemonic": "QUERY",
+      "category": "Architectural System Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "system:QUERY"
+      }
+    },
+    {
+      "instruction_id": "SB-SYSX-IN-001-CE854A",
+      "mnemonic": "IN",
+      "category": "Architectural System Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "system:IN"
+      }
+    },
+    {
+      "instruction_id": "SB-SYSX-OUT-001-1DB66B",
+      "mnemonic": "OUT",
+      "category": "Architectural System Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "system:OUT"
+      }
+    },
+    {
+      "instruction_id": "SB-SYSX-XSAVE-001-87007D",
+      "mnemonic": "XSAVE",
+      "category": "Architectural System Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "system:XSAVE"
+      }
+    },
+    {
+      "instruction_id": "SB-SYSX-XRSTOR-001-942774",
+      "mnemonic": "XRSTOR",
+      "category": "Architectural System Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "system:XRSTOR"
+      }
+    },
+    {
+      "instruction_id": "SB-SYSX-ISYNC-001-85D024",
+      "mnemonic": "ISYNC",
+      "category": "Architectural System Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "system:ISYNC"
+      }
+    },
+    {
+      "instruction_id": "SB-SYSX-INVTLB-001-820D9C",
+      "mnemonic": "INVTLB",
+      "category": "Architectural System Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "system:INVTLB"
+      }
+    },
+    {
+      "instruction_id": "SB-SYSX-INVTLBASID-001-6CA17C",
+      "mnemonic": "INVTLBASID",
+      "category": "Architectural System Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "system:INVTLBASID"
+      }
+    },
+    {
+      "instruction_id": "SB-SYSX-INVTLBALL-001-97E083",
+      "mnemonic": "INVTLBALL",
+      "category": "Architectural System Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "system:INVTLBALL"
+      }
+    },
+    {
+      "instruction_id": "SB-SYSX-SENDIPI-001-EBED24",
+      "mnemonic": "SENDIPI",
+      "category": "Architectural System Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "system:SENDIPI"
+      }
+    },
+    {
+      "instruction_id": "SB-SYSX-EOI-001-3DE70D",
+      "mnemonic": "EOI",
+      "category": "Architectural System Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "system:EOI"
+      }
+    },
+    {
+      "instruction_id": "SB-SYSX-VMENTER-001-5722AE",
+      "mnemonic": "VMENTER",
+      "category": "Architectural System Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "system:VMENTER"
+      }
+    },
+    {
+      "instruction_id": "SB-SYSX-VMRESUME-001-C4431B",
+      "mnemonic": "VMRESUME",
+      "category": "Architectural System Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "system:VMRESUME"
+      }
+    },
+    {
+      "instruction_id": "SB-SYSX-VMREAD-001-C05686",
+      "mnemonic": "VMREAD",
+      "category": "Architectural System Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "system:VMREAD"
+      }
+    },
+    {
+      "instruction_id": "SB-SYSX-VMWRITE-001-0156FC",
+      "mnemonic": "VMWRITE",
+      "category": "Architectural System Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "system:VMWRITE"
+      }
+    },
+    {
+      "instruction_id": "SB-SYSX-ENDBR-001-AAD169",
+      "mnemonic": "ENDBR",
+      "category": "Architectural System Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "system:ENDBR"
+      }
+    },
+    {
+      "instruction_id": "SB-SYSX-WRSS-001-85CB61",
+      "mnemonic": "WRSS",
+      "category": "Architectural System Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "system:WRSS"
+      }
+    },
+    {
+      "instruction_id": "SB-SYSX-RDPMC-001-69EF0A",
+      "mnemonic": "RDPMC",
+      "category": "Architectural System Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "system:RDPMC"
+      }
+    },
+    {
+      "instruction_id": "SB-SYSX-RNGGET-001-71C333",
+      "mnemonic": "RNGGET",
+      "category": "Architectural System Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "system:RNGGET"
+      }
+    },
+    {
+      "instruction_id": "SB-SYSX-SAVECTX-001-C68442",
+      "mnemonic": "SAVECTX",
+      "category": "Architectural System Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "system:SAVECTX"
+      }
+    },
+    {
+      "instruction_id": "SB-SYSX-LOADCTX-001-9AA675",
+      "mnemonic": "LOADCTX",
+      "category": "Architectural System Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "system:LOADCTX"
+      }
+    },
+    {
+      "instruction_id": "SB-SYSX-GETCPL-001-FD6788",
+      "mnemonic": "GETCPL",
+      "category": "Architectural System Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "system:GETCPL"
+      }
+    },
+    {
+      "instruction_id": "SB-SYSX-SETMODE-001-7FE93D",
+      "mnemonic": "SETMODE",
+      "category": "Architectural System Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "system:SETMODE"
+      }
+    },
+    {
+      "instruction_id": "SB-FPX-FLD-RC2-001",
+      "mnemonic": "FLD",
+      "category": "Floating Point",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-FPX-FST-RC2-001",
+      "mnemonic": "FST",
+      "category": "Floating Point",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    }
+  ]
+}

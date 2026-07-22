@@ -1,0 +1,244 @@
+\documentclass[10pt]{article}
+\usepackage[margin=0.8in,includefoot]{geometry}
+\usepackage{longtable,booktabs,array,fancyhdr,hyperref,titlesec}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\pagestyle{fancy}\fancyhf{}
+\fancyhead[L]{\sffamily SeaBird Volume 5 -- Binary Interfaces}
+\fancyhead[R]{\sffamily Version 3.0 RC1}
+\fancyfoot[C]{\thepage}\setlength{\headheight}{14pt}
+\titleformat{\section}{\Large\bfseries\sffamily}{\thesection}{0.7em}{}
+\titleformat{\subsection}{\large\bfseries\sffamily}{\thesubsection}{0.7em}{}
+\hypersetup{colorlinks=true,linkcolor=black}\sloppy\emergencystretch=1em
+\begin{document}
+\begin{titlepage}\centering\vspace*{2cm}
+{\Huge\bfseries SeaBird ISA\\[0.3cm]}{\LARGE Volume 5: Binary Interfaces\\[0.5cm]}
+{\Large Version 3.0 Release Candidate 1}\vfill
+{\large Generated from architectural-layouts.json\\June 27, 2026}\vfill
+\end{titlepage}
+\tableofcontents\clearpage
+\section{Feature Discovery Bit Assignments}
+QUERY leaf 0x0001 returns the basic bitmap in R0. QUERY leaf 0x0003 returns the extended bitmap in R0. Unlisted bits are reserved and read zero.
+
+\subsection{basic\_r0}
+\begin{longtable}{@{}L{3.5cm}L{2cm}@{}}
+\toprule Feature & Bit \\ \midrule
+CLOWNFISH & 0 \\
+TETRA & 1 \\
+DRAGONET & 2 \\
+DROPLET & 3 \\
+MMU & 4 \\
+ATOMICS & 5 \\
+FP & 6 \\
+SIMD & 7 \\
+PIO & 8 \\
+SMP & 9 \\
+XSTATE & 10 \\
+DEBUG & 11 \\
+PMU & 12 \\
+MCA & 13 \\
+\bottomrule\end{longtable}
+\subsection{extended\_r0}
+\begin{longtable}{@{}L{3.5cm}L{2cm}@{}}
+\toprule Feature & Bit \\ \midrule
+AVX & 0 \\
+CRYPTO & 1 \\
+DSP & 2 \\
+TXN & 3 \\
+VIRT & 4 \\
+SHSTK & 5 \\
+IBT & 6 \\
+BCD & 7 \\
+MLAUNCH & 8 \\
+RNG & 9 \\
+ATOMIC128 & 10 \\
+RINGS12 & 11 \\
+\bottomrule\end{longtable}
+\section{Control Register Bit Layouts}
+\subsection{CR0 (64 bits)}
+\begin{longtable}{@{}L{4.5cm}L{2cm}L{2cm}@{}}
+\toprule Field & First bit & Width \\ \midrule
+PE & 0 & 1 \\
+MP & 1 & 1 \\
+EM & 2 & 1 \\
+TS & 3 & 1 \\
+NE & 5 & 1 \\
+WP & 16 & 1 \\
+AM & 18 & 1 \\
+PG & 31 & 1 \\
+\bottomrule\end{longtable}
+Unlisted bits are reserved, read as zero, and must be written as zero.
+\subsection{CR1 (64 bits)}
+\begin{longtable}{@{}L{4.5cm}L{2cm}L{2cm}@{}}
+\toprule Field & First bit & Width \\ \midrule
+FP & 0 & 1 \\
+SIMD & 1 & 1 \\
+AVX & 2 & 1 \\
+CRYPTO & 3 & 1 \\
+DSP & 4 & 1 \\
+TXN & 5 & 1 \\
+PIO & 6 & 1 \\
+VIRT & 7 & 1 \\
+PMU & 8 & 1 \\
+SHSTK & 9 & 1 \\
+IBT & 10 & 1 \\
+RNG & 11 & 1 \\
+\bottomrule\end{longtable}
+Unlisted bits are reserved, read as zero, and must be written as zero.
+\subsection{CR3 (64 bits)}
+\begin{longtable}{@{}L{4.5cm}L{2cm}L{2cm}@{}}
+\toprule Field & First bit & Width \\ \midrule
+ASID & 0 & 12 \\
+ROOT\_PFN & 12 & 40 \\
+NO\_FLUSH & 63 & 1 \\
+\bottomrule\end{longtable}
+Unlisted bits are reserved, read as zero, and must be written as zero.
+\subsection{CR4 (64 bits)}
+\begin{longtable}{@{}L{4.5cm}L{2cm}L{2cm}@{}}
+\toprule Field & First bit & Width \\ \midrule
+GLOBAL\_PAGES & 0 & 1 \\
+ASID\_ENABLE & 1 & 1 \\
+PKEY\_ENABLE & 2 & 1 \\
+USER\_ALIGN & 3 & 1 \\
+SHSTK\_ENABLE & 4 & 1 \\
+IBT\_ENABLE & 5 & 1 \\
+XSTATE\_ENABLE & 6 & 1 \\
+STAGE2\_ENABLE & 7 & 1 \\
+\bottomrule\end{longtable}
+Unlisted bits are reserved, read as zero, and must be written as zero.
+\subsection{MODE (64 bits)}
+\begin{longtable}{@{}L{4.5cm}L{2cm}L{2cm}@{}}
+\toprule Field & First bit & Width \\ \midrule
+EXECUTION\_MODE & 0 & 2 \\
+VA\_LEVELS\_MINUS\_4 & 2 & 1 \\
+\bottomrule\end{longtable}
+Unlisted bits are reserved, read as zero, and must be written as zero.
+\section{Architectural Binary Structures}
+All offsets and sizes in this section are bytes. All multi-byte fields are little-endian.
+\subsection{IDT\_ENTRY}
+Size: 32 bytes. Alignment: 32 bytes.
+\begin{longtable}{@{}L{4cm}L{2cm}L{2cm}@{}}
+\toprule Field & Offset & Size \\ \midrule
+handler\_low & 0 & 8 \\
+handler\_high & 8 & 8 \\
+target\_cpl & 16 & 1 \\
+gate\_type & 17 & 1 \\
+stack\_selector & 18 & 1 \\
+caller\_cpl & 19 & 1 \\
+present & 20 & 1 \\
+reserved & 21 & 11 \\
+\bottomrule\end{longtable}
+\subsection{CORE\_CONTEXT}
+Size: 1024 bytes. Alignment: 64 bytes.
+\begin{longtable}{@{}L{4cm}L{2cm}L{2cm}@{}}
+\toprule Field & Offset & Size \\ \midrule
+magic & 0 & 4 \\
+revision & 4 & 2 \\
+mode & 6 & 1 \\
+cpl & 7 & 1 \\
+image\_size & 8 & 4 \\
+flags & 16 & 16 \\
+ip & 32 & 16 \\
+gpr\_r0\_r31 & 64 & 512 \\
+fpcr & 576 & 8 \\
+fpsr & 584 & 8 \\
+k0\_k7 & 592 & 64 \\
+system\_state & 656 & 112 \\
+reserved & 768 & 256 \\
+\bottomrule\end{longtable}
+\subsection{XSTATE\_HEADER}
+Size: 64 bytes. Alignment: 64 bytes.
+\begin{longtable}{@{}L{4cm}L{2cm}L{2cm}@{}}
+\toprule Field & Offset & Size \\ \midrule
+magic & 0 & 4 \\
+revision & 4 & 2 \\
+header\_size & 6 & 2 \\
+total\_size & 8 & 4 \\
+present\_mask & 16 & 16 \\
+enabled\_mask & 32 & 16 \\
+checksum & 48 & 8 \\
+reserved & 56 & 8 \\
+\bottomrule\end{longtable}
+\subsection{VMCB}
+Size: 4096 bytes. Alignment: 4096 bytes.
+\begin{longtable}{@{}L{4cm}L{2cm}L{2cm}@{}}
+\toprule Field & Offset & Size \\ \midrule
+magic & 0 & 4 \\
+revision & 4 & 2 \\
+header\_size & 6 & 2 \\
+total\_size & 8 & 4 \\
+flags & 16 & 8 \\
+stage2\_root & 24 & 8 \\
+guest\_asid & 32 & 4 \\
+intercept\_bitmap & 64 & 64 \\
+guest\_context & 128 & 1024 \\
+host\_context & 1152 & 1024 \\
+exit\_reason & 2176 & 4 \\
+exit\_qualification & 2184 & 8 \\
+exit\_gpa & 2192 & 16 \\
+injection & 2208 & 32 \\
+reserved & 2240 & 1856 \\
+\bottomrule\end{longtable}
+\section{Extended State Components}
+QUERY leaf 0x0005 uses the component number as subleaf. R0 returns component size, R1 alignment, R2 offset in the standard image, and R3 feature requirements. Offsets are ascending, non-overlapping, and aligned.
+\begin{longtable}{@{}L{1.5cm}L{3cm}L{2cm}L{5cm}@{}}
+\toprule ID & Name & Alignment & Contents \\ \midrule
+0 & FP\_MASK & 64 & FPCR, FPSR, and K0-K7 \\
+1 & VECTOR & 64 & V0-V31 at enabled vector width \\
+2 & DEBUG & 64 & DBGCTL and DB0-DB7 \\
+3 & PMU & 64 & enabled performance-monitor state \\
+4 & TXN & 64 & transaction status; no live transaction may be saved \\
+5 & VIRT & 64 & virtualization host state \\
+\bottomrule\end{longtable}
+\section{ELF Object ABI}
+SeaBird objects are little-endian ELF. Until an official registry assignment exists, experimental tools use e\_machine value 0x5342. Production tools must make the value configurable and must reject incompatible ABI notes.
+\subsection{Relocations}
+ELF64 SeaBird objects use RELA records. Relocation expressions follow S+A for absolute fields and S+A-P for PC-relative fields, where P is the address of the relocated field. A canonical five-byte B-type rel32 instruction places its field one byte after the opcode and therefore uses addend -4 so the architectural base is next\_IP.
+\begin{longtable}{@{}L{4.5cm}L{2cm}@{}}
+\toprule Relocation & Number \\ \midrule
+R\_SB\_NONE & 0 \\
+R\_SB\_ABS16 & 1 \\
+R\_SB\_ABS32 & 2 \\
+R\_SB\_ABS64 & 3 \\
+R\_SB\_ABS128 & 4 \\
+R\_SB\_PCREL8 & 5 \\
+R\_SB\_PCREL16 & 6 \\
+R\_SB\_PCREL32 & 7 \\
+R\_SB\_GOT32 & 8 \\
+R\_SB\_GOT64 & 9 \\
+R\_SB\_PLT32 & 10 \\
+R\_SB\_TLS\_GD & 11 \\
+R\_SB\_TLS\_IE & 12 \\
+R\_SB\_TLS\_LE & 13 \\
+R\_SB\_RELATIVE & 14 \\
+R\_SB\_JUMP\_SLOT & 15 \\
+R\_SB\_GLOB\_DAT & 16 \\
+\bottomrule\end{longtable}
+\subsection{TLS Models}
+
+TPBASE addresses the current thread control block. Local-exec computes TPBASE plus a link-time constant. Initial-exec loads a TP-relative offset through the GOT. General-dynamic calls the platform TLS resolver with the module and offset pair and receives the address in R0. The resolver follows the standard calling convention and may clobber caller-saved registers.
+
+PLT entries preserve argument registers, use R28--R31 as resolver scratch, and tail-branch to the resolved target. The GOT is pointer-width aligned. Dynamic RELATIVE relocations compute base plus addend without symbol lookup.
+
+\section{DWARF and Unwinding}
+The canonical frame address uses register 7 (R7). The return-address column is 32 (IP). The CIE augmentation string is \texttt{zSB}.
+\begin{longtable}{@{}L{4cm}L{4cm}@{}}
+\toprule Architectural register & DWARF number \\ \midrule
+R0-R31 & 0--31 \\
+IP & 32 \\
+FLAGS & 33 \\
+SPTR & 34 \\
+TPBASE & 35 \\
+KPBASE & 36 \\
+FPCR & 37 \\
+FPSR & 38 \\
+V0-V31 & 64--95 \\
+K0-K7 & 96--103 \\
+\bottomrule\end{longtable}
+\section{Ratification Requirements}
+
+A conforming implementation must pass opcode uniqueness, reserved-encoding, decoder round-trip, arithmetic edge-case, precise-exception, paging-permission, memory-order, context-image, and ABI relocation tests. A reserved instruction must raise INVALID\_OP before privilege, address, or arithmetic checks. Architecture changes require a database revision and regenerated manuals; hand-edited generated files are non-normative.
+
+\section{RC1 Ratification Results}
+The RC1 corpus contains 310 normative instructions and 310 ID-bound golden vectors. Exact ID coverage is required. The independent edge suite contains 34 arithmetic, FP, vector, restart, DSP, and cryptographic cases. The Python oracle, C++ reference core, and translator agree on their overlapping byte and execution domains.
+\textbf{Result: PASS -- all architecture-owned RC1 ratification gates are satisfied.}
+\end{document}

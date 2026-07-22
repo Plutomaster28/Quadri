@@ -1,0 +1,128 @@
+diff --git a/llvm/include/llvm/BinaryFormat/ELF.h b/llvm/include/llvm/BinaryFormat/ELF.h
+--- a/llvm/include/llvm/BinaryFormat/ELF.h
++++ b/llvm/include/llvm/BinaryFormat/ELF.h
+@@ -323,6 +323,7 @@ enum {
+   EM_VE = 251,            // NEC SX-Aurora VE
+   EM_CSKY = 252,          // C-SKY 32-bit processor
+   EM_LOONGARCH = 258,     // LoongArch
++  EM_SEABIRD = 0x5342,    // SeaBird experimental allocation
+ };
+ 
+ // Object file classes.
+@@ -705,6 +706,11 @@ enum {
+ #include "ELFRelocs/Lanai.def"
+ };
+ 
++// ELF relocation types for SeaBird.
++enum {
++#include "ELFRelocs/SeaBird.def"
++};
++
+ // RISCV Specific e_flags
+ enum : unsigned {
+   EF_RISCV_RVC = 0x0001,
+diff --git a/llvm/include/llvm/BinaryFormat/ELFRelocs/SeaBird.def b/llvm/include/llvm/BinaryFormat/ELFRelocs/SeaBird.def
+new file mode 100644
+--- /dev/null
++++ b/llvm/include/llvm/BinaryFormat/ELFRelocs/SeaBird.def
+@@ -0,0 +1,21 @@
++#ifndef ELF_RELOC
++#error "ELF_RELOC must be defined"
++#endif
++
++ELF_RELOC(R_SB_NONE, 0)
++ELF_RELOC(R_SB_ABS16, 1)
++ELF_RELOC(R_SB_ABS32, 2)
++ELF_RELOC(R_SB_ABS64, 3)
++ELF_RELOC(R_SB_ABS128, 4)
++ELF_RELOC(R_SB_PCREL8, 5)
++ELF_RELOC(R_SB_PCREL16, 6)
++ELF_RELOC(R_SB_PCREL32, 7)
++ELF_RELOC(R_SB_GOT32, 8)
++ELF_RELOC(R_SB_GOT64, 9)
++ELF_RELOC(R_SB_PLT32, 10)
++ELF_RELOC(R_SB_TLS_GD, 11)
++ELF_RELOC(R_SB_TLS_IE, 12)
++ELF_RELOC(R_SB_TLS_LE, 13)
++ELF_RELOC(R_SB_RELATIVE, 14)
++ELF_RELOC(R_SB_JUMP_SLOT, 15)
++ELF_RELOC(R_SB_GLOB_DAT, 16)
+diff --git a/llvm/lib/BinaryFormat/ELF.cpp b/llvm/lib/BinaryFormat/ELF.cpp
+--- a/llvm/lib/BinaryFormat/ELF.cpp
++++ b/llvm/lib/BinaryFormat/ELF.cpp
+@@ -193,6 +193,8 @@ uint16_t ELF::convertArchNameToEMachine(StringRef Arch) {
+       .Case("amdgpu", EM_AMDGPU)
+       .Case("riscv", EM_RISCV)
+       .Case("lanai", EM_LANAI)
++      .Case("seabird32", EM_SEABIRD)
++      .Case("seabird64", EM_SEABIRD)
+       .Case("bpf", EM_BPF)
+       .Case("ve", EM_VE)
+       .Case("csky", EM_CSKY)
+@@ -239,6 +240,9 @@ uint16_t ELF::convertTripleArchTypeToEMachine(Triple::ArchType ArchType) {
+   case Triple::riscv32:
+   case Triple::riscv64:
+     return EM_RISCV;
++  case Triple::seabird32:
++  case Triple::seabird64:
++    return EM_SEABIRD;
+   case Triple::sparc:
+   case Triple::sparcel:
+     return EM_SPARC;
+@@ -619,6 +622,8 @@ StringRef ELF::convertEMachineToArchName(uint16_t EMachine) {
+     return "riscv";
+   case EM_LANAI:
+     return "lanai";
++  case EM_SEABIRD:
++    return "seabird64";
+   case EM_BPF:
+     return "bpf";
+   case EM_VE:
+diff --git a/llvm/include/llvm/Object/ELFObjectFile.h b/llvm/include/llvm/Object/ELFObjectFile.h
+--- a/llvm/include/llvm/Object/ELFObjectFile.h
++++ b/llvm/include/llvm/Object/ELFObjectFile.h
+@@ -1318,6 +1318,8 @@ StringRef ELFObjectFile<ELFT>::getFileFormatName() const {
+     case ELF::EM_SPARC:
+     case ELF::EM_SPARC32PLUS:
+       return "elf32-sparc";
+     case ELF::EM_AMDGPU:
+       return "elf32-amdgpu";
++    case ELF::EM_SEABIRD:
++      return "elf32-seabird";
+     case ELF::EM_LOONGARCH:
+@@ -1350,6 +1350,8 @@ StringRef ELFObjectFile<ELFT>::getFileFormatName() const {
+       return "elf64-bpf";
+     case ELF::EM_VE:
+       return "elf64-ve";
++    case ELF::EM_SEABIRD:
++      return "elf64-seabird";
+     case ELF::EM_LOONGARCH:
+       return "elf64-loongarch";
+     default:
+@@ -1382,6 +1384,10 @@ template <class ELFT> Triple::ArchType ELFObjectFile<ELFT>::getArch() const {
+     return Triple::hexagon;
+   case ELF::EM_LANAI:
+     return Triple::lanai;
++  case ELF::EM_SEABIRD:
++    return EF.getHeader().e_ident[ELF::EI_CLASS] == ELF::ELFCLASS32
++               ? Triple::seabird32
++               : Triple::seabird64;
+   case ELF::EM_MIPS:
+     switch (EF.getHeader().e_ident[ELF::EI_CLASS]) {
+     case ELF::ELFCLASS32:
+diff --git a/llvm/lib/Object/ELF.cpp b/llvm/lib/Object/ELF.cpp
+--- a/llvm/lib/Object/ELF.cpp
++++ b/llvm/lib/Object/ELF.cpp
+@@ -96,5 +96,12 @@ StringRef llvm::object::getELFRelocationTypeName(uint32_t Machine,
+     }
+     break;
++  case ELF::EM_SEABIRD:
++    switch (Type) {
++#include "llvm/BinaryFormat/ELFRelocs/SeaBird.def"
++    default:
++      break;
++    }
++    break;
+   case ELF::EM_PPC:
+     switch (Type) {
+ #include "llvm/BinaryFormat/ELFRelocs/PowerPC.def"
