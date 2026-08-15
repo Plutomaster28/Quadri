@@ -5,6 +5,26 @@
 
 namespace llvm::SeaBirdII {
 
+// Performance markers are architectural prefixes carried in MCInst::Flags.
+// They are deliberately separate from TSFlags, which describe the underlying
+// instruction encoding.  Zero means that no marker prefix is present.
+enum PerformanceMarker : unsigned {
+  NoMarker = 0,
+  Assume = 1,
+  Likely = 2,
+  Unlikely = 3,
+  Stream = 4,
+  Prefetch = 5,
+  Temporary = 6,
+  Persistent = 7,
+  Independent = 8,
+  Reuse = 9,
+  Leaf = 10,
+};
+
+constexpr unsigned PerformanceMarkerEscape = 0xFD;
+constexpr unsigned MarkerMask = 0xFF;
+
 enum Form : unsigned {
   FormMask = 0x1F00,
   FormShift = 8,

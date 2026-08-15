@@ -54,7 +54,7 @@ void SeaBirdInstrInfo::storeRegToStackSlot(
     llvm_unreachable("unsupported SeaBird spill register class");
   BuildMI(MBB, Position, DL, get(Opcode))
       .addFrameIndex(FrameIndex)
-      .addReg(SeaBird::R4)
+      .addReg(SeaBird::NOIDX)
       .addImm(1)
       .addImm(0)
       .addReg(Source, getKillRegState(IsKill))
@@ -84,7 +84,7 @@ void SeaBirdInstrInfo::loadRegFromStackSlot(
     llvm_unreachable("unsupported SeaBird reload register class");
   BuildMI(MBB, Position, DL, get(Opcode), Destination)
       .addFrameIndex(FrameIndex)
-      .addReg(SeaBird::R4)
+      .addReg(SeaBird::NOIDX)
       .addImm(1)
       .addImm(0)
       .setMIFlag(Flags);

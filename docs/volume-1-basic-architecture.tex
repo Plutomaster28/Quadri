@@ -10,7 +10,7 @@
 \AtBeginEnvironment{longtable}{\footnotesize}\AtBeginEnvironment{table}{\footnotesize}
 \lstset{basicstyle=\ttfamily\small,breaklines=true,showstringspaces=false,frame=single,numbers=left,numberstyle=\tiny\color{gray},backgroundcolor=\color{gray!8}}
 \pagestyle{fancy}\fancyhf{}
-\fancyhead[L]{\small\sffamily SeaBird ISA Volume 1}\fancyhead[R]{\small\sffamily Version 3.0 RC1}
+\fancyhead[L]{\small\sffamily SeaBird ISA Volume 1}\fancyhead[R]{\small\sffamily Architecture 3.2 / SDK 1.0}
 \fancyfoot[C]{\thepage}\setlength{\headheight}{14pt}
 \titleformat{\section}{\Large\bfseries\sffamily}{\thesection}{0.8em}{}
 \titleformat{\subsection}{\large\bfseries\sffamily}{\thesubsection}{0.8em}{}
@@ -20,8 +20,8 @@
 \begin{document}
 \begin{titlepage}\centering\vspace*{2cm}
 {\Huge\bfseries SeaBird ISA\\[0.3cm]}{\LARGE Volume 1: Basic Architecture\\[0.5cm]}
-{\Large Version 3.0 Release Candidate 1}\vfill
-{\large Machine-readable architecture revision 1\\June 27, 2026}\vfill
+{\Large Architecture 3.2 / SDK 1.0}\vfill
+{\large Machine-readable architecture 3.2\\August 14, 2026}\vfill
 \end{titlepage}
 \tableofcontents\clearpage
 \section{Introduction}
@@ -397,7 +397,37 @@ SB128 & 8 & 16 & 32 & 64 & 128 & P128; 128-bit pointers \\ \bottomrule
     \item R28--R31, FLAGS condition bits, and all caller-saved registers may be clobbered by a syscall.
 \end{itemize}
 
-\textbf{Optional register windowing:} Implementations may provide a register-window or register-renaming mechanism beneath the architectural ABI. Windowing must be invisible to normal software: architectural R0--R31 names, caller/callee preservation rules, exception save/restore, and binary translation behavior remain exactly as specified. A windowed implementation must flush or materialize architectural register state before traps, interrupts, context switches, and debug visibility events.
+\textbf{Register-window ABI profile:} Register windows are enabled only when
+QUERY reports REGISTER\_WINDOWS, CR1.REGISTER\_WINDOWS and
+CR4.WINDOW\_ENABLE are set, and the loaded object carries
+EF\_SB\_WINDOWED\_ABI. The ordinary ABI remains unchanged otherwise. In the
+windowed ABI, R0--R7 are global (including R7/SP), R8--R15 are incoming,
+R16--R23 are local, and R24--R31 are outgoing. A caller places up to eight
+integer arguments in R24--R31; after CALL advances the logical window the
+callee observes them in R8--R15. Callee integer results use R8/R9 and are
+visible to the restored caller in R24/R25. Mixing windowed and ordinary objects
+requires an ABI thunk and a conforming linker must reject an unthunked mix.
+
+Logical window state is architectural; the resident physical-window count is
+not. CALL/CALLA and RET advance and restore one logical window when enabled.
+The reset root uses the already-visible R8--R31 values. A child maps caller
+R24--R31 to child R8--R15, zeroes child R16--R31, and on restoration propagates
+all child R8--R15 values back to parent R24--R31. The zeroing is architectural
+even if physical backing is reused; only R8/R9 are ABI result registers.
+Hardware transparently spills and restores window records through the
+WSPBR/WSP bounded spill area. A spill or restore fault is precise and leaves
+the logical transition uncommitted. Exceptions execute in a dedicated
+privileged handler context while preserving the interrupted current-window
+identifier; IRET restores that identifier atomically. XSAVE component 6 is a
+self-contained window snapshot. SAVECTX materializes non-current windows to
+the task spill area and records its validated bounds/token in CORE\_CONTEXT;
+LOADCTX performs the inverse validation and restoration.
+
+Only a CPL0 ABI thunk may toggle window mode. It must be at logical depth zero
+with no pins or assist, marshal arguments/results between the two ABI register
+maps, and install or validate the task spill context before enabling windows.
+Disabling windowing or clearing CR1.REGISTER\_WINDOWS with a live child window,
+pin, or assist raises GPF and leaves the control unchanged.
 
 \section{Architectural Programming Model}
 
@@ -480,6 +510,8 @@ IEEE exceptions set FPSR sticky bits. An unmasked exception raises FPU\_ERROR or
 0x0003 & Extended features & Crypto, DSP, transactions, virtualization, shadow stack, indirect-branch tracking, and BCD. \\
 0x0004 & Cache description & Deterministic cache type, level, line size, sets, and ways indexed by subleaf. \\
 0x0005 & State components & XSAVE component bitmap, required size, alignment, and component offset indexed by subleaf. \\
+0x0006 & Performance markers & R0 bit (marker ID minus one) reports markers actively optimized by this implementation; zero is compliant. \\
+0x0007 & PAE/window parameters & PAE physical width, translation levels, window spill-record size, and optional resident-window information. \\
 0x80000000 & Maximum extended leaf & Maximum supported extended leaf. \\
 0x80000001 & Architecture identity & Architecture revision, microarchitecture identifier, and implementation revision. \\ \bottomrule
 \end{longtable}
@@ -499,7 +531,7 @@ should prefer memory-mapped I/O for new devices.
 
 \subsection{Architectural State Save and Restore}
 
-\texttt{XSAVE [mem], mask} and \texttt{XRSTOR [mem], mask} save and restore enabled extended state components in the offsets reported by QUERY leaf 5. Component zero contains FPCR, FPSR, V0--V31, and K0--K7. The memory area must be 64-byte aligned. Unsupported mask bits raise GPF. XRSTOR validates the complete requested image before changing architectural state. Operating systems must use this interface for task switching when any extended state feature is enabled.
+\texttt{XSAVE [mem], mask} and \texttt{XRSTOR [mem], mask} save and restore enabled extended state components in the offsets reported by QUERY leaf 5. Component zero contains FPCR, FPSR, V0--V31, and K0--K7; component six contains the register-window state header and logical/spilled window image. The memory area must be 64-byte aligned. Unsupported mask bits raise GPF. XRSTOR validates the complete requested image before changing architectural state. Operating systems must use this interface for task switching when any extended state feature is enabled.
 
 \section{Instruction Syntax}
 
@@ -536,13 +568,6 @@ MNEMONIC  operand1, operand2, operand3
 \subsection{Canonical Mnemonics and Aliases}
 
 The assembler must emit canonical instruction names in listings and object metadata. Aliases are accepted for programmer convenience but are not distinct instructions.
-
-Scalar floating-point mnemonics use an explicit \texttt{.s} suffix for the
-IEEE binary32 encoding and \texttt{.q} for IEEE binary128, for example
-\texttt{FADD.S}, \texttt{FLD.Q}, and \texttt{FCVTI.Q}. An unsuffixed scalar
-floating-point mnemonic denotes the binary64 form. The suffix selects the
-corresponding operand-width or scalar lane-width prefix and is part of the
-canonical assembly spelling, not a separate architectural instruction.
 
 \begin{table}[h]
 \centering
@@ -811,6 +836,46 @@ This encoding scheme is:
 
 SeaBird prefixes are encoded using explicit escape bytes so the decoder can always distinguish a prefix from an opcode.
 
+\subsubsection{Performance Marker Prefix}
+
+Version 3.2 defines an optional, architecturally inert performance marker before
+an instruction. Its canonical encoding is
+\texttt{[0xFD][MarkerID][instruction]}, where the instruction begins with its
+ordinary optional \texttt{0xFE} primary prefix or \texttt{0xFF} extension
+stream. At most one marker is permitted on an instruction. Marker ID zero,
+unknown IDs, repeated markers, and a marker without a following instruction
+raise INVALID\_OP before any architectural modification.
+
+Markers communicate optimization intent but never relax instruction semantics,
+memory ordering, exception delivery, privilege checks, or dependencies visible
+in architectural state. A conforming implementation must decode every defined
+marker and may otherwise ignore all of them.
+
+\begin{center}
+\begin{tabular}{@{}C{0.8cm}L{3cm}L{10cm}@{}}
+\toprule
+ID & Assembly prefix & Meaning \\
+\midrule
+1 & \texttt{assume.} & Ordinary completion is expected; faults remain precise and unchanged. \\
+2 & \texttt{likely.} & The taken conditional-control-flow edge is expected to be hot. \\
+3 & \texttt{unlikely.} & The taken conditional-control-flow edge is expected to be cold. \\
+4 & \texttt{stream.} & Accessed memory is expected to have little near-term reuse. \\
+5 & \texttt{prefetch.} & A normal load may benefit from early cache or translation work. \\
+6 & \texttt{temporary.} & The produced register value is expected to have a short live range. \\
+7 & \texttt{persistent.} & The produced register value is expected to have a long live range. \\
+8 & \texttt{independent.} & Analysis found no dependency on adjacent independently marked operations. \\
+9 & \texttt{reuse.} & A call's physical backing may be reused when logical window isolation remains exact. \\
+10 & \texttt{leaf.} & The destination is expected not to make a windowed call; logical CALL semantics are unchanged. \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The assembler diagnoses nonsensical pairings. Hardware must still preserve real
+dependencies even when an \texttt{independent.} assertion is incorrect. The
+\texttt{assume.} and \texttt{prefetch.} markers do not suppress, defer, or turn
+faults into non-faulting accesses. Query leaf \texttt{0x0006} reports which
+markers an implementation actively optimizes; a zero bitmap is compliant.
+
 \begin{itemize}
     \item \textbf{No prefix:} instruction uses the current mode default widths and only low register numbers R0--R7 in ModR/M and SIB fields.
     \item \textbf{0xFE primary prefix:} followed by one prefix control byte. This prefix is used for width overrides, vector-width selection, and extended register encoding.
@@ -890,7 +955,9 @@ Floating Point & 0xA6--0xAF & 10 base instructions & 2--3 \\
 Atomic \& Synchronization & 0xB0--0xBF & 16 instructions & 1--2 \\
 Bit Manipulation (BMI-style) & 0xC0--0xCF & 16 instructions & 1--2 \\
 Transactional Memory & 0xD0--0xD7 & 8 instructions & 1 \\
-Reserved base opcodes & 0xD8--0xFD & 38 reserved values & 1 \\
+SeaBird v3.1 scalar additions & 0xD8--0xDC & 5 instructions & 1 \\
+Reserved base opcodes & 0xDD--0xFC & 32 reserved values & 1 \\
+Performance marker escape & 0xFD & Marker ID followed by an instruction & 3+ \\
 Primary prefix escape & 0xFE & Prefix control & 2+ \\
 Extension stream escape & 0xFF & Five extension groups & 3+ \\\bottomrule
 \end{tabular}
@@ -924,11 +991,11 @@ This scheme permits arbitrarily many instructions in each extension group withou
 \paragraph{Extension Sub-Opcode Assignment}
 To make extension encodings deterministic, each extension group is assigned a contiguous sub-opcode space: 
 \begin{itemize}
-    \item \textbf{AVX (ExtGroupID = 0x01):} sub-opcodes `0x00`..`0x2A` (43 entries) mapped to the AVX instruction list in the order shown in the Advanced Vector table. Reserved AVX sub-opcodes 0x2B--0x2F are held for future widening so the group remains naturally aligned.
+    \item \textbf{AVX (ExtGroupID = 0x01):} sub-opcodes `0x00`..`0x2F` (48 entries) are allocated by the Advanced Vector table and the v3.1 predicate/complement additions. Four legacy entries remain reserved because their operand contracts are incomplete.
     \item \textbf{CRYPTO (ExtGroupID = 0x02):} sub-opcodes `0x00`..`0x17` (24 entries) mapped to the Crypto table.
     \item \textbf{DSP (ExtGroupID = 0x03):} sub-opcodes `0x00`..`0x1C` (29 entries) mapped to the DSP table.
-    \item \textbf{SYSX (ExtGroupID = 0x04):} assigned sub-opcodes in `0x00`..`0x1A` are mapped by the architectural system-extension table; unlisted values are reserved.
-    \item \textbf{FPX (ExtGroupID = 0x05):} sub-opcodes `0x00`..`0x0F` encode the sixteen extended scalar floating-point operations in table order.
+    \item \textbf{SYSX (ExtGroupID = 0x04):} assigned sub-opcodes in `0x00`..`0x1F` are mapped by the architectural system-extension table; unlisted values are reserved.
+    \item \textbf{FPX (ExtGroupID = 0x05):} sub-opcodes `0x00`..`0x11` encode eighteen extended scalar floating-point operations, including scalar loads and stores.
 \end{itemize}
 
 \noindent Example encoding (VFMADD):

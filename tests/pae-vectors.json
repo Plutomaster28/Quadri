@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "physical_bits": 36,
+  "vectors": [
+    {
+      "name": "user-read-high-physical-4k", "va": 3735928559,
+      "access": "read", "cpl": 3,
+      "entries": [
+        {"P": 1, "R": 1, "W": 1, "U": 1, "PFN": 256},
+        {"P": 1, "R": 1, "W": 1, "U": 1, "PFN": 512},
+        {"P": 1, "R": 1, "W": 1, "U": 1, "PFN": 11608837}
+      ],
+      "expected": {"pa": 47549800175, "set_accessed": [0, 1, 2], "set_dirty": []}
+    },
+    {
+      "name": "supervisor-write-2m-large-page", "va": 4198964,
+      "access": "write", "cpl": 0,
+      "entries": [
+        {"P": 1, "R": 1, "W": 1, "U": 0, "PFN": 768},
+        {"P": 1, "R": 1, "W": 1, "U": 0, "PS": 1, "PFN": 10747904}
+      ],
+      "expected": {"pa": 44023419444, "set_accessed": [0, 1], "set_dirty": [1]}
+    },
+    {
+      "name": "write-protection", "va": 2147488308,
+      "access": "write", "cpl": 3,
+      "entries": [
+        {"P": 1, "R": 1, "W": 1, "U": 1, "PFN": 256},
+        {"P": 1, "R": 1, "W": 1, "U": 1, "PFN": 512},
+        {"P": 1, "R": 1, "W": 0, "U": 1, "PFN": 1024}
+      ],
+      "expected": {"fault": "WRITE"}
+    },
+    {
+      "name": "execute-disable", "va": 4198964,
+      "access": "execute", "cpl": 3,
+      "entries": [
+        {"P": 1, "R": 1, "W": 1, "U": 1, "PFN": 256},
+        {"P": 1, "R": 1, "W": 1, "U": 1, "PFN": 512},
+        {"P": 1, "R": 1, "W": 1, "U": 1, "XD": 1, "PFN": 1024}
+      ],
+      "expected": {"fault": "EXECUTE"}
+    },
+    {
+      "name": "physical-width-overflow", "va": 4198964,
+      "access": "read", "cpl": 0,
+      "entries": [
+        {"P": 1, "R": 1, "W": 1, "U": 0, "PFN": 256},
+        {"P": 1, "R": 1, "W": 1, "U": 0, "PFN": 512},
+        {"P": 1, "R": 1, "W": 1, "U": 0, "PFN": 16777216}
+      ],
+      "expected": {"fault": "PHYSICAL_WIDTH"}
+    }
+  ]
+}

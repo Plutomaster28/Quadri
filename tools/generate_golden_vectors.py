@@ -17,7 +17,7 @@ EVENT_CATEGORIES = {
 }
 MEMORY_MNEMONICS = {"LD", "ST", "LDI", "LDB", "LDH", "LDW", "LDQ", "STB", "STH", "STW", "STQ", "LDP", "STP"}
 BRANCHES = {"JMP", "JMPA", "CALL", "CALLA", "RET", "JE", "JNE", "JG", "JGE", "JL", "JLE", "JC", "JNC", "JO", "JNO", "JS", "JNS", "JZR", "JNZR", "BRR", "TRAP", "YIELD"}
-FP = {"FADD", "FSUB", "FMUL", "FDIV", "FSQRT", "FCMP", "FCVTI", "FCVTS", "FNEG", "FABS", "FMADD", "FMSUB", "FNMADD", "FNMSUB", "FMIN", "FMAX", "FRECIP", "FRSQRT", "FRND", "FRNDZ", "FCVT.S2D", "FCVT.D2S", "FCVTINT", "FCLASS", "FCHS", "FTEST"}
+FP = {"FADD", "FSUB", "FMUL", "FDIV", "FSQRT", "FCMP", "FCVTI", "FCVTS", "FCVTU", "FCVTUS", "FNEG", "FABS", "FMADD", "FMSUB", "FNMADD", "FNMSUB", "FMIN", "FMAX", "FRECIP", "FRSQRT", "FRND", "FRNDZ", "FCVT.S2D", "FCVT.D2S", "FCVTINT", "FCLASS", "FCHS", "FTEST"}
 
 
 def expected(inst):

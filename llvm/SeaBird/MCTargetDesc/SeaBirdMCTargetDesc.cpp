@@ -1,9 +1,12 @@
 #include "SeaBirdMCTargetDesc.h"
 #include "SeaBirdInstPrinter.h"
 #include "SeaBirdMCAsmInfo.h"
+#include "SeaBirdELFRelocs.h"
 #include "TargetInfo/SeaBirdTargetInfo.h"
 #include "llvm/ADT/StringRef.h"
 #include "llvm/MC/MCInstrInfo.h"
+#include "llvm/MC/MCELFObjectWriter.h"
+#include "llvm/MC/MCELFStreamer.h"
 #include "llvm/MC/MCRegisterInfo.h"
 #include "llvm/MC/MCStreamer.h"
 #include "llvm/MC/MCSubtargetInfo.h"
@@ -24,6 +27,30 @@
 
 using namespace llvm;
 
+namespace {
+
+class SeaBirdTargetELFStreamer final : public MCTargetStreamer {
+  unsigned EFlags = 0;
+
+public:
+  SeaBirdTargetELFStreamer(MCStreamer &S, const MCSubtargetInfo &STI)
+      : MCTargetStreamer(S) {
+    const FeatureBitset &Features = STI.getFeatureBits();
+    if (Features[SeaBird::FeatureRegisterWindows])
+      EFlags |= SeaBirdELF::EF_SB_WINDOWED_ABI;
+    if (Features[SeaBird::FeaturePAE32])
+      EFlags |= SeaBirdELF::EF_SB_PAE32_REQUIRED;
+  }
+
+  void finish() override {
+    auto &ELFStreamer = static_cast<MCELFStreamer &>(getStreamer());
+    ELFObjectWriter &Writer = ELFStreamer.getWriter();
+    Writer.setELFHeaderEFlags(Writer.getELFHeaderEFlags() | EFlags);
+  }
+};
+
+} // namespace
+
 static MCInstrInfo *createSeaBirdMCInstrInfo() {
   auto *Info = new MCInstrInfo();
   InitSeaBirdMCInstrInfo(Info);
@@ -32,7 +59,7 @@ static MCInstrInfo *createSeaBirdMCInstrInfo() {
 
 static MCRegisterInfo *createSeaBirdMCRegisterInfo(const Triple &TT) {
   auto *Info = new MCRegisterInfo();
-  InitSeaBirdMCRegisterInfo(Info, SeaBird::R27);
+  InitSeaBirdMCRegisterInfo(Info, SeaBird::IP);
   return Info;
 }
 
@@ -64,6 +91,12 @@ static MCRelocationInfo *createSeaBirdRelocationInfo(const Triple &TT,
   return createMCRelocationInfo(TT, Context);
 }
 
+static MCTargetStreamer *
+createSeaBirdObjectTargetStreamer(MCStreamer &S,
+                                  const MCSubtargetInfo &STI) {
+  return new SeaBirdTargetELFStreamer(S, STI);
+}
+
 extern "C" LLVM_ABI LLVM_EXTERNAL_VISIBILITY void
 LLVMInitializeSeaBirdTargetMC() {
   for (Target *T : {&getTheSeaBird32Target(), &getTheSeaBird64Target()}) {
@@ -76,6 +109,8 @@ LLVMInitializeSeaBirdTargetMC() {
     TargetRegistry::RegisterMCCodeEmitter(*T, createSeaBirdMCCodeEmitter);
     TargetRegistry::RegisterMCAsmBackend(*T, createSeaBirdAsmBackend);
     TargetRegistry::RegisterELFStreamer(*T, createSeaBirdELFStreamer);
+    TargetRegistry::RegisterObjectTargetStreamer(
+        *T, createSeaBirdObjectTargetStreamer);
     TargetRegistry::RegisterMCRelocationInfo(*T,
                                              createSeaBirdRelocationInfo);
   }

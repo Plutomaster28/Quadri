@@ -8,7 +8,7 @@
 \usepackage{tocloft}
 \pagestyle{fancy}\fancyhf{}
 \fancyhead[L]{\sffamily SeaBird Volume 2 -- Instruction Reference}
-\fancyhead[R]{\sffamily Version 3.0 RC1}
+\fancyhead[R]{\sffamily Architecture 3.2 / SDK 1.0}
 \fancyfoot[C]{\thepage}
 \setlength{\headheight}{14pt}
 \titleformat{\section}{\Large\bfseries\sffamily}{\thesection}{0.7em}{}
@@ -21,8 +21,8 @@
 \begin{document}
 \begin{titlepage}\centering\vspace*{2cm}
 {\Huge\bfseries SeaBird ISA\\[0.3cm]}{\LARGE Volume 2: Instruction Reference\\[0.4cm]}
-{\Large Version 3.0 Release Candidate 1}\vfill
-{\large Generated from the machine-readable architectural database\\June 27, 2026}\vfill
+{\Large Architecture 3.2 / SDK 1.0}\vfill
+{\large Generated from the machine-readable architectural database\\August 14, 2026}\vfill
 \end{titlepage}
 \tableofcontents\clearpage
 \section*{Status Legend}
@@ -61,6 +61,30 @@ dst <- trunc_width(dst + a); CF receives carry out
 \end{lstlisting}
 \subsection*{Flags}
 CF=unchanged, PF=unchanged, AF=unchanged, ZF=unchanged, SF=unchanged, OF=unchanged.
+\subsection*{Memory Ordering}
+No memory access.
+\subsection*{Exceptions}
+\begin{itemize}
+\item INVALID\_OP for malformed encoding or unavailable feature
+\end{itemize}
+\clearpage
+
+\section{ADC -- ADC Rdst, Rsrc}
+\textbf{Status:} NORMATIVE\quad \textbf{Feature:} BASE\quad \textbf{Privilege:} user\\
+\textbf{Encoding:} \texttt{D8}, R-type\\
+\textbf{Operand binding:} ModR/M.reg = Rdst; ModR/M.r/m = Rsrc.
+
+Add source and carry flag to destination.
+
+\subsection*{Operation}
+\begin{lstlisting}
+carry_in <- CF
+sum <- unsigned(dst) + unsigned(src) + carry_in
+dst <- low_width_bits(sum)
+update arithmetic FLAGS including carry_out
+\end{lstlisting}
+\subsection*{Flags}
+CF=defined, PF=defined, AF=defined, ZF=defined, SF=defined, OF=defined.
 \subsection*{Memory Ordering}
 No memory access.
 \subsection*{Exceptions}
@@ -764,15 +788,19 @@ uPUSH ret\_addr; uJMP PC+offset.
 \begin{lstlisting}
 SP <- SP - pointer_bytes
 memory[SP, pointer_bytes] <- next_IP
+if CR4.WINDOW_ENABLE then advance one logical register window
 IP <- next_IP + sign_extend(relative_displacement)
 \end{lstlisting}
 \subsection*{Flags}
 CF=unchanged, PF=unchanged, AF=unchanged, ZF=unchanged, SF=unchanged, OF=unchanged.
 \subsection*{Memory Ordering}
-No memory access.
+Ordinary TSO stack access using the active architectural stack pointer.
 \subsection*{Exceptions}
 \begin{itemize}
 \item INVALID\_OP for malformed encoding or unavailable feature
+\item GPF for non-canonical address
+\item ALIGN\_CHECK when required alignment is violated
+\item PAGE\_FAULT for translation or permission failure
 \end{itemize}
 \clearpage
 
@@ -785,17 +813,22 @@ uPUSH ret\_addr; uJMP addr.
 
 \subsection*{Operation}
 \begin{lstlisting}
+target <- absolute_target before any window transition
 SP <- SP - pointer_bytes
 memory[SP, pointer_bytes] <- next_IP
-IP <- absolute_target
+if CR4.WINDOW_ENABLE then advance one logical register window
+IP <- target
 \end{lstlisting}
 \subsection*{Flags}
 CF=unchanged, PF=unchanged, AF=unchanged, ZF=unchanged, SF=unchanged, OF=unchanged.
 \subsection*{Memory Ordering}
-No memory access.
+Ordinary TSO stack access using the active architectural stack pointer.
 \subsection*{Exceptions}
 \begin{itemize}
 \item INVALID\_OP for malformed encoding or unavailable feature
+\item GPF for non-canonical address
+\item ALIGN\_CHECK when required alignment is violated
+\item PAGE\_FAULT for translation or permission failure
 \end{itemize}
 \clearpage
 
@@ -1073,10 +1106,13 @@ on fault, completed-byte count is written to R0 and remaining addresses to R1/R2
 \subsection*{Flags}
 CF=unchanged, PF=unchanged, AF=unchanged, ZF=unchanged, SF=unchanged, OF=unchanged.
 \subsection*{Memory Ordering}
-No memory access.
+Restartable sequence of ordinary TSO accesses in increasing element order; completed stores remain visible if a later element faults.
 \subsection*{Exceptions}
 \begin{itemize}
 \item INVALID\_OP for malformed encoding or unavailable feature
+\item GPF for non-canonical address
+\item ALIGN\_CHECK when required alignment is violated
+\item PAGE\_FAULT for translation or permission failure
 \end{itemize}
 \clearpage
 
@@ -1095,10 +1131,13 @@ on fault, completed-word count is written to R0
 \subsection*{Flags}
 CF=unchanged, PF=unchanged, AF=unchanged, ZF=unchanged, SF=unchanged, OF=unchanged.
 \subsection*{Memory Ordering}
-No memory access.
+Restartable sequence of ordinary TSO accesses in increasing element order; completed stores remain visible if a later element faults.
 \subsection*{Exceptions}
 \begin{itemize}
 \item INVALID\_OP for malformed encoding or unavailable feature
+\item GPF for non-canonical address
+\item ALIGN\_CHECK when required alignment is violated
+\item PAGE\_FAULT for translation or permission failure
 \end{itemize}
 \clearpage
 
@@ -1271,10 +1310,13 @@ SP <- SP - frame_size
 \subsection*{Flags}
 CF=unchanged, PF=unchanged, AF=unchanged, ZF=unchanged, SF=unchanged, OF=unchanged.
 \subsection*{Memory Ordering}
-No memory access.
+Ordinary TSO stack access using the active architectural stack pointer.
 \subsection*{Exceptions}
 \begin{itemize}
 \item INVALID\_OP for malformed encoding or unavailable feature
+\item GPF for non-canonical address
+\item ALIGN\_CHECK when required alignment is violated
+\item PAGE\_FAULT for translation or permission failure
 \end{itemize}
 \clearpage
 
@@ -1540,7 +1582,7 @@ Convert float Fd to integer Ra.
 
 \subsection*{Operation}
 \begin{lstlisting}
-convert IEEE source to signed integer using FPCR rounding; invalid result raises or returns signed_min when masked
+convert IEEE source to signed integer by truncation toward zero; invalid result raises or returns signed_min when masked
 \end{lstlisting}
 \subsection*{Flags}
 CF=unchanged, PF=unchanged, AF=unchanged, ZF=unchanged, SF=unchanged, OF=unchanged.
@@ -1550,6 +1592,52 @@ No memory access.
 \begin{itemize}
 \item INVALID\_OP for malformed encoding or unavailable feature
 \item FPU\_ERROR or SIMD\_ERROR for an unmasked IEEE exception
+\end{itemize}
+\clearpage
+
+\section{FCVTU -- FCVTU Fd, Ra}
+\textbf{Status:} NORMATIVE\quad \textbf{Feature:} FP\quad \textbf{Privilege:} user\\
+\textbf{Encoding:} \texttt{DB}, R-type (unsigned conversion)\\
+\textbf{Operand binding:} ModR/M.reg = Fd; ModR/M.r/m = Ra; VectorCtl selects the scalar IEEE format.
+
+Convert an unsigned integer to a scalar IEEE value.
+
+\subsection*{Operation}
+\begin{lstlisting}
+convert unsigned integer source to destination IEEE format using FPCR rounding
+update FPSR; raise an unmasked FPU_ERROR before writeback
+\end{lstlisting}
+\subsection*{Flags}
+CF=unchanged, PF=unchanged, AF=unchanged, ZF=unchanged, SF=unchanged, OF=unchanged.
+\subsection*{Memory Ordering}
+No memory access.
+\subsection*{Exceptions}
+\begin{itemize}
+\item INVALID\_OP for malformed encoding or unavailable feature
+\item FPU\_ERROR for an unmasked IEEE exception
+\end{itemize}
+\clearpage
+
+\section{FCVTUS -- FCVTUS Ra, Fs}
+\textbf{Status:} NORMATIVE\quad \textbf{Feature:} FP\quad \textbf{Privilege:} user\\
+\textbf{Encoding:} \texttt{DC}, R-type (unsigned conversion)\\
+\textbf{Operand binding:} ModR/M.reg = Ra; ModR/M.r/m = Fs; VectorCtl selects the scalar IEEE format.
+
+Convert a scalar IEEE value to an unsigned integer.
+
+\subsection*{Operation}
+\begin{lstlisting}
+convert IEEE source to unsigned integer by truncation toward zero
+invalid result raises FPU_ERROR or returns zero when masked
+\end{lstlisting}
+\subsection*{Flags}
+CF=unchanged, PF=unchanged, AF=unchanged, ZF=unchanged, SF=unchanged, OF=unchanged.
+\subsection*{Memory Ordering}
+No memory access.
+\subsection*{Exceptions}
+\begin{itemize}
+\item INVALID\_OP for malformed encoding or unavailable feature
+\item FPU\_ERROR for an unmasked IEEE exception
 \end{itemize}
 \clearpage
 
@@ -1725,7 +1813,7 @@ write back dirty data for the addressed cache line to the point of coherency and
 \subsection*{Flags}
 CF=unchanged, PF=unchanged, AF=unchanged, ZF=unchanged, SF=unchanged, OF=unchanged.
 \subsection*{Memory Ordering}
-Ordinary TSO access unless the instruction entry states atomic or device ordering.
+Cache-maintenance operation ordered after older accesses to the addressed line; use the required fence or ISYNC before relying on global visibility or refetch.
 \subsection*{Exceptions}
 \begin{itemize}
 \item INVALID\_OP for malformed encoding or unavailable feature
@@ -2355,7 +2443,7 @@ invalidate a clean local data-cache line; raise GPF if dirty data would be disca
 \subsection*{Flags}
 CF=unchanged, PF=unchanged, AF=unchanged, ZF=unchanged, SF=unchanged, OF=unchanged.
 \subsection*{Memory Ordering}
-Ordinary TSO access unless the instruction entry states atomic or device ordering.
+Cache-maintenance operation ordered after older accesses to the addressed line; use the required fence or ISYNC before relying on global visibility or refetch.
 \subsection*{Exceptions}
 \begin{itemize}
 \item INVALID\_OP for malformed encoding or unavailable feature
@@ -2380,7 +2468,7 @@ invalidate the local instruction-cache line containing the address; requires sub
 \subsection*{Flags}
 CF=unchanged, PF=unchanged, AF=unchanged, ZF=unchanged, SF=unchanged, OF=unchanged.
 \subsection*{Memory Ordering}
-Ordinary TSO access unless the instruction entry states atomic or device ordering.
+Cache-maintenance operation ordered after older accesses to the addressed line; use the required fence or ISYNC before relying on global visibility or refetch.
 \subsection*{Exceptions}
 \begin{itemize}
 \item INVALID\_OP for malformed encoding or unavailable feature
@@ -3192,10 +3280,13 @@ SP <- SP + pointer_bytes
 \subsection*{Flags}
 CF=unchanged, PF=unchanged, AF=unchanged, ZF=unchanged, SF=unchanged, OF=unchanged.
 \subsection*{Memory Ordering}
-No memory access.
+Ordinary TSO stack access using the active architectural stack pointer.
 \subsection*{Exceptions}
 \begin{itemize}
 \item INVALID\_OP for malformed encoding or unavailable feature
+\item GPF for non-canonical address
+\item ALIGN\_CHECK when required alignment is violated
+\item PAGE\_FAULT for translation or permission failure
 \end{itemize}
 \clearpage
 
@@ -3284,11 +3375,14 @@ atomically load core context; execution resumes at restored IP
 \subsection*{Flags}
 CF=unchanged, PF=unchanged, AF=unchanged, ZF=unchanged, SF=unchanged, OF=unchanged.
 \subsection*{Memory Ordering}
-No memory access.
+Architectural multi-byte memory access with the validation and atomicity contract stated by the instruction.
 \subsection*{Exceptions}
 \begin{itemize}
 \item INVALID\_OP for malformed encoding or unavailable feature
 \item GPF when current privilege is insufficient
+\item GPF for non-canonical address
+\item ALIGN\_CHECK when required alignment is violated
+\item PAGE\_FAULT for translation or permission failure
 \end{itemize}
 \clearpage
 
@@ -3523,10 +3617,13 @@ on fault, completed-element count is written to R0
 \subsection*{Flags}
 CF=unchanged, PF=unchanged, AF=unchanged, ZF=unchanged, SF=unchanged, OF=unchanged.
 \subsection*{Memory Ordering}
-No memory access.
+Restartable sequence of ordinary TSO accesses in increasing element order; completed stores remain visible if a later element faults.
 \subsection*{Exceptions}
 \begin{itemize}
 \item INVALID\_OP for malformed encoding or unavailable feature
+\item GPF for non-canonical address
+\item ALIGN\_CHECK when required alignment is violated
+\item PAGE\_FAULT for translation or permission failure
 \end{itemize}
 \clearpage
 
@@ -4156,10 +4253,13 @@ dst <- zero_extend(value)
 \subsection*{Flags}
 CF=unchanged, PF=unchanged, AF=unchanged, ZF=unchanged, SF=unchanged, OF=unchanged.
 \subsection*{Memory Ordering}
-No memory access.
+Ordinary TSO stack access using the active architectural stack pointer.
 \subsection*{Exceptions}
 \begin{itemize}
 \item INVALID\_OP for malformed encoding or unavailable feature
+\item GPF for non-canonical address
+\item ALIGN\_CHECK when required alignment is violated
+\item PAGE\_FAULT for translation or permission failure
 \end{itemize}
 \clearpage
 
@@ -4178,10 +4278,13 @@ restore R0-R31 atomically; restored R7 supplies final SP
 \subsection*{Flags}
 CF=unchanged, PF=unchanged, AF=unchanged, ZF=unchanged, SF=unchanged, OF=unchanged.
 \subsection*{Memory Ordering}
-No memory access.
+Ordinary TSO stack access using the active architectural stack pointer.
 \subsection*{Exceptions}
 \begin{itemize}
 \item INVALID\_OP for malformed encoding or unavailable feature
+\item GPF for non-canonical address
+\item ALIGN\_CHECK when required alignment is violated
+\item PAGE\_FAULT for translation or permission failure
 \end{itemize}
 \clearpage
 
@@ -4244,10 +4347,13 @@ SP <- SP + pointer_bytes
 \subsection*{Flags}
 CF=unchanged, PF=unchanged, AF=unchanged, ZF=unchanged, SF=unchanged, OF=unchanged.
 \subsection*{Memory Ordering}
-No memory access.
+Ordinary TSO stack access using the active architectural stack pointer.
 \subsection*{Exceptions}
 \begin{itemize}
 \item INVALID\_OP for malformed encoding or unavailable feature
+\item GPF for non-canonical address
+\item ALIGN\_CHECK when required alignment is violated
+\item PAGE\_FAULT for translation or permission failure
 \end{itemize}
 \clearpage
 
@@ -4267,10 +4373,13 @@ SP <- SP + 2 * pointer_bytes
 \subsection*{Flags}
 CF=unchanged, PF=unchanged, AF=unchanged, ZF=unchanged, SF=unchanged, OF=unchanged.
 \subsection*{Memory Ordering}
-No memory access.
+Ordinary TSO stack access using the active architectural stack pointer.
 \subsection*{Exceptions}
 \begin{itemize}
 \item INVALID\_OP for malformed encoding or unavailable feature
+\item GPF for non-canonical address
+\item ALIGN\_CHECK when required alignment is violated
+\item PAGE\_FAULT for translation or permission failure
 \end{itemize}
 \clearpage
 
@@ -4288,13 +4397,10 @@ request that the cache line containing effective_address(mem) be fetched; faults
 \subsection*{Flags}
 CF=unchanged, PF=unchanged, AF=unchanged, ZF=unchanged, SF=unchanged, OF=unchanged.
 \subsection*{Memory Ordering}
-Ordinary TSO access unless the instruction entry states atomic or device ordering.
+Non-binding cache hint; creates no memory-order edge and suppresses address, translation, and permission faults.
 \subsection*{Exceptions}
 \begin{itemize}
 \item INVALID\_OP for malformed encoding or unavailable feature
-\item GPF for non-canonical address
-\item ALIGN\_CHECK when required alignment is violated
-\item PAGE\_FAULT for translation or permission failure
 \end{itemize}
 \clearpage
 
@@ -4313,10 +4419,13 @@ memory[SP, pointer_bytes] <- low_bits(src, pointer_width)
 \subsection*{Flags}
 CF=unchanged, PF=unchanged, AF=unchanged, ZF=unchanged, SF=unchanged, OF=unchanged.
 \subsection*{Memory Ordering}
-No memory access.
+Ordinary TSO stack access using the active architectural stack pointer.
 \subsection*{Exceptions}
 \begin{itemize}
 \item INVALID\_OP for malformed encoding or unavailable feature
+\item GPF for non-canonical address
+\item ALIGN\_CHECK when required alignment is violated
+\item PAGE\_FAULT for translation or permission failure
 \end{itemize}
 \clearpage
 
@@ -4337,10 +4446,13 @@ store snapshot in increasing register order
 \subsection*{Flags}
 CF=unchanged, PF=unchanged, AF=unchanged, ZF=unchanged, SF=unchanged, OF=unchanged.
 \subsection*{Memory Ordering}
-No memory access.
+Ordinary TSO stack access using the active architectural stack pointer.
 \subsection*{Exceptions}
 \begin{itemize}
 \item INVALID\_OP for malformed encoding or unavailable feature
+\item GPF for non-canonical address
+\item ALIGN\_CHECK when required alignment is violated
+\item PAGE\_FAULT for translation or permission failure
 \end{itemize}
 \clearpage
 
@@ -4359,10 +4471,13 @@ memory[SP, pointer_bytes] <- FLAGS
 \subsection*{Flags}
 CF=unchanged, PF=unchanged, AF=unchanged, ZF=unchanged, SF=unchanged, OF=unchanged.
 \subsection*{Memory Ordering}
-No memory access.
+Ordinary TSO stack access using the active architectural stack pointer.
 \subsection*{Exceptions}
 \begin{itemize}
 \item INVALID\_OP for malformed encoding or unavailable feature
+\item GPF for non-canonical address
+\item ALIGN\_CHECK when required alignment is violated
+\item PAGE\_FAULT for translation or permission failure
 \end{itemize}
 \clearpage
 
@@ -4381,10 +4496,13 @@ store the named consecutive register pair in increasing register order
 \subsection*{Flags}
 CF=unchanged, PF=unchanged, AF=unchanged, ZF=unchanged, SF=unchanged, OF=unchanged.
 \subsection*{Memory Ordering}
-No memory access.
+Ordinary TSO stack access using the active architectural stack pointer.
 \subsection*{Exceptions}
 \begin{itemize}
 \item INVALID\_OP for malformed encoding or unavailable feature
+\item GPF for non-canonical address
+\item ALIGN\_CHECK when required alignment is violated
+\item PAGE\_FAULT for translation or permission failure
 \end{itemize}
 \clearpage
 
@@ -4527,16 +4645,20 @@ uPOP PC.
 \subsection*{Operation}
 \begin{lstlisting}
 target <- memory[SP, pointer_bytes]
+if CR4.WINDOW_ENABLE then validate and restore the previous logical register window
 SP <- SP + pointer_bytes
 IP <- target
 \end{lstlisting}
 \subsection*{Flags}
 CF=unchanged, PF=unchanged, AF=unchanged, ZF=unchanged, SF=unchanged, OF=unchanged.
 \subsection*{Memory Ordering}
-No memory access.
+Ordinary TSO stack access using the active architectural stack pointer.
 \subsection*{Exceptions}
 \begin{itemize}
 \item INVALID\_OP for malformed encoding or unavailable feature
+\item GPF for non-canonical address
+\item ALIGN\_CHECK when required alignment is violated
+\item PAGE\_FAULT for translation or permission failure
 \end{itemize}
 \clearpage
 
@@ -4790,6 +4912,33 @@ save core architectural context using the QUERY-reported revision
 \end{lstlisting}
 \subsection*{Flags}
 CF=unchanged, PF=unchanged, AF=unchanged, ZF=unchanged, SF=unchanged, OF=unchanged.
+\subsection*{Memory Ordering}
+Architectural multi-byte memory access with the validation and atomicity contract stated by the instruction.
+\subsection*{Exceptions}
+\begin{itemize}
+\item INVALID\_OP for malformed encoding or unavailable feature
+\item GPF for non-canonical address
+\item ALIGN\_CHECK when required alignment is violated
+\item PAGE\_FAULT for translation or permission failure
+\end{itemize}
+\clearpage
+
+\section{SBB -- SBB Rdst, Rsrc}
+\textbf{Status:} NORMATIVE\quad \textbf{Feature:} BASE\quad \textbf{Privilege:} user\\
+\textbf{Encoding:} \texttt{D9}, R-type\\
+\textbf{Operand binding:} ModR/M.reg = Rdst; ModR/M.r/m = Rsrc.
+
+Subtract source and borrow flag from destination.
+
+\subsection*{Operation}
+\begin{lstlisting}
+borrow_in <- CF
+difference <- unsigned(dst) - unsigned(src) - borrow_in
+dst <- low_width_bits(difference)
+update arithmetic FLAGS including borrow_out
+\end{lstlisting}
+\subsection*{Flags}
+CF=defined, PF=defined, AF=defined, ZF=defined, SF=defined, OF=defined.
 \subsection*{Memory Ordering}
 No memory access.
 \subsection*{Exceptions}
@@ -5824,6 +5973,28 @@ No memory access.
 \end{itemize}
 \clearpage
 
+\section{UMULH -- UMULH Rdst, Rsrc}
+\textbf{Status:} NORMATIVE\quad \textbf{Feature:} BASE\quad \textbf{Privilege:} user\\
+\textbf{Encoding:} \texttt{DA}, R-type (unsigned high bits)\\
+\textbf{Operand binding:} ModR/M.reg = Rdst; ModR/M.r/m = Rsrc.
+
+Return the high half of an unsigned full-width product.
+
+\subsection*{Operation}
+\begin{lstlisting}
+product <- unsigned(dst) * unsigned(src) at twice operand width
+dst <- high_width_bits(product)
+\end{lstlisting}
+\subsection*{Flags}
+CF=unchanged, PF=unchanged, AF=unchanged, ZF=unchanged, SF=unchanged, OF=unchanged.
+\subsection*{Memory Ordering}
+No memory access.
+\subsection*{Exceptions}
+\begin{itemize}
+\item INVALID\_OP for malformed encoding or unavailable feature
+\end{itemize}
+\clearpage
+
 \section{UNPACK\_EXP -- UNPACK\_EXP Rdst, Ra}
 \textbf{Status:} NORMATIVE\quad \textbf{Feature:} DSP\quad \textbf{Privilege:} user\\
 \textbf{Encoding:} \texttt{FF 03 0F}, R-type\\
@@ -6007,6 +6178,30 @@ No memory access.
 \end{itemize}
 \clearpage
 
+\section{VCOMPARE\_EQ -- VCOMPARE\_EQ Vd, Va, Vb}
+\textbf{Status:} NORMATIVE\quad \textbf{Feature:} AVX\quad \textbf{Privilege:} user\\
+\textbf{Encoding:} \texttt{FF 01 2B}, V-type\\
+\textbf{Operand binding:} ModR/M.reg = Vd; ModR/M.r/m = Va; XOP0 = Vb; VectorCtl is required.
+
+Per-lane predicate for a[i] == b[i].
+
+\subsection*{Operation}
+\begin{lstlisting}
+result[i] <- all_ones if a[i] == b[i] else zero
+apply encoded merge/zero mask policy
+commit complete vector destination atomically
+\end{lstlisting}
+\subsection*{Flags}
+CF=unchanged, PF=unchanged, AF=unchanged, ZF=unchanged, SF=unchanged, OF=unchanged.
+\subsection*{Memory Ordering}
+No memory access.
+\subsection*{Exceptions}
+\begin{itemize}
+\item INVALID\_OP for malformed encoding or unavailable feature
+\item SIMD\_ERROR for an invalid vector-control combination
+\end{itemize}
+\clearpage
+
 \section{VCOMPARE\_GT -- VCOMPARE\_GT Vd, Va, Vb}
 \textbf{Status:} NORMATIVE\quad \textbf{Feature:} AVX\quad \textbf{Privilege:} user\\
 \textbf{Encoding:} \texttt{FF 01 0C}, V-type\\
@@ -6050,6 +6245,78 @@ No memory access.
 \subsection*{Exceptions}
 \begin{itemize}
 \item INVALID\_OP for malformed encoding or unavailable feature
+\end{itemize}
+\clearpage
+
+\section{VCOMPARE\_NE -- VCOMPARE\_NE Vd, Va, Vb}
+\textbf{Status:} NORMATIVE\quad \textbf{Feature:} AVX\quad \textbf{Privilege:} user\\
+\textbf{Encoding:} \texttt{FF 01 2C}, V-type\\
+\textbf{Operand binding:} ModR/M.reg = Vd; ModR/M.r/m = Va; XOP0 = Vb; VectorCtl is required.
+
+Per-lane predicate for a[i] != b[i].
+
+\subsection*{Operation}
+\begin{lstlisting}
+result[i] <- all_ones if a[i] != b[i] else zero
+apply encoded merge/zero mask policy
+commit complete vector destination atomically
+\end{lstlisting}
+\subsection*{Flags}
+CF=unchanged, PF=unchanged, AF=unchanged, ZF=unchanged, SF=unchanged, OF=unchanged.
+\subsection*{Memory Ordering}
+No memory access.
+\subsection*{Exceptions}
+\begin{itemize}
+\item INVALID\_OP for malformed encoding or unavailable feature
+\item SIMD\_ERROR for an invalid vector-control combination
+\end{itemize}
+\clearpage
+
+\section{VCOMPARE\_UGT -- VCOMPARE\_UGT Vd, Va, Vb}
+\textbf{Status:} NORMATIVE\quad \textbf{Feature:} AVX\quad \textbf{Privilege:} user\\
+\textbf{Encoding:} \texttt{FF 01 2E}, V-type\\
+\textbf{Operand binding:} ModR/M.reg = Vd; ModR/M.r/m = Va; XOP0 = Vb; VectorCtl is required.
+
+Per-lane predicate for unsigned(a[i]) $>$ unsigned(b[i]).
+
+\subsection*{Operation}
+\begin{lstlisting}
+result[i] <- all_ones if unsigned(a[i]) > unsigned(b[i]) else zero
+apply encoded merge/zero mask policy
+commit complete vector destination atomically
+\end{lstlisting}
+\subsection*{Flags}
+CF=unchanged, PF=unchanged, AF=unchanged, ZF=unchanged, SF=unchanged, OF=unchanged.
+\subsection*{Memory Ordering}
+No memory access.
+\subsection*{Exceptions}
+\begin{itemize}
+\item INVALID\_OP for malformed encoding or unavailable feature
+\item SIMD\_ERROR for an invalid vector-control combination
+\end{itemize}
+\clearpage
+
+\section{VCOMPARE\_ULT -- VCOMPARE\_ULT Vd, Va, Vb}
+\textbf{Status:} NORMATIVE\quad \textbf{Feature:} AVX\quad \textbf{Privilege:} user\\
+\textbf{Encoding:} \texttt{FF 01 2D}, V-type\\
+\textbf{Operand binding:} ModR/M.reg = Vd; ModR/M.r/m = Va; XOP0 = Vb; VectorCtl is required.
+
+Per-lane predicate for unsigned(a[i]) $<$ unsigned(b[i]).
+
+\subsection*{Operation}
+\begin{lstlisting}
+result[i] <- all_ones if unsigned(a[i]) < unsigned(b[i]) else zero
+apply encoded merge/zero mask policy
+commit complete vector destination atomically
+\end{lstlisting}
+\subsection*{Flags}
+CF=unchanged, PF=unchanged, AF=unchanged, ZF=unchanged, SF=unchanged, OF=unchanged.
+\subsection*{Memory Ordering}
+No memory access.
+\subsection*{Exceptions}
+\begin{itemize}
+\item INVALID\_OP for malformed encoding or unavailable feature
+\item SIMD\_ERROR for an invalid vector-control combination
 \end{itemize}
 \clearpage
 
@@ -6350,10 +6617,13 @@ on fault commit completed lanes and clear their mask bits; leave later lanes and
 \subsection*{Flags}
 CF=unchanged, PF=unchanged, AF=unchanged, ZF=unchanged, SF=unchanged, OF=unchanged.
 \subsection*{Memory Ordering}
-No memory access.
+Lane-ordered ordinary TSO accesses with the instruction's documented partial-progress state on fault.
 \subsection*{Exceptions}
 \begin{itemize}
 \item INVALID\_OP for malformed encoding or unavailable feature
+\item GPF for non-canonical address
+\item ALIGN\_CHECK when required alignment is violated
+\item PAGE\_FAULT for translation or permission failure
 \end{itemize}
 \clearpage
 
@@ -6373,10 +6643,13 @@ on fault commit completed lanes and clear their mask bits; leave later lanes and
 \subsection*{Flags}
 CF=unchanged, PF=unchanged, AF=unchanged, ZF=unchanged, SF=unchanged, OF=unchanged.
 \subsection*{Memory Ordering}
-No memory access.
+Lane-ordered ordinary TSO accesses with the instruction's documented partial-progress state on fault.
 \subsection*{Exceptions}
 \begin{itemize}
 \item INVALID\_OP for malformed encoding or unavailable feature
+\item GPF for non-canonical address
+\item ALIGN\_CHECK when required alignment is violated
+\item PAGE\_FAULT for translation or permission failure
 \end{itemize}
 \clearpage
 
@@ -6510,11 +6783,14 @@ save host state and atomically load guest state
 \subsection*{Flags}
 CF=unchanged, PF=unchanged, AF=unchanged, ZF=unchanged, SF=unchanged, OF=unchanged.
 \subsection*{Memory Ordering}
-No memory access.
+Architectural multi-byte memory access with the validation and atomicity contract stated by the instruction.
 \subsection*{Exceptions}
 \begin{itemize}
 \item INVALID\_OP for malformed encoding or unavailable feature
 \item GPF when current privilege is insufficient
+\item GPF for non-canonical address
+\item ALIGN\_CHECK when required alignment is violated
+\item PAGE\_FAULT for translation or permission failure
 \end{itemize}
 \clearpage
 
@@ -6579,11 +6855,14 @@ save host state and atomically reload saved guest state
 \subsection*{Flags}
 CF=unchanged, PF=unchanged, AF=unchanged, ZF=unchanged, SF=unchanged, OF=unchanged.
 \subsection*{Memory Ordering}
-No memory access.
+Architectural multi-byte memory access with the validation and atomicity contract stated by the instruction.
 \subsection*{Exceptions}
 \begin{itemize}
 \item INVALID\_OP for malformed encoding or unavailable feature
 \item GPF when current privilege is insufficient
+\item GPF for non-canonical address
+\item ALIGN\_CHECK when required alignment is violated
+\item PAGE\_FAULT for translation or permission failure
 \end{itemize}
 \clearpage
 
@@ -6653,6 +6932,30 @@ No memory access.
 \begin{itemize}
 \item INVALID\_OP for malformed encoding or unavailable feature
 \item GPF when current privilege is insufficient
+\end{itemize}
+\clearpage
+
+\section{VNOT -- VNOT Vd, Va}
+\textbf{Status:} NORMATIVE\quad \textbf{Feature:} AVX\quad \textbf{Privilege:} user\\
+\textbf{Encoding:} \texttt{FF 01 2F}, V-type\\
+\textbf{Operand binding:} ModR/M.reg = Vd; ModR/M.r/m = Va; VectorCtl is required.
+
+Per-lane vector bitwise complement.
+
+\subsection*{Operation}
+\begin{lstlisting}
+result[i] <- bitwise_not(a[i])
+apply encoded merge/zero mask policy
+commit complete vector destination atomically
+\end{lstlisting}
+\subsection*{Flags}
+CF=unchanged, PF=unchanged, AF=unchanged, ZF=unchanged, SF=unchanged, OF=unchanged.
+\subsection*{Memory Ordering}
+No memory access.
+\subsection*{Exceptions}
+\begin{itemize}
+\item INVALID\_OP for malformed encoding or unavailable feature
+\item SIMD\_ERROR for an invalid vector-control combination
 \end{itemize}
 \clearpage
 
@@ -7018,10 +7321,13 @@ on fault completed stores remain visible and completed mask bits are cleared
 \subsection*{Flags}
 CF=unchanged, PF=unchanged, AF=unchanged, ZF=unchanged, SF=unchanged, OF=unchanged.
 \subsection*{Memory Ordering}
-No memory access.
+Lane-ordered ordinary TSO accesses with the instruction's documented partial-progress state on fault.
 \subsection*{Exceptions}
 \begin{itemize}
 \item INVALID\_OP for malformed encoding or unavailable feature
+\item GPF for non-canonical address
+\item ALIGN\_CHECK when required alignment is violated
+\item PAGE\_FAULT for translation or permission failure
 \end{itemize}
 \clearpage
 
@@ -7041,10 +7347,13 @@ on fault completed stores remain visible and completed mask bits are cleared
 \subsection*{Flags}
 CF=unchanged, PF=unchanged, AF=unchanged, ZF=unchanged, SF=unchanged, OF=unchanged.
 \subsection*{Memory Ordering}
-No memory access.
+Lane-ordered ordinary TSO accesses with the instruction's documented partial-progress state on fault.
 \subsection*{Exceptions}
 \begin{itemize}
 \item INVALID\_OP for malformed encoding or unavailable feature
+\item GPF for non-canonical address
+\item ALIGN\_CHECK when required alignment is violated
+\item PAGE\_FAULT for translation or permission failure
 \end{itemize}
 \clearpage
 
@@ -7301,6 +7610,129 @@ No memory access.
 \end{itemize}
 \clearpage
 
+\section{WINNEW -- WINNEW}
+\textbf{Status:} NORMATIVE\quad \textbf{Feature:} WINDOW\quad \textbf{Privilege:} user\\
+\textbf{Encoding:} \texttt{FF 04 1B}, X-type (no operands)\\
+\textbf{Operand binding:} No ModR/M, XOP, immediate, or displacement bytes.
+
+Advance to a fresh logical register window without control transfer.
+
+\subsection*{Operation}
+\begin{lstlisting}
+validate window state and spill-area configuration
+create a child window; map caller R24-R31 to child R8-R15
+initialize child R16-R31 to zero
+make the child window current atomically
+\end{lstlisting}
+\subsection*{Flags}
+CF=unchanged, PF=unchanged, AF=unchanged, ZF=unchanged, SF=unchanged, OF=unchanged.
+\subsection*{Memory Ordering}
+May perform transparent window spill or restore memory accesses; those accesses are ordered as ordinary core-context loads/stores and complete before retirement.
+\subsection*{Exceptions}
+\begin{itemize}
+\item INVALID\_OP for malformed encoding or unavailable WINDOW feature
+\item GPF when CR4.WINDOW\_ENABLE is clear
+\item GPF for invalid or exhausted WSP configuration
+\item ALIGN\_CHECK or PAGE\_FAULT before architectural modification if a transparent spill/restore fails
+\end{itemize}
+\clearpage
+
+\section{WINPIN -- WINPIN}
+\textbf{Status:} NORMATIVE\quad \textbf{Feature:} WINDOW\quad \textbf{Privilege:} user\\
+\textbf{Encoding:} \texttt{FF 04 1E}, X-type (no operands)\\
+\textbf{Operand binding:} No ModR/M, XOP, immediate, or displacement bytes.
+
+Request advisory retention of the current logical window.
+
+\subsection*{Operation}
+\begin{lstlisting}
+increment the current window retention hint count
+do not prevent a spill required for correctness or forward progress
+\end{lstlisting}
+\subsection*{Flags}
+CF=unchanged, PF=unchanged, AF=unchanged, ZF=unchanged, SF=unchanged, OF=unchanged.
+\subsection*{Memory Ordering}
+No memory access.
+\subsection*{Exceptions}
+\begin{itemize}
+\item INVALID\_OP for malformed encoding or unavailable WINDOW feature
+\item GPF when CR4.WINDOW\_ENABLE is clear
+\end{itemize}
+\clearpage
+
+\section{WINPREV -- WINPREV}
+\textbf{Status:} NORMATIVE\quad \textbf{Feature:} WINDOW\quad \textbf{Privilege:} user\\
+\textbf{Encoding:} \texttt{FF 04 1C}, X-type (no operands)\\
+\textbf{Operand binding:} No ModR/M, XOP, immediate, or displacement bytes.
+
+Restore the previous logical register window without returning.
+
+\subsection*{Operation}
+\begin{lstlisting}
+require a previous logical window
+propagate child R8-R15 through the overlap to parent R24-R31
+make the parent window current atomically; restore it transparently if spilled
+\end{lstlisting}
+\subsection*{Flags}
+CF=unchanged, PF=unchanged, AF=unchanged, ZF=unchanged, SF=unchanged, OF=unchanged.
+\subsection*{Memory Ordering}
+May perform transparent window spill or restore memory accesses; those accesses are ordered as ordinary core-context loads/stores and complete before retirement.
+\subsection*{Exceptions}
+\begin{itemize}
+\item INVALID\_OP for malformed encoding or unavailable WINDOW feature
+\item GPF when CR4.WINDOW\_ENABLE is clear
+\item GPF for window underflow or invalid WSP configuration
+\item ALIGN\_CHECK or PAGE\_FAULT before architectural modification if a transparent spill/restore fails
+\end{itemize}
+\clearpage
+
+\section{WINRELEASE -- WINRELEASE}
+\textbf{Status:} NORMATIVE\quad \textbf{Feature:} WINDOW\quad \textbf{Privilege:} user\\
+\textbf{Encoding:} \texttt{FF 04 1F}, X-type (no operands)\\
+\textbf{Operand binding:} No ModR/M, XOP, immediate, or displacement bytes.
+
+Release one advisory window-retention request.
+
+\subsection*{Operation}
+\begin{lstlisting}
+require a nonzero retention hint count
+decrement the current window retention hint count
+\end{lstlisting}
+\subsection*{Flags}
+CF=unchanged, PF=unchanged, AF=unchanged, ZF=unchanged, SF=unchanged, OF=unchanged.
+\subsection*{Memory Ordering}
+No memory access.
+\subsection*{Exceptions}
+\begin{itemize}
+\item INVALID\_OP for malformed encoding or unavailable WINDOW feature
+\item GPF when CR4.WINDOW\_ENABLE is clear
+\item GPF for an unbalanced release
+\end{itemize}
+\clearpage
+
+\section{WINRESERVE -- WINRESERVE}
+\textbf{Status:} NORMATIVE\quad \textbf{Feature:} WINDOW\quad \textbf{Privilege:} user\\
+\textbf{Encoding:} \texttt{FF 04 1D}, X-type (no operands)\\
+\textbf{Operand binding:} No ModR/M, XOP, immediate, or displacement bytes.
+
+Hint that another logical window will be needed soon.
+
+\subsection*{Operation}
+\begin{lstlisting}
+optionally prepare microarchitectural resident capacity
+do not spill, fault, or change architectural window state
+\end{lstlisting}
+\subsection*{Flags}
+CF=unchanged, PF=unchanged, AF=unchanged, ZF=unchanged, SF=unchanged, OF=unchanged.
+\subsection*{Memory Ordering}
+No memory access.
+\subsection*{Exceptions}
+\begin{itemize}
+\item INVALID\_OP for malformed encoding or unavailable WINDOW feature
+\item GPF when CR4.WINDOW\_ENABLE is clear
+\end{itemize}
+\clearpage
+
 \section{WRCR -- WRCR CRn, Rsrc}
 \textbf{Status:} NORMATIVE\quad \textbf{Feature:} BASE\quad \textbf{Privilege:} kernel\\
 \textbf{Encoding:} \texttt{81}, S-type\\
@@ -7339,11 +7771,14 @@ memory[effective_address(mem), pointer_bytes] <- src using shadow-stack write pe
 \subsection*{Flags}
 CF=unchanged, PF=unchanged, AF=unchanged, ZF=unchanged, SF=unchanged, OF=unchanged.
 \subsection*{Memory Ordering}
-No memory access.
+Architectural multi-byte memory access with the validation and atomicity contract stated by the instruction.
 \subsection*{Exceptions}
 \begin{itemize}
 \item INVALID\_OP for malformed encoding or unavailable feature
 \item GPF when current privilege is insufficient
+\item GPF for non-canonical address
+\item ALIGN\_CHECK when required alignment is violated
+\item PAGE\_FAULT for translation or permission failure
 \end{itemize}
 \clearpage
 
@@ -7614,10 +8049,13 @@ atomically restore requested enabled components
 \subsection*{Flags}
 CF=unchanged, PF=unchanged, AF=unchanged, ZF=unchanged, SF=unchanged, OF=unchanged.
 \subsection*{Memory Ordering}
-No memory access.
+Architectural multi-byte memory access with the validation and atomicity contract stated by the instruction.
 \subsection*{Exceptions}
 \begin{itemize}
 \item INVALID\_OP for malformed encoding or unavailable feature
+\item GPF for non-canonical address
+\item ALIGN\_CHECK when required alignment is violated
+\item PAGE\_FAULT for translation or permission failure
 \end{itemize}
 \clearpage
 
@@ -7636,10 +8074,13 @@ write requested enabled components at QUERY-reported offsets
 \subsection*{Flags}
 CF=unchanged, PF=unchanged, AF=unchanged, ZF=unchanged, SF=unchanged, OF=unchanged.
 \subsection*{Memory Ordering}
-No memory access.
+Architectural multi-byte memory access with the validation and atomicity contract stated by the instruction.
 \subsection*{Exceptions}
 \begin{itemize}
 \item INVALID\_OP for malformed encoding or unavailable feature
+\item GPF for non-canonical address
+\item ALIGN\_CHECK when required alignment is violated
+\item PAGE\_FAULT for translation or permission failure
 \end{itemize}
 \clearpage
 

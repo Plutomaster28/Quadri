@@ -6,7 +6,7 @@
 
 namespace seabird::isa {
 struct OpcodeEntry { std::string_view mnemonic; std::string_view syntax; std::string_view operand_binding; std::array<std::uint8_t, 3> bytes; std::uint8_t length; std::uint8_t operand_count; bool normative; };
-inline constexpr std::array<OpcodeEntry, 337> kOpcodes{{
+inline constexpr std::array<OpcodeEntry, 352> kOpcodes{{
   {"MOV", "MOV Rdst, Rsrc", "ModR/M.reg = Rdst; ModR/M.r/m = Rsrc.", {0, 0, 0}, 1, 2, true},
   {"MOVI", "MOVI Rdst, #imm", "ModR/M.r/m = Rdst; ModR/M.reg = 0; immediate field = #imm.", {1, 0, 0}, 1, 2, true},
   {"MOVZX", "MOVZX Rdst, Rsrc", "ModR/M.reg = Rdst; ModR/M.r/m = Rsrc.", {2, 0, 0}, 1, 2, true},
@@ -344,5 +344,20 @@ inline constexpr std::array<OpcodeEntry, 337> kOpcodes{{
   {"SETMODE", "SETMODE mode", "immediate field = mode.", {255, 4, 26}, 3, 1, true},
   {"FLD", "FLD Fd, [addr]", "ModR/M.reg = Fd; ModR/M.r/m = [addr]. Operand-width prefix selects 16/32/64/128-bit scalar format.", {255, 5, 16}, 3, 2, true},
   {"FST", "FST [addr], Fs", "ModR/M.r/m = [addr]; ModR/M.reg = Fs. Operand-width prefix selects 16/32/64/128-bit scalar format.", {255, 5, 17}, 3, 2, true},
+  {"ADC", "ADC Rdst, Rsrc", "ModR/M.reg = Rdst; ModR/M.r/m = Rsrc.", {216, 0, 0}, 1, 2, true},
+  {"SBB", "SBB Rdst, Rsrc", "ModR/M.reg = Rdst; ModR/M.r/m = Rsrc.", {217, 0, 0}, 1, 2, true},
+  {"UMULH", "UMULH Rdst, Rsrc", "ModR/M.reg = Rdst; ModR/M.r/m = Rsrc.", {218, 0, 0}, 1, 2, true},
+  {"FCVTU", "FCVTU Fd, Ra", "ModR/M.reg = Fd; ModR/M.r/m = Ra; VectorCtl selects the scalar IEEE format.", {219, 0, 0}, 1, 2, true},
+  {"FCVTUS", "FCVTUS Ra, Fs", "ModR/M.reg = Ra; ModR/M.r/m = Fs; VectorCtl selects the scalar IEEE format.", {220, 0, 0}, 1, 2, true},
+  {"VCOMPARE_EQ", "VCOMPARE_EQ Vd, Va, Vb", "ModR/M.reg = Vd; ModR/M.r/m = Va; XOP0 = Vb; VectorCtl is required.", {255, 1, 43}, 3, 3, true},
+  {"VCOMPARE_NE", "VCOMPARE_NE Vd, Va, Vb", "ModR/M.reg = Vd; ModR/M.r/m = Va; XOP0 = Vb; VectorCtl is required.", {255, 1, 44}, 3, 3, true},
+  {"VCOMPARE_ULT", "VCOMPARE_ULT Vd, Va, Vb", "ModR/M.reg = Vd; ModR/M.r/m = Va; XOP0 = Vb; VectorCtl is required.", {255, 1, 45}, 3, 3, true},
+  {"VCOMPARE_UGT", "VCOMPARE_UGT Vd, Va, Vb", "ModR/M.reg = Vd; ModR/M.r/m = Va; XOP0 = Vb; VectorCtl is required.", {255, 1, 46}, 3, 3, true},
+  {"VNOT", "VNOT Vd, Va", "ModR/M.reg = Vd; ModR/M.r/m = Va; VectorCtl is required.", {255, 1, 47}, 3, 2, true},
+  {"WINNEW", "WINNEW", "No ModR/M, XOP, immediate, or displacement bytes.", {255, 4, 27}, 3, 0, true},
+  {"WINPREV", "WINPREV", "No ModR/M, XOP, immediate, or displacement bytes.", {255, 4, 28}, 3, 0, true},
+  {"WINRESERVE", "WINRESERVE", "No ModR/M, XOP, immediate, or displacement bytes.", {255, 4, 29}, 3, 0, true},
+  {"WINPIN", "WINPIN", "No ModR/M, XOP, immediate, or displacement bytes.", {255, 4, 30}, 3, 0, true},
+  {"WINRELEASE", "WINRELEASE", "No ModR/M, XOP, immediate, or displacement bytes.", {255, 4, 31}, 3, 0, true},
 }};
 }  // namespace seabird::isa

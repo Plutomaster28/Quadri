@@ -4,6 +4,9 @@
 def NotTritium : Predicate<"!Subtarget->hasTritium()">,
     AssemblerPredicate<(all_of (not FeatureTritium)),
                        "instruction is excluded from Tritium v1">;
+def HasRegisterWindows : Predicate<"Subtarget->hasRegisterWindows()">,
+    AssemblerPredicate<(all_of FeatureRegisterWindows),
+                       "instruction requires the register-window extension">;
 
 class SeaBirdInst<string mnemonic, string operands, bits<8> opcode,
                   string form, bits<5> formCode> : Instruction {
@@ -42,7 +45,8 @@ def memaddr32 : Operand<i32> {
 def SBAddr32 : ComplexPattern<i32, 4, "selectAddr", [frameindex], []>;
 
 def SeaBirdRetGlue : SDNode<"SeaBirdISD::RET_GLUE", SDTNone,
-                             [SDNPHasChain, SDNPOptInGlue, SDNPVariadic]>;
+                             [SDNPHasChain, SDNPOptInGlue, SDNPVariadic,
+                              SDNPMayLoad, SDNPMayStore]>;
 def SDT_SeaBirdCallSeqStart : SDCallSeqStart<[SDTCisVT<0, iPTR>, SDTCisVT<1, iPTR>]>;
 def SDT_SeaBirdCallSeqEnd : SDCallSeqEnd<[SDTCisVT<0, iPTR>, SDTCisVT<1, iPTR>]>;
 def SeaBirdCallSeqStart : SDNode<"ISD::CALLSEQ_START", SDT_SeaBirdCallSeqStart,
@@ -52,7 +56,7 @@ def SeaBirdCallSeqEnd : SDNode<"ISD::CALLSEQ_END", SDT_SeaBirdCallSeqEnd,
 def SDT_SeaBirdCall : SDTypeProfile<0, -1, [SDTCisVT<0, iPTR>]>;
 def SeaBirdCallNode : SDNode<"SeaBirdISD::CALL", SDT_SeaBirdCall,
                              [SDNPHasChain, SDNPOutGlue, SDNPOptInGlue,
-                              SDNPVariadic]>;
+                              SDNPVariadic, SDNPMayLoad, SDNPMayStore]>;
 def SDT_SeaBirdCmp : SDTypeProfile<0, 2, [SDTCisSameAs<0, 1>, SDTCisInt<0>]>;
 def SeaBirdCmpNode : SDNode<"SeaBirdISD::CMP", SDT_SeaBirdCmp,
                             [SDNPHasChain, SDNPOutGlue]>;
@@ -159,6 +163,12 @@ class ALURR<string mnemonic, bits<8> opcode>
   let Constraints = "$dst = $old";
 }
 
+class CarryALURR<string mnemonic, bits<8> opcode>
+    : ALURR<mnemonic, opcode> {
+  let Uses = [FLAGS];
+  let Defs = [FLAGS];
+}
+
 class UnaryInPlace<string mnemonic, bits<8> opcode>
     : SeaBirdInst<mnemonic, "$dst", opcode, "R-type (unary)", 20> {
   dag OutOperandList = (outs GPR64:$dst);
@@ -218,6 +228,19 @@ class TernaryRR<string mnemonic, bits<8> opcode>
                   "R-type + XOP register", 10> {
   dag OutOperandList = (outs GPR64:$dst);
   dag InOperandList = (ins GPR64:$src, GPR64:$extra);
+}
+
+class StringCopy<string mnemonic, bits<8> opcode>
+    : TernaryRR<mnemonic, opcode> {
+  let mayLoad = 1;
+  let mayStore = 1;
+  let hasSideEffects = 1;
+}
+
+class StringFill<string mnemonic, bits<8> opcode>
+    : TernaryRR<mnemonic, opcode> {
+  let mayStore = 1;
+  let hasSideEffects = 1;
 }
 
 class PairLoad<string mnemonic, bits<8> opcode>
@@ -518,6 +541,7 @@ class UncondBranch<string mnemonic, bits<8> opcode>
   dag InOperandList = (ins brtarget:$target);
   let isBranch = 1;
   let isTerminator = 1;
+  let isBarrier = 1;
 }
 
 class CondBranch<string mnemonic, bits<8> opcode>
@@ -542,6 +566,12 @@ class Call<string mnemonic, bits<8> opcode>
   dag OutOperandList = (outs);
   dag InOperandList = (ins calltarget:$target);
   let isCall = 1;
+  let Defs = [R7];
+  let Uses = [R7];
+  // CALL always pushes a return address. A window transition may also spill
+  // or restore transparent backing state, so model both directions.
+  let mayLoad = 1;
+  let mayStore = 1;
   let hasSideEffects = 1;
 }
 
@@ -550,6 +580,10 @@ class IndirectCall<string mnemonic, bits<8> opcode>
   dag OutOperandList = (outs);
   dag InOperandList = (ins GPR64:$target);
   let isCall = 1;
+  let Defs = [R7];
+  let Uses = [R7];
+  let mayLoad = 1;
+  let mayStore = 1;
   let hasSideEffects = 1;
 }
 
@@ -683,6 +717,12 @@ class SysXNoOperand<string mnemonic, bits<8> opcode>
   let ExtensionGroup = 4;
   let hasSideEffects = 1;
   let isBarrier = 1;
+}
+
+class WindowTransition<string mnemonic, bits<8> opcode>
+    : SysXNoOperand<mnemonic, opcode> {
+  let mayLoad = 1;
+  let mayStore = 1;
 }
 
 class SysXPair<string mnemonic, bits<8> opcode>
@@ -865,6 +905,11 @@ class Return<string mnemonic, bits<8> opcode>
   let isReturn = 1;
   let isTerminator = 1;
   let isBarrier = 1;
+  let Defs = [R7];
+  let Uses = [R7];
+  let mayLoad = 1;
+  // Window restoration may write a transparent spill record.
+  let mayStore = 1;
   let Pattern = [(SeaBirdRetGlue)];
 }
 
@@ -941,6 +986,18 @@ class FP32ToIntCG
   dag InOperandList = (ins FPR32:$src);
   let ScalarWidth = 3;
 }
+class UIntToFP32CG
+    : SeaBirdInst<"fcvtu.s", "$dst, $src", 0xDB, "R-type u64-to-f32", 18> {
+  dag OutOperandList = (outs FPR32:$dst);
+  dag InOperandList = (ins GPR64:$src);
+  let ScalarWidth = 3;
+}
+class FP32ToUIntCG
+    : SeaBirdInst<"fcvtus.s", "$dst, $src", 0xDC, "R-type f32-to-u64", 19> {
+  dag OutOperandList = (outs GPR64:$dst);
+  dag InOperandList = (ins FPR32:$src);
+  let ScalarWidth = 3;
+}
 class FPExt32To64CG
     : SeaBirdInst<"fcvt.s2d", "$dst, $src", 0x0A, "FPX f32-to-f64", 12> {
   dag OutOperandList = (outs FPR64:$dst);
@@ -972,6 +1029,8 @@ def FLD32CG : ScalarFPLoad32CG;
 def FST32CG : ScalarFPStore32CG;
 def FCVTI32CG : IntToFP32CG;
 def FCVTS32CG : FP32ToIntCG;
+def FCVTU32CG : UIntToFP32CG;
+def FCVTUS32CG : FP32ToUIntCG;
 def FCVT_S2D32CG : FPExt32To64CG;
 def FCVT_D2S32CG : FPRound64To32CG;
 }
@@ -1046,6 +1105,18 @@ class FP128ToIntCG
   dag InOperandList = (ins FPR128:$src);
   let ScalarWidth = 5;
 }
+class UIntToFP128CG
+    : SeaBirdInst<"fcvtu.q", "$dst, $src", 0xDB, "R-type u64-to-f128", 18> {
+  dag OutOperandList = (outs FPR128:$dst);
+  dag InOperandList = (ins GPR64:$src);
+  let ScalarWidth = 5;
+}
+class FP128ToUIntCG
+    : SeaBirdInst<"fcvtus.q", "$dst, $src", 0xDC, "R-type f128-to-u64", 19> {
+  dag OutOperandList = (outs GPR64:$dst);
+  dag InOperandList = (ins FPR128:$src);
+  let ScalarWidth = 5;
+}
 
 def FADD128CG : FPBinary128CG<"fadd.q", 0xA6>;
 def FSUB128CG : FPBinary128CG<"fsub.q", 0xA7>;
@@ -1063,6 +1134,8 @@ def FLD128CG : ScalarFPLoad128CG;
 def FST128CG : ScalarFPStore128CG;
 def FCVTI128CG : IntToFP128CG;
 def FCVTS128CG : FP128ToIntCG;
+def FCVTU128CG : UIntToFP128CG;
+def FCVTUS128CG : FP128ToUIntCG;
 }
 
 // Tetra code-generation records share the architectural opcodes and textual
@@ -1170,6 +1243,10 @@ class IndirectCall32<string mnemonic, bits<8> opcode>
   dag OutOperandList = (outs);
   dag InOperandList = (ins GPR32:$target);
   let isCall = 1;
+  let Defs = [R7];
+  let Uses = [R7];
+  let mayLoad = 1;
+  let mayStore = 1;
   let hasSideEffects = 1;
 }
 
@@ -1262,6 +1339,8 @@ def : Pat<(sra GPR64:$lhs, GPR64:$rhs),
           (SARrr GPR64:$lhs, GPR64:$rhs)>;
 def : Pat<(mul GPR64:$lhs, GPR64:$rhs),
           (MULrr GPR64:$lhs, GPR64:$rhs)>;
+def : Pat<(mulhu GPR64:$lhs, GPR64:$rhs),
+          (UMULHrr GPR64:$lhs, GPR64:$rhs)>;
 def : Pat<(sdiv GPR64:$lhs, GPR64:$rhs),
           (DIVrr GPR64:$lhs, GPR64:$rhs)>;
 def : Pat<(udiv GPR64:$lhs, GPR64:$rhs),
@@ -1437,6 +1516,8 @@ def : Pat<(smin VR128:$lhs, VR128:$rhs),
           (VMIN128 VR128:$lhs, VR128:$rhs)>;
 def : Pat<(f64 (sint_to_fp GPR64:$src)), (FCVTI64 GPR64:$src)>;
 def : Pat<(i64 (fp_to_sint FPR64:$src)), (FCVTS64 FPR64:$src)>;
+def : Pat<(f64 (uint_to_fp GPR64:$src)), (FCVTU64 GPR64:$src)>;
+def : Pat<(i64 (fp_to_uint FPR64:$src)), (FCVTUS64 FPR64:$src)>;
 def : Pat<(add VR128:$lhs, VR128:$rhs), (VADD128 VR128:$lhs, VR128:$rhs)>;
 def : Pat<(sub VR128:$lhs, VR128:$rhs), (VSUB128 VR128:$lhs, VR128:$rhs)>;
 def : Pat<(mul VR128:$lhs, VR128:$rhs), (VMUL128 VR128:$lhs, VR128:$rhs)>;
@@ -1465,6 +1546,8 @@ def : Pat<(fmaxnum FPR32:$lhs, FPR32:$rhs),
           (FMAX32CG FPR32:$lhs, FPR32:$rhs)>;
 def : Pat<(f32 (sint_to_fp GPR64:$src)), (FCVTI32CG GPR64:$src)>;
 def : Pat<(i64 (fp_to_sint FPR32:$src)), (FCVTS32CG FPR32:$src)>;
+def : Pat<(f32 (uint_to_fp GPR64:$src)), (FCVTU32CG GPR64:$src)>;
+def : Pat<(i64 (fp_to_uint FPR32:$src)), (FCVTUS32CG FPR32:$src)>;
 def : Pat<(f64 (fpextend FPR32:$src)), (FCVT_S2D32CG FPR32:$src)>;
 def : Pat<(f32 (fpround FPR64:$src)), (FCVT_D2S32CG FPR64:$src)>;
 def : Pat<(f32 (load SBAddr:$base)), (FLD32CG SBAddr:$base)>;
@@ -1489,6 +1572,8 @@ def : Pat<(fmaxnum FPR128:$lhs, FPR128:$rhs),
           (FMAX128CG FPR128:$lhs, FPR128:$rhs)>;
 def : Pat<(f128 (sint_to_fp GPR64:$src)), (FCVTI128CG GPR64:$src)>;
 def : Pat<(i64 (fp_to_sint FPR128:$src)), (FCVTS128CG FPR128:$src)>;
+def : Pat<(f128 (uint_to_fp GPR64:$src)), (FCVTU128CG GPR64:$src)>;
+def : Pat<(i64 (fp_to_uint FPR128:$src)), (FCVTUS128CG FPR128:$src)>;
 def : Pat<(f128 (load SBAddr:$base)), (FLD128CG SBAddr:$base)>;
 def : Pat<(store FPR128:$value, SBAddr:$base),
           (FST128CG SBAddr:$base, FPR128:$value)>;

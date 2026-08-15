@@ -1,5 +1,7 @@
 #include "SeaBirdSubtarget.h"
 
+#define DEBUG_TYPE "seabird-subtarget"
+
 #define GET_SUBTARGETINFO_TARGET_DESC
 #define GET_SUBTARGETINFO_CTOR
 #include "SeaBirdGenSubtargetInfo.inc"

@@ -4,7 +4,7 @@
 \newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
 \pagestyle{fancy}\fancyhf{}
 \fancyhead[L]{\sffamily SeaBird Volume 5 -- Binary Interfaces}
-\fancyhead[R]{\sffamily Version 3.0 RC1}
+\fancyhead[R]{\sffamily Architecture 3.2 / SDK 1.0}
 \fancyfoot[C]{\thepage}\setlength{\headheight}{14pt}
 \titleformat{\section}{\Large\bfseries\sffamily}{\thesection}{0.7em}{}
 \titleformat{\subsection}{\large\bfseries\sffamily}{\thesubsection}{0.7em}{}
@@ -12,14 +12,14 @@
 \begin{document}
 \begin{titlepage}\centering\vspace*{2cm}
 {\Huge\bfseries SeaBird ISA\\[0.3cm]}{\LARGE Volume 5: Binary Interfaces\\[0.5cm]}
-{\Large Version 3.0 Release Candidate 1}\vfill
-{\large Generated from architectural-layouts.json\\June 27, 2026}\vfill
+{\Large Architecture 3.2 / SDK 1.0}\vfill
+{\large Generated from architectural-layouts.json\\August 14, 2026}\vfill
 \end{titlepage}
 \tableofcontents\clearpage
 \section{Feature Discovery Bit Assignments}
 QUERY leaf 0x0001 returns the basic bitmap in R0. QUERY leaf 0x0003 returns the extended bitmap in R0. Unlisted bits are reserved and read zero.
 
-\subsection{basic\_r0}
+\subsection{basic\_\allowbreak{}r0}
 \begin{longtable}{@{}L{3.5cm}L{2cm}@{}}
 \toprule Feature & Bit \\ \midrule
 CLOWNFISH & 0 \\
@@ -37,7 +37,7 @@ DEBUG & 11 \\
 PMU & 12 \\
 MCA & 13 \\
 \bottomrule\end{longtable}
-\subsection{extended\_r0}
+\subsection{extended\_\allowbreak{}r0}
 \begin{longtable}{@{}L{3.5cm}L{2cm}@{}}
 \toprule Feature & Bit \\ \midrule
 AVX & 0 \\
@@ -52,7 +52,64 @@ MLAUNCH & 8 \\
 RNG & 9 \\
 ATOMIC128 & 10 \\
 RINGS12 & 11 \\
+PERF\_\allowbreak{}MARKERS & 12 \\
+PAE32 & 13 \\
+REGISTER\_\allowbreak{}WINDOWS & 14 \\
 \bottomrule\end{longtable}
+\section{Performance Marker Discovery}
+QUERY leaf 0x0006 returns the performance-marker optimization bitmap in R0. Bit (marker ID minus one) is one when the implementation actively uses that marker as an optimization hint. A zero bitmap is fully compliant because every marker is architecturally inert. R1--R3 are reserved and return zero.
+\section{PAE32 Translation Layout}
+PAE32 retains 32-bit virtual addresses and uses 36-bit physical addresses with 64-bit PTEs. Base pages are 4096 bytes and large pages are 2097152 bytes.
+\begin{longtable}{@{}L{3cm}L{2cm}L{2cm}@{}}
+\toprule VA field & First bit & Width \\ \midrule
+L1 & 30 & 2 \\
+L2 & 21 & 9 \\
+L3 & 12 & 9 \\
+OFFSET & 0 & 12 \\
+\bottomrule\end{longtable}
+\begin{longtable}{@{}L{3cm}L{2cm}L{2cm}@{}}
+\toprule PTE field & First bit & Width \\ \midrule
+P & 0 & 1 \\
+W & 1 & 1 \\
+U & 2 & 1 \\
+R & 3 & 1 \\
+MT & 4 & 2 \\
+A & 6 & 1 \\
+D & 7 & 1 \\
+PS & 8 & 1 \\
+G & 9 & 1 \\
+SW\_\allowbreak{}LOW & 10 & 2 \\
+PFN36 & 12 & 24 \\
+RESERVED\_\allowbreak{}HIGH & 36 & 16 \\
+SW\_\allowbreak{}HIGH & 52 & 7 \\
+PKEY & 59 & 4 \\
+XD & 63 & 1 \\
+\bottomrule\end{longtable}
+\begin{longtable}{@{}L{3cm}L{2cm}@{}}
+\toprule MT value & Encoding \\ \midrule
+WB & 0 \\
+WT & 1 \\
+UC & 2 \\
+DEVICE & 3 \\
+\bottomrule\end{longtable}
+\section{Register-Window ABI Layout}
+The windowed ABI is selected by EF\_SB\_WINDOWED\_ABI and CR4.WINDOW\_ENABLE. R0--R7 are global, R8--R15 incoming, R16--R23 local, and R24--R31 outgoing. Caller outgoing registers overlap callee incoming registers.
+\begin{longtable}{@{}L{3cm}L{3cm}L{3cm}@{}}
+\toprule Mode & Payload bytes & Record stride \\ \midrule
+Clownfish & 48 & 64 \\
+Tetra & 96 & 128 \\
+Dragonet & 192 & 192 \\
+Droplet & 384 & 384 \\
+\bottomrule\end{longtable}
+
+Each spill record stores R8 through R31 in increasing register-number order.
+Each value occupies the active pointer width and is little-endian. Remaining
+bytes through the record stride are zero. WSP is the next-free byte offset:
+a spill writes at WSP and then advances it by the mode stride; a restore first
+decrements WSP by that stride and then reads the record. A fresh child maps its
+incoming R8--R15 to the caller's outgoing R24--R31 and initializes child local
+R16--R23 and outgoing R24--R31 to zero.
+
 \section{Control Register Bit Layouts}
 \subsection{CR0 (64 bits)}
 \begin{longtable}{@{}L{4.5cm}L{2cm}L{2cm}@{}}
@@ -82,52 +139,95 @@ PMU & 8 & 1 \\
 SHSTK & 9 & 1 \\
 IBT & 10 & 1 \\
 RNG & 11 & 1 \\
+PAE32 & 12 & 1 \\
+REGISTER\_\allowbreak{}WINDOWS & 13 & 1 \\
 \bottomrule\end{longtable}
 Unlisted bits are reserved, read as zero, and must be written as zero.
 \subsection{CR3 (64 bits)}
 \begin{longtable}{@{}L{4.5cm}L{2cm}L{2cm}@{}}
 \toprule Field & First bit & Width \\ \midrule
 ASID & 0 & 12 \\
-ROOT\_PFN & 12 & 40 \\
-NO\_FLUSH & 63 & 1 \\
+ROOT\_\allowbreak{}PFN & 12 & 40 \\
+NO\_\allowbreak{}FLUSH & 63 & 1 \\
 \bottomrule\end{longtable}
 Unlisted bits are reserved, read as zero, and must be written as zero.
 \subsection{CR4 (64 bits)}
 \begin{longtable}{@{}L{4.5cm}L{2cm}L{2cm}@{}}
 \toprule Field & First bit & Width \\ \midrule
-GLOBAL\_PAGES & 0 & 1 \\
-ASID\_ENABLE & 1 & 1 \\
-PKEY\_ENABLE & 2 & 1 \\
-USER\_ALIGN & 3 & 1 \\
-SHSTK\_ENABLE & 4 & 1 \\
-IBT\_ENABLE & 5 & 1 \\
-XSTATE\_ENABLE & 6 & 1 \\
-STAGE2\_ENABLE & 7 & 1 \\
+GLOBAL\_\allowbreak{}PAGES & 0 & 1 \\
+ASID\_\allowbreak{}ENABLE & 1 & 1 \\
+PKEY\_\allowbreak{}ENABLE & 2 & 1 \\
+USER\_\allowbreak{}ALIGN & 3 & 1 \\
+SHSTK\_\allowbreak{}ENABLE & 4 & 1 \\
+IBT\_\allowbreak{}ENABLE & 5 & 1 \\
+XSTATE\_\allowbreak{}ENABLE & 6 & 1 \\
+STAGE2\_\allowbreak{}ENABLE & 7 & 1 \\
+PAE\_\allowbreak{}ENABLE & 8 & 1 \\
+WINDOW\_\allowbreak{}ENABLE & 9 & 1 \\
 \bottomrule\end{longtable}
 Unlisted bits are reserved, read as zero, and must be written as zero.
 \subsection{MODE (64 bits)}
 \begin{longtable}{@{}L{4.5cm}L{2cm}L{2cm}@{}}
 \toprule Field & First bit & Width \\ \midrule
-EXECUTION\_MODE & 0 & 2 \\
-VA\_LEVELS\_MINUS\_4 & 2 & 1 \\
+EXECUTION\_\allowbreak{}MODE & 0 & 2 \\
+VA\_\allowbreak{}LEVELS\_\allowbreak{}MINUS\_\allowbreak{}4 & 2 & 1 \\
 \bottomrule\end{longtable}
 Unlisted bits are reserved, read as zero, and must be written as zero.
+\section{Register-Window System Registers}
+\subsection{WSPBR (64 bits)}
+\begin{longtable}{@{}L{4.5cm}L{2cm}L{2cm}@{}}
+\toprule Field & First bit & Width \\ \midrule
+BASE\_\allowbreak{}63\_\allowbreak{}6 & 6 & 58 \\
+\bottomrule\end{longtable}
+Unlisted bits are reserved and read zero.
+\subsection{WSP (64 bits)}
+\begin{longtable}{@{}L{4.5cm}L{2cm}L{2cm}@{}}
+\toprule Field & First bit & Width \\ \midrule
+NEXT\_\allowbreak{}FREE\_\allowbreak{}OFFSET\_\allowbreak{}63\_\allowbreak{}6 & 6 & 58 \\
+\bottomrule\end{longtable}
+Unlisted bits are reserved and read zero.
+\subsection{WDEPTH (64 bits)}
+\begin{longtable}{@{}L{4.5cm}L{2cm}L{2cm}@{}}
+\toprule Field & First bit & Width \\ \midrule
+ACTIVE\_\allowbreak{}DEPTH & 0 & 32 \\
+SPILLED\_\allowbreak{}WINDOWS & 32 & 32 \\
+\bottomrule\end{longtable}
+Unlisted bits are reserved and read zero.
+\subsection{WSTATUS (64 bits)}
+\begin{longtable}{@{}L{4.5cm}L{2cm}L{2cm}@{}}
+\toprule Field & First bit & Width \\ \midrule
+LIMIT\_\allowbreak{}64B\_\allowbreak{}UNITS & 0 & 32 \\
+PIN\_\allowbreak{}COUNT & 32 & 16 \\
+ASSIST\_\allowbreak{}PENDING & 48 & 1 \\
+AREA\_\allowbreak{}EXHAUSTED & 49 & 1 \\
+AT\_\allowbreak{}ROOT & 50 & 1 \\
+\bottomrule\end{longtable}
+Unlisted bits are reserved and read zero.
+
+WSPBR and WSP are writable only while windowing is disabled and logical depth
+is zero. WSPBR is a 64-byte-aligned virtual base, zero-extended to the active
+address width; WSP is a 64-byte-aligned next-free offset. WSTATUS bits 31:0 are
+the writable exclusive spill limit in 64-byte units. PIN\_COUNT,
+ASSIST\_PENDING, AREA\_EXHAUSTED, and AT\_ROOT are read-only. WDEPTH is wholly
+read-only. Reset clears WSPBR, WSP, and the WSTATUS limit and establishes depth
+zero, no spills, no pins, no assist, and AT\_ROOT=1.
+
 \section{Architectural Binary Structures}
 All offsets and sizes in this section are bytes. All multi-byte fields are little-endian.
-\subsection{IDT\_ENTRY}
+\subsection{IDT\_\allowbreak{}ENTRY}
 Size: 32 bytes. Alignment: 32 bytes.
 \begin{longtable}{@{}L{4cm}L{2cm}L{2cm}@{}}
 \toprule Field & Offset & Size \\ \midrule
-handler\_low & 0 & 8 \\
-handler\_high & 8 & 8 \\
-target\_cpl & 16 & 1 \\
-gate\_type & 17 & 1 \\
-stack\_selector & 18 & 1 \\
-caller\_cpl & 19 & 1 \\
+handler\_\allowbreak{}low & 0 & 8 \\
+handler\_\allowbreak{}high & 8 & 8 \\
+target\_\allowbreak{}cpl & 16 & 1 \\
+gate\_\allowbreak{}type & 17 & 1 \\
+stack\_\allowbreak{}selector & 18 & 1 \\
+caller\_\allowbreak{}cpl & 19 & 1 \\
 present & 20 & 1 \\
 reserved & 21 & 11 \\
 \bottomrule\end{longtable}
-\subsection{CORE\_CONTEXT}
+\subsection{CORE\_\allowbreak{}CONTEXT}
 Size: 1024 bytes. Alignment: 64 bytes.
 \begin{longtable}{@{}L{4cm}L{2cm}L{2cm}@{}}
 \toprule Field & Offset & Size \\ \midrule
@@ -135,28 +235,46 @@ magic & 0 & 4 \\
 revision & 4 & 2 \\
 mode & 6 & 1 \\
 cpl & 7 & 1 \\
-image\_size & 8 & 4 \\
+image\_\allowbreak{}size & 8 & 4 \\
 flags & 16 & 16 \\
 ip & 32 & 16 \\
-gpr\_r0\_r31 & 64 & 512 \\
+gpr\_\allowbreak{}r0\_\allowbreak{}r31 & 64 & 512 \\
 fpcr & 576 & 8 \\
 fpsr & 584 & 8 \\
-k0\_k7 & 592 & 64 \\
-system\_state & 656 & 112 \\
+k0\_\allowbreak{}k7 & 592 & 64 \\
+system\_\allowbreak{}state & 656 & 112 \\
 reserved & 768 & 256 \\
 \bottomrule\end{longtable}
-\subsection{XSTATE\_HEADER}
+\subsection{XSTATE\_\allowbreak{}HEADER}
 Size: 64 bytes. Alignment: 64 bytes.
 \begin{longtable}{@{}L{4cm}L{2cm}L{2cm}@{}}
 \toprule Field & Offset & Size \\ \midrule
 magic & 0 & 4 \\
 revision & 4 & 2 \\
-header\_size & 6 & 2 \\
-total\_size & 8 & 4 \\
-present\_mask & 16 & 16 \\
-enabled\_mask & 32 & 16 \\
+header\_\allowbreak{}size & 6 & 2 \\
+total\_\allowbreak{}size & 8 & 4 \\
+present\_\allowbreak{}mask & 16 & 16 \\
+enabled\_\allowbreak{}mask & 32 & 16 \\
 checksum & 48 & 8 \\
 reserved & 56 & 8 \\
+\bottomrule\end{longtable}
+\subsection{WINDOW\_\allowbreak{}STATE\_\allowbreak{}HEADER}
+Size: 64 bytes. Alignment: 64 bytes.
+\begin{longtable}{@{}L{4cm}L{2cm}L{2cm}@{}}
+\toprule Field & Offset & Size \\ \midrule
+magic & 0 & 4 \\
+revision & 4 & 2 \\
+header\_\allowbreak{}size & 6 & 2 \\
+active\_\allowbreak{}depth & 8 & 4 \\
+spilled\_\allowbreak{}windows & 12 & 4 \\
+spill\_\allowbreak{}position & 16 & 8 \\
+spill\_\allowbreak{}limit & 24 & 8 \\
+current\_\allowbreak{}pin\_\allowbreak{}count & 32 & 4 \\
+flags & 36 & 4 \\
+current\_\allowbreak{}token & 40 & 8 \\
+record\_\allowbreak{}stride & 48 & 4 \\
+mode & 52 & 1 \\
+reserved & 53 & 11 \\
 \bottomrule\end{longtable}
 \subsection{VMCB}
 Size: 4096 bytes. Alignment: 4096 bytes.
@@ -164,54 +282,81 @@ Size: 4096 bytes. Alignment: 4096 bytes.
 \toprule Field & Offset & Size \\ \midrule
 magic & 0 & 4 \\
 revision & 4 & 2 \\
-header\_size & 6 & 2 \\
-total\_size & 8 & 4 \\
+header\_\allowbreak{}size & 6 & 2 \\
+total\_\allowbreak{}size & 8 & 4 \\
 flags & 16 & 8 \\
-stage2\_root & 24 & 8 \\
-guest\_asid & 32 & 4 \\
-intercept\_bitmap & 64 & 64 \\
-guest\_context & 128 & 1024 \\
-host\_context & 1152 & 1024 \\
-exit\_reason & 2176 & 4 \\
-exit\_qualification & 2184 & 8 \\
-exit\_gpa & 2192 & 16 \\
+stage2\_\allowbreak{}root & 24 & 8 \\
+guest\_\allowbreak{}asid & 32 & 4 \\
+intercept\_\allowbreak{}bitmap & 64 & 64 \\
+guest\_\allowbreak{}context & 128 & 1024 \\
+host\_\allowbreak{}context & 1152 & 1024 \\
+exit\_\allowbreak{}reason & 2176 & 4 \\
+exit\_\allowbreak{}qualification & 2184 & 8 \\
+exit\_\allowbreak{}gpa & 2192 & 16 \\
 injection & 2208 & 32 \\
 reserved & 2240 & 1856 \\
 \bottomrule\end{longtable}
+\subsection{Portable Register-Window Image Rules}
+
+WINDOW\_STATE\_HEADER uses magic bytes ``SBWN'', revision 1, and header size
+64. Mode uses 0=Clownfish, 1=Tetra, 2=Dragonet, and 3=Droplet. Flag bit zero
+means the logical image is complete and bit one means the current window is
+also present in the image; other flag bits are zero. The current token is an
+opaque value that is meaningful only to LOADCTX/IRET on the producing
+architecture revision. Record stride must equal the QUERY leaf 7 value for the
+recorded mode.
+
+XSAVE component 6 places the header first, followed by depth+1 records in
+root-to-current order, including the current window. This is the portable
+self-contained form. SAVECTX instead stores the current window in the ordinary
+CORE\_CONTEXT GPR fields and materializes only non-current windows in the
+task-owned spill area; its system\_state contains the header and token needed
+to find those records. Reserved and padding bytes are zero and restorers reject
+unknown revision, mode, stride, flags, nonzero reserved bytes, inconsistent
+counts, or out-of-bounds records before changing architectural state.
+
 \section{Extended State Components}
 QUERY leaf 0x0005 uses the component number as subleaf. R0 returns component size, R1 alignment, R2 offset in the standard image, and R3 feature requirements. Offsets are ascending, non-overlapping, and aligned.
 \begin{longtable}{@{}L{1.5cm}L{3cm}L{2cm}L{5cm}@{}}
 \toprule ID & Name & Alignment & Contents \\ \midrule
-0 & FP\_MASK & 64 & FPCR, FPSR, and K0-K7 \\
+0 & FP\_\allowbreak{}MASK & 64 & FPCR, FPSR, and K0-K7 \\
 1 & VECTOR & 64 & V0-V31 at enabled vector width \\
 2 & DEBUG & 64 & DBGCTL and DB0-DB7 \\
 3 & PMU & 64 & enabled performance-monitor state \\
 4 & TXN & 64 & transaction status; no live transaction may be saved \\
 5 & VIRT & 64 & virtualization host state \\
+6 & REGISTER\_\allowbreak{}WINDOWS & 64 & logical window stack header and implementation-independent spilled-window image \\
 \bottomrule\end{longtable}
 \section{ELF Object ABI}
 SeaBird objects are little-endian ELF. Until an official registry assignment exists, experimental tools use e\_machine value 0x5342. Production tools must make the value configurable and must reject incompatible ABI notes.
+\subsection{ABI Flags}
+\begin{longtable}{@{}L{4.5cm}L{2cm}@{}}
+\toprule Flag & Value \\ \midrule
+EF\_\allowbreak{}SB\_\allowbreak{}WINDOWED\_\allowbreak{}ABI & 1 \\
+EF\_\allowbreak{}SB\_\allowbreak{}PAE32\_\allowbreak{}REQUIRED & 2 \\
+\bottomrule\end{longtable}
+A linker must reject an unthunked mixture of windowed and ordinary ABI objects. The PAE32-required flag declares an operating-environment requirement without changing pointer width.
 \subsection{Relocations}
 ELF64 SeaBird objects use RELA records. Relocation expressions follow S+A for absolute fields and S+A-P for PC-relative fields, where P is the address of the relocated field. A canonical five-byte B-type rel32 instruction places its field one byte after the opcode and therefore uses addend -4 so the architectural base is next\_IP.
 \begin{longtable}{@{}L{4.5cm}L{2cm}@{}}
 \toprule Relocation & Number \\ \midrule
-R\_SB\_NONE & 0 \\
-R\_SB\_ABS16 & 1 \\
-R\_SB\_ABS32 & 2 \\
-R\_SB\_ABS64 & 3 \\
-R\_SB\_ABS128 & 4 \\
-R\_SB\_PCREL8 & 5 \\
-R\_SB\_PCREL16 & 6 \\
-R\_SB\_PCREL32 & 7 \\
-R\_SB\_GOT32 & 8 \\
-R\_SB\_GOT64 & 9 \\
-R\_SB\_PLT32 & 10 \\
-R\_SB\_TLS\_GD & 11 \\
-R\_SB\_TLS\_IE & 12 \\
-R\_SB\_TLS\_LE & 13 \\
-R\_SB\_RELATIVE & 14 \\
-R\_SB\_JUMP\_SLOT & 15 \\
-R\_SB\_GLOB\_DAT & 16 \\
+R\_\allowbreak{}SB\_\allowbreak{}NONE & 0 \\
+R\_\allowbreak{}SB\_\allowbreak{}ABS16 & 1 \\
+R\_\allowbreak{}SB\_\allowbreak{}ABS32 & 2 \\
+R\_\allowbreak{}SB\_\allowbreak{}ABS64 & 3 \\
+R\_\allowbreak{}SB\_\allowbreak{}ABS128 & 4 \\
+R\_\allowbreak{}SB\_\allowbreak{}PCREL8 & 5 \\
+R\_\allowbreak{}SB\_\allowbreak{}PCREL16 & 6 \\
+R\_\allowbreak{}SB\_\allowbreak{}PCREL32 & 7 \\
+R\_\allowbreak{}SB\_\allowbreak{}GOT32 & 8 \\
+R\_\allowbreak{}SB\_\allowbreak{}GOT64 & 9 \\
+R\_\allowbreak{}SB\_\allowbreak{}PLT32 & 10 \\
+R\_\allowbreak{}SB\_\allowbreak{}TLS\_\allowbreak{}GD & 11 \\
+R\_\allowbreak{}SB\_\allowbreak{}TLS\_\allowbreak{}IE & 12 \\
+R\_\allowbreak{}SB\_\allowbreak{}TLS\_\allowbreak{}LE & 13 \\
+R\_\allowbreak{}SB\_\allowbreak{}RELATIVE & 14 \\
+R\_\allowbreak{}SB\_\allowbreak{}JUMP\_\allowbreak{}SLOT & 15 \\
+R\_\allowbreak{}SB\_\allowbreak{}GLOB\_\allowbreak{}DAT & 16 \\
 \bottomrule\end{longtable}
 \subsection{TLS Models}
 
@@ -238,7 +383,7 @@ K0-K7 & 96--103 \\
 
 A conforming implementation must pass opcode uniqueness, reserved-encoding, decoder round-trip, arithmetic edge-case, precise-exception, paging-permission, memory-order, context-image, and ABI relocation tests. A reserved instruction must raise INVALID\_OP before privilege, address, or arithmetic checks. Architecture changes require a database revision and regenerated manuals; hand-edited generated files are non-normative.
 
-\section{RC1 Ratification Results}
-The RC1 corpus contains 310 normative instructions and 310 ID-bound golden vectors. Exact ID coverage is required. The independent edge suite contains 34 arithmetic, FP, vector, restart, DSP, and cryptographic cases. The Python oracle, C++ reference core, and translator agree on their overlapping byte and execution domains.
-\textbf{Result: PASS -- all architecture-owned RC1 ratification gates are satisfied.}
+\section{SDK 1.0 Ratification Results}
+The corpus contains 325 normative instructions and 325 ID-bound golden vectors. Exact ID coverage is required. The independent edge suite contains 40 arithmetic, FP, vector, restart, DSP, and cryptographic cases. PAE32 has a separate executable translation-walk corpus. The Python oracles, C++ reference core, and translator agree on their overlapping byte and execution domains.
+\textbf{Result: PASS -- all architecture-owned SDK 1.0 ratification gates are satisfied.}
 \end{document}

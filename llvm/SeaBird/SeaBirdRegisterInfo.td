@@ -10,7 +10,14 @@ foreach I = 0-31 in {
   def R#I : SeaBirdReg<I, "r"#I>, DwarfRegNum<[I]>;
 }
 
-def FLAGS : SeaBirdReg<32, "flags">, DwarfRegNum<[33]>;
+// IP is an architectural, non-allocatable pseudo-register used for DWARF's
+// return-address column. FLAGS follows the ratified binary-interface mapping.
+def IP : SeaBirdReg<32, "ip">, DwarfRegNum<[32]>;
+def FLAGS : SeaBirdReg<33, "flags">, DwarfRegNum<[33]>;
+// Internal code-generation sentinel for the M-type "no index" encoding.
+// Keeping it distinct from architectural R4 prevents a false data dependency
+// when R4 simultaneously carries an ABI argument.
+def NOIDX : SeaBirdReg<4, "noidx">;
 
 foreach I = 0-31 in {
   def V#I : SeaBirdReg<!add(I, 64), "v"#I>, DwarfRegNum<[!add(I, 64)]>;
@@ -24,4 +31,5 @@ def FPR128 : RegisterClass<"SeaBird", [f128], 128, (add (sequence "V%u", 0, 31))
 def VR128 : RegisterClass<"SeaBird", [v2i64], 128, (add (sequence "V%u", 0, 31))>;
 
 // ABI aliases are modeled as register variables in C++, not duplicate physical
-// registers. R7 is SP; R6 is the optional frame pointer; R27 is the link register.
+// registers. R7 is SP and R6 is the optional frame pointer. CALL/RET use a
+// memory return-address stack, so SeaBird has no architectural link register.

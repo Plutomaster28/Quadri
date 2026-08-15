@@ -1,6 +1,73 @@
 {
-  "schema_version": 1,
-  "architecture_version": "3.0-rc2",
+  "schema_version": 2,
+  "architecture_version": "3.2",
+  "performance_markers": {
+    "escape": 253,
+    "ordering": "FD marker-id precedes the optional FE primary prefix and the instruction opcode; exactly zero or one marker is permitted per instruction.",
+    "unknown_id_behavior": "INVALID_OP before instruction decode or any architectural modification.",
+    "markers": [
+      {
+        "id": 1,
+        "name": "assume",
+        "applicability": "Memory-accessing instructions.",
+        "semantics": "The compiler expects ordinary completion. All standard faults, ordering, and recovery behavior remain unchanged."
+      },
+      {
+        "id": 2,
+        "name": "likely",
+        "applicability": "Conditional control-flow instructions.",
+        "semantics": "The taken edge is expected to be hot."
+      },
+      {
+        "id": 3,
+        "name": "unlikely",
+        "applicability": "Conditional control-flow instructions.",
+        "semantics": "The taken edge is expected to be cold."
+      },
+      {
+        "id": 4,
+        "name": "stream",
+        "applicability": "Memory-reading or memory-writing instructions.",
+        "semantics": "The accessed cache lines are expected to have little near-term reuse."
+      },
+      {
+        "id": 5,
+        "name": "prefetch",
+        "applicability": "Memory-reading instructions.",
+        "semantics": "The access is expected soon enough that an implementation may initiate translation or cache activity early; the instruction itself still executes normally."
+      },
+      {
+        "id": 6,
+        "name": "temporary",
+        "applicability": "Instructions that produce a register result.",
+        "semantics": "The produced value is expected to have a short live range."
+      },
+      {
+        "id": 7,
+        "name": "persistent",
+        "applicability": "Instructions that produce a register result.",
+        "semantics": "The produced value is expected to have a long live range."
+      },
+      {
+        "id": 8,
+        "name": "independent",
+        "applicability": "Non-serializing instructions.",
+        "semantics": "Alias analysis found no dependency on adjacent independently marked instructions; implementations must preserve architectural dependencies regardless."
+      },
+      {
+        "id": 9,
+        "name": "reuse",
+        "applicability": "CALL and CALLA.",
+        "semantics": "The logical call and window transition are unchanged; an implementation may reuse resident physical backing when it can prove the architectural window remains isolated."
+      },
+      {
+        "id": 10,
+        "name": "leaf",
+        "applicability": "CALL and CALLA.",
+        "semantics": "Software expects the destination not to perform a windowed call. The logical window transition is unchanged and the hint may be ignored."
+      }
+    ]
+  },
   "instructions": [
     {
       "id": "SB-BASE-MOV-001-AE65A4",
@@ -40,7 +107,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1368
+      "source_line": 1447
     },
     {
       "id": "SB-BASE-MOVI-001-362505",
@@ -80,7 +147,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1369
+      "source_line": 1448
     },
     {
       "id": "SB-BASE-MOVZX-001-8F1BE2",
@@ -120,7 +187,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1370
+      "source_line": 1449
     },
     {
       "id": "SB-BASE-MOVSX-001-32DF3A",
@@ -160,7 +227,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1371
+      "source_line": 1450
     },
     {
       "id": "SB-BASE-MOVHI-001-552437",
@@ -201,7 +268,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1372
+      "source_line": 1451
     },
     {
       "id": "SB-BASE-MOVLO-001-222869",
@@ -241,7 +308,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1373
+      "source_line": 1452
     },
     {
       "id": "SB-BASE-MOVSWP-001-66D12C",
@@ -281,7 +348,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1374
+      "source_line": 1453
     },
     {
       "id": "SB-BASE-LD-001-4E0B76",
@@ -325,7 +392,7 @@
         "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 1375
+      "source_line": 1454
     },
     {
       "id": "SB-BASE-ST-001-F0201A",
@@ -369,7 +436,7 @@
         "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 1376
+      "source_line": 1455
     },
     {
       "id": "SB-BASE-LDI-001-9541F9",
@@ -412,7 +479,7 @@
         "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 1377
+      "source_line": 1456
     },
     {
       "id": "SB-BASE-LDB-001-C8AEE5",
@@ -455,7 +522,7 @@
         "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 1378
+      "source_line": 1457
     },
     {
       "id": "SB-BASE-LDH-001-CFF238",
@@ -498,7 +565,7 @@
         "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 1379
+      "source_line": 1458
     },
     {
       "id": "SB-BASE-LDW-001-12BDCD",
@@ -541,7 +608,7 @@
         "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 1380
+      "source_line": 1459
     },
     {
       "id": "SB-BASE-LDQ-001-9F083E",
@@ -584,7 +651,7 @@
         "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 1381
+      "source_line": 1460
     },
     {
       "id": "SB-BASE-STB-001-689416",
@@ -627,7 +694,7 @@
         "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 1382
+      "source_line": 1461
     },
     {
       "id": "SB-BASE-STH-001-F5DC8A",
@@ -670,7 +737,7 @@
         "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 1383
+      "source_line": 1462
     },
     {
       "id": "SB-BASE-STW-001-7E9144",
@@ -713,7 +780,7 @@
         "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 1384
+      "source_line": 1463
     },
     {
       "id": "SB-BASE-STQ-001-B0B6A1",
@@ -756,7 +823,7 @@
         "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 1385
+      "source_line": 1464
     },
     {
       "id": "SB-BASE-LDP-001-731431",
@@ -802,7 +869,7 @@
         "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 1386
+      "source_line": 1465
     },
     {
       "id": "SB-BASE-STP-001-96D7CC",
@@ -848,7 +915,7 @@
         "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 1387
+      "source_line": 1466
     },
     {
       "id": "SB-BASE-LEA-001-FCF6C3",
@@ -891,7 +958,7 @@
         "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 1388
+      "source_line": 1467
     },
     {
       "id": "SB-BASE-LEAS-001-133BB7",
@@ -934,7 +1001,7 @@
         "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 1389
+      "source_line": 1468
     },
     {
       "id": "SB-BASE-XCHG-001-FD62CB",
@@ -977,7 +1044,7 @@
         "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 1390
+      "source_line": 1469
     },
     {
       "id": "SB-BASE-ADD-001-B7D114",
@@ -1019,7 +1086,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1402
+      "source_line": 1481
     },
     {
       "id": "SB-BASE-ADDI-001-1CAA92",
@@ -1061,7 +1128,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1403
+      "source_line": 1482
     },
     {
       "id": "SB-BASE-SUB-001-8261ED",
@@ -1103,7 +1170,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1404
+      "source_line": 1483
     },
     {
       "id": "SB-BASE-SUBI-001-CF02D7",
@@ -1145,7 +1212,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1405
+      "source_line": 1484
     },
     {
       "id": "SB-BASE-MUL-001-E5AD4A",
@@ -1187,7 +1254,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1406
+      "source_line": 1485
     },
     {
       "id": "SB-BASE-MULI-001-53512D",
@@ -1229,7 +1296,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1407
+      "source_line": 1486
     },
     {
       "id": "SB-BASE-DIV-001-539731",
@@ -1271,7 +1338,7 @@
         "DIV_ZERO or floating-point divide-by-zero before destination write"
       ],
       "status": "normative",
-      "source_line": 1408
+      "source_line": 1487
     },
     {
       "id": "SB-BASE-DIVI-001-B111EF",
@@ -1314,7 +1381,7 @@
         "DIV_ZERO or floating-point divide-by-zero before destination write"
       ],
       "status": "normative",
-      "source_line": 1409
+      "source_line": 1488
     },
     {
       "id": "SB-BASE-MOD-001-1E12B8",
@@ -1356,7 +1423,7 @@
         "DIV_ZERO or floating-point divide-by-zero before destination write"
       ],
       "status": "normative",
-      "source_line": 1410
+      "source_line": 1489
     },
     {
       "id": "SB-BASE-MODI-001-1AC6C8",
@@ -1399,7 +1466,7 @@
         "DIV_ZERO or floating-point divide-by-zero before destination write"
       ],
       "status": "normative",
-      "source_line": 1411
+      "source_line": 1490
     },
     {
       "id": "SB-BASE-NEG-001-9E141C",
@@ -1439,7 +1506,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1412
+      "source_line": 1491
     },
     {
       "id": "SB-BASE-INC-001-CBAFBD",
@@ -1479,7 +1546,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1413
+      "source_line": 1492
     },
     {
       "id": "SB-BASE-DEC-001-CCFA82",
@@ -1519,7 +1586,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1414
+      "source_line": 1493
     },
     {
       "id": "SB-BASE-MULH-001-A25A70",
@@ -1560,7 +1627,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1415
+      "source_line": 1494
     },
     {
       "id": "SB-BASE-UMUL-001-9A9BDA",
@@ -1600,7 +1667,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1416
+      "source_line": 1495
     },
     {
       "id": "SB-BASE-UDIV-001-A261AE",
@@ -1642,7 +1709,7 @@
         "DIV_ZERO or floating-point divide-by-zero before destination write"
       ],
       "status": "normative",
-      "source_line": 1417
+      "source_line": 1496
     },
     {
       "id": "SB-BASE-ADDS-001-45CF43",
@@ -1682,7 +1749,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1418
+      "source_line": 1497
     },
     {
       "id": "SB-BASE-ADDU-001-B36D34",
@@ -1722,7 +1789,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1419
+      "source_line": 1498
     },
     {
       "id": "SB-BASE-SUBS-001-3B158A",
@@ -1762,7 +1829,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1420
+      "source_line": 1499
     },
     {
       "id": "SB-BASE-SUBU-001-0303E2",
@@ -1802,7 +1869,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1421
+      "source_line": 1500
     },
     {
       "id": "SB-BASE-ABS-001-A94D39",
@@ -1842,7 +1909,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1422
+      "source_line": 1501
     },
     {
       "id": "SB-BASE-CLZ-001-3BEF53",
@@ -1882,7 +1949,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1423
+      "source_line": 1502
     },
     {
       "id": "SB-BASE-CTZ-001-666F7E",
@@ -1922,7 +1989,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1424
+      "source_line": 1503
     },
     {
       "id": "SB-BASE-POPC-001-16C8DB",
@@ -1962,7 +2029,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1425
+      "source_line": 1504
     },
     {
       "id": "SB-BASE-AND-001-78B311",
@@ -2004,7 +2071,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1437
+      "source_line": 1516
     },
     {
       "id": "SB-BASE-OR-001-ED8B5A",
@@ -2046,7 +2113,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1438
+      "source_line": 1517
     },
     {
       "id": "SB-BASE-XOR-001-3731DA",
@@ -2088,7 +2155,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1439
+      "source_line": 1518
     },
     {
       "id": "SB-BASE-NOT-001-7B0728",
@@ -2128,7 +2195,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1440
+      "source_line": 1519
     },
     {
       "id": "SB-BASE-NAND-001-8C4691",
@@ -2170,7 +2237,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1441
+      "source_line": 1520
     },
     {
       "id": "SB-BASE-NOR-001-A42487",
@@ -2212,7 +2279,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1442
+      "source_line": 1521
     },
     {
       "id": "SB-BASE-XNOR-001-05E022",
@@ -2254,7 +2321,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1443
+      "source_line": 1522
     },
     {
       "id": "SB-BASE-SHL-001-C554FA",
@@ -2295,7 +2362,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1444
+      "source_line": 1523
     },
     {
       "id": "SB-BASE-SHR-001-681B74",
@@ -2336,7 +2403,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1445
+      "source_line": 1524
     },
     {
       "id": "SB-BASE-SAR-001-5FB392",
@@ -2377,7 +2444,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1446
+      "source_line": 1525
     },
     {
       "id": "SB-BASE-ROL-001-E2ACF2",
@@ -2418,7 +2485,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1447
+      "source_line": 1526
     },
     {
       "id": "SB-BASE-ROR-001-C967F5",
@@ -2459,7 +2526,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1448
+      "source_line": 1527
     },
     {
       "id": "SB-BASE-BSET-001-8E09CE",
@@ -2500,7 +2567,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1449
+      "source_line": 1528
     },
     {
       "id": "SB-BASE-BCLR-001-CAE2EB",
@@ -2541,7 +2608,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1450
+      "source_line": 1529
     },
     {
       "id": "SB-BASE-BTOG-001-4188DF",
@@ -2582,7 +2649,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1451
+      "source_line": 1530
     },
     {
       "id": "SB-BASE-BTST-001-17FC5A",
@@ -2623,7 +2690,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1452
+      "source_line": 1531
     },
     {
       "id": "SB-BASE-MASK-001-4CE3CD",
@@ -2663,7 +2730,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1453
+      "source_line": 1532
     },
     {
       "id": "SB-BASE-EXT-001-A72C1F",
@@ -2704,7 +2771,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1454
+      "source_line": 1533
     },
     {
       "id": "SB-BASE-PDEP-001-EDEA14",
@@ -2744,7 +2811,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1466
+      "source_line": 1545
     },
     {
       "id": "SB-BASE-PEXT-001-B9A827",
@@ -2784,7 +2851,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1467
+      "source_line": 1546
     },
     {
       "id": "SB-BASE-LZCNT-001-B49082",
@@ -2824,7 +2891,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1468
+      "source_line": 1547
     },
     {
       "id": "SB-BASE-TZCNT-001-623794",
@@ -2864,7 +2931,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1469
+      "source_line": 1548
     },
     {
       "id": "SB-BASE-POPCNT-001-2A468E",
@@ -2904,7 +2971,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1470
+      "source_line": 1549
     },
     {
       "id": "SB-BASE-BEXTR-001-5A288C",
@@ -2945,7 +3012,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1471
+      "source_line": 1550
     },
     {
       "id": "SB-BASE-BINSERT-001-957ECA",
@@ -2986,7 +3053,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1472
+      "source_line": 1551
     },
     {
       "id": "SB-BASE-BLSI-001-F132CF",
@@ -3026,7 +3093,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1473
+      "source_line": 1552
     },
     {
       "id": "SB-BASE-BLSMSK-001-E7B720",
@@ -3066,7 +3133,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1474
+      "source_line": 1553
     },
     {
       "id": "SB-BASE-BLSR-001-029C71",
@@ -3106,7 +3173,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1475
+      "source_line": 1554
     },
     {
       "id": "SB-BASE-RORX-001-1F09FE",
@@ -3146,7 +3213,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1476
+      "source_line": 1555
     },
     {
       "id": "SB-BASE-SHLX-001-03CE27",
@@ -3186,7 +3253,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1477
+      "source_line": 1556
     },
     {
       "id": "SB-BASE-SHRX-001-62E5FA",
@@ -3226,7 +3293,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1478
+      "source_line": 1557
     },
     {
       "id": "SB-BASE-ANDN-001-BE23BB",
@@ -3266,7 +3333,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1479
+      "source_line": 1558
     },
     {
       "id": "SB-BASE-BZHI-001-45BCF6",
@@ -3307,7 +3374,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1480
+      "source_line": 1559
     },
     {
       "id": "SB-BASE-TZCNTV-001-F0FD6C",
@@ -3347,7 +3414,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1481
+      "source_line": 1560
     },
     {
       "id": "SB-BASE-CMP-001-5B559E",
@@ -3387,7 +3454,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1493
+      "source_line": 1572
     },
     {
       "id": "SB-BASE-CMPI-001-FEAA63",
@@ -3427,7 +3494,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1494
+      "source_line": 1573
     },
     {
       "id": "SB-BASE-CMPS-001-3705B7",
@@ -3467,7 +3534,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1495
+      "source_line": 1574
     },
     {
       "id": "SB-BASE-CMPU-001-679F00",
@@ -3507,7 +3574,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1496
+      "source_line": 1575
     },
     {
       "id": "SB-BASE-TST-001-408E38",
@@ -3547,7 +3614,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1497
+      "source_line": 1576
     },
     {
       "id": "SB-BASE-TSTI-001-24289B",
@@ -3587,7 +3654,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1498
+      "source_line": 1577
     },
     {
       "id": "SB-BASE-MAX-001-00423A",
@@ -3627,7 +3694,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1499
+      "source_line": 1578
     },
     {
       "id": "SB-BASE-MIN-001-4227E9",
@@ -3667,7 +3734,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1500
+      "source_line": 1579
     },
     {
       "id": "SB-BASE-SLT-001-1CF708",
@@ -3707,7 +3774,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1501
+      "source_line": 1580
     },
     {
       "id": "SB-BASE-SGT-001-24AAE1",
@@ -3747,7 +3814,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1502
+      "source_line": 1581
     },
     {
       "id": "SB-BASE-JMP-001-122B35",
@@ -3787,7 +3854,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1514
+      "source_line": 1593
     },
     {
       "id": "SB-BASE-JMPA-001-DDC1B7",
@@ -3827,7 +3894,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1515
+      "source_line": 1594
     },
     {
       "id": "SB-BASE-CALL-001-424E5D",
@@ -3854,6 +3921,7 @@
       "operation": [
         "SP <- SP - pointer_bytes",
         "memory[SP, pointer_bytes] <- next_IP",
+        "if CR4.WINDOW_ENABLE then advance one logical register window",
         "IP <- next_IP + sign_extend(relative_displacement)"
       ],
       "flags": {
@@ -3864,12 +3932,15 @@
         "SF": "unchanged",
         "OF": "unchanged"
       },
-      "memory_order": "No memory access.",
+      "memory_order": "Ordinary TSO stack access using the active architectural stack pointer.",
       "exceptions": [
-        "INVALID_OP for malformed encoding or unavailable feature"
+        "INVALID_OP for malformed encoding or unavailable feature",
+        "GPF for non-canonical address",
+        "ALIGN_CHECK when required alignment is violated",
+        "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 1516
+      "source_line": 1595
     },
     {
       "id": "SB-BASE-CALLA-001-B411B0",
@@ -3894,9 +3965,11 @@
       ],
       "description": "uPUSH ret_addr; uJMP addr",
       "operation": [
+        "target <- absolute_target before any window transition",
         "SP <- SP - pointer_bytes",
         "memory[SP, pointer_bytes] <- next_IP",
-        "IP <- absolute_target"
+        "if CR4.WINDOW_ENABLE then advance one logical register window",
+        "IP <- target"
       ],
       "flags": {
         "CF": "unchanged",
@@ -3906,12 +3979,15 @@
         "SF": "unchanged",
         "OF": "unchanged"
       },
-      "memory_order": "No memory access.",
+      "memory_order": "Ordinary TSO stack access using the active architectural stack pointer.",
       "exceptions": [
-        "INVALID_OP for malformed encoding or unavailable feature"
+        "INVALID_OP for malformed encoding or unavailable feature",
+        "GPF for non-canonical address",
+        "ALIGN_CHECK when required alignment is violated",
+        "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 1517
+      "source_line": 1596
     },
     {
       "id": "SB-BASE-RET-001-33CD56",
@@ -3937,6 +4013,7 @@
       "description": "uPOP PC",
       "operation": [
         "target <- memory[SP, pointer_bytes]",
+        "if CR4.WINDOW_ENABLE then validate and restore the previous logical register window",
         "SP <- SP + pointer_bytes",
         "IP <- target"
       ],
@@ -3948,12 +4025,15 @@
         "SF": "unchanged",
         "OF": "unchanged"
       },
-      "memory_order": "No memory access.",
+      "memory_order": "Ordinary TSO stack access using the active architectural stack pointer.",
       "exceptions": [
-        "INVALID_OP for malformed encoding or unavailable feature"
+        "INVALID_OP for malformed encoding or unavailable feature",
+        "GPF for non-canonical address",
+        "ALIGN_CHECK when required alignment is violated",
+        "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 1518
+      "source_line": 1597
     },
     {
       "id": "SB-BASE-JE-001-EE49C5",
@@ -3993,7 +4073,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1519
+      "source_line": 1598
     },
     {
       "id": "SB-BASE-JNE-001-E2574A",
@@ -4033,7 +4113,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1520
+      "source_line": 1599
     },
     {
       "id": "SB-BASE-JG-001-3FDEF7",
@@ -4073,7 +4153,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1521
+      "source_line": 1600
     },
     {
       "id": "SB-BASE-JGE-001-91E832",
@@ -4113,7 +4193,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1522
+      "source_line": 1601
     },
     {
       "id": "SB-BASE-JL-001-0EF1CD",
@@ -4153,7 +4233,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1523
+      "source_line": 1602
     },
     {
       "id": "SB-BASE-JLE-001-45C845",
@@ -4193,7 +4273,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1524
+      "source_line": 1603
     },
     {
       "id": "SB-BASE-JC-001-C050DC",
@@ -4233,7 +4313,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1525
+      "source_line": 1604
     },
     {
       "id": "SB-BASE-JNC-001-27F7A3",
@@ -4273,7 +4353,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1526
+      "source_line": 1605
     },
     {
       "id": "SB-BASE-JO-001-E4BE06",
@@ -4313,7 +4393,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1527
+      "source_line": 1606
     },
     {
       "id": "SB-BASE-JNO-001-9C598E",
@@ -4353,7 +4433,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1528
+      "source_line": 1607
     },
     {
       "id": "SB-BASE-JS-001-5DDF24",
@@ -4393,7 +4473,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1529
+      "source_line": 1608
     },
     {
       "id": "SB-BASE-JNS-001-B8D5E8",
@@ -4433,7 +4513,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1530
+      "source_line": 1609
     },
     {
       "id": "SB-BASE-JZR-001-17BA35",
@@ -4473,7 +4553,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1531
+      "source_line": 1610
     },
     {
       "id": "SB-BASE-JNZR-001-7A15A9",
@@ -4513,7 +4593,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1532
+      "source_line": 1611
     },
     {
       "id": "SB-BASE-BRR-001-6B89F0",
@@ -4553,7 +4633,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1533
+      "source_line": 1612
     },
     {
       "id": "SB-BASE-TRAP-001-9D8292",
@@ -4593,7 +4673,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1534
+      "source_line": 1613
     },
     {
       "id": "SB-BASE-YIELD-001-C75408",
@@ -4633,7 +4713,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1535
+      "source_line": 1614
     },
     {
       "id": "SB-BASE-PREFETCH-001-C477B1",
@@ -4668,15 +4748,12 @@
         "SF": "unchanged",
         "OF": "unchanged"
       },
-      "memory_order": "Ordinary TSO access unless the instruction entry states atomic or device ordering.",
+      "memory_order": "Non-binding cache hint; creates no memory-order edge and suppresses address, translation, and permission faults.",
       "exceptions": [
-        "INVALID_OP for malformed encoding or unavailable feature",
-        "GPF for non-canonical address",
-        "ALIGN_CHECK when required alignment is violated",
-        "PAGE_FAULT for translation or permission failure"
+        "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1547
+      "source_line": 1626
     },
     {
       "id": "SB-BASE-FLUSH-001-8F1203",
@@ -4711,7 +4788,7 @@
         "SF": "unchanged",
         "OF": "unchanged"
       },
-      "memory_order": "Ordinary TSO access unless the instruction entry states atomic or device ordering.",
+      "memory_order": "Cache-maintenance operation ordered after older accesses to the addressed line; use the required fence or ISYNC before relying on global visibility or refetch.",
       "exceptions": [
         "INVALID_OP for malformed encoding or unavailable feature",
         "GPF for non-canonical address",
@@ -4719,7 +4796,7 @@
         "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 1548
+      "source_line": 1627
     },
     {
       "id": "SB-BASE-INVIC-001-FB46F2",
@@ -4754,7 +4831,7 @@
         "SF": "unchanged",
         "OF": "unchanged"
       },
-      "memory_order": "Ordinary TSO access unless the instruction entry states atomic or device ordering.",
+      "memory_order": "Cache-maintenance operation ordered after older accesses to the addressed line; use the required fence or ISYNC before relying on global visibility or refetch.",
       "exceptions": [
         "INVALID_OP for malformed encoding or unavailable feature",
         "GPF when current privilege is insufficient",
@@ -4763,7 +4840,7 @@
         "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 1549
+      "source_line": 1628
     },
     {
       "id": "SB-BASE-INVDC-001-E7D848",
@@ -4798,7 +4875,7 @@
         "SF": "unchanged",
         "OF": "unchanged"
       },
-      "memory_order": "Ordinary TSO access unless the instruction entry states atomic or device ordering.",
+      "memory_order": "Cache-maintenance operation ordered after older accesses to the addressed line; use the required fence or ISYNC before relying on global visibility or refetch.",
       "exceptions": [
         "INVALID_OP for malformed encoding or unavailable feature",
         "GPF when current privilege is insufficient",
@@ -4807,7 +4884,7 @@
         "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 1550
+      "source_line": 1629
     },
     {
       "id": "SB-BASE-LDX-001-2D4E41",
@@ -4852,7 +4929,7 @@
         "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 1551
+      "source_line": 1630
     },
     {
       "id": "SB-BASE-STX-001-337C57",
@@ -4897,7 +4974,7 @@
         "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 1552
+      "source_line": 1631
     },
     {
       "id": "SB-BASE-LDN-001-4E2AD0",
@@ -4942,7 +5019,7 @@
         "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 1553
+      "source_line": 1632
     },
     {
       "id": "SB-BASE-STN-001-103DDC",
@@ -4987,7 +5064,7 @@
         "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 1554
+      "source_line": 1633
     },
     {
       "id": "SB-BASE-MOVM-001-443B8E",
@@ -5027,7 +5104,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "reserved",
-      "source_line": 1555
+      "source_line": 1634
     },
     {
       "id": "SB-BASE-CPYB-001-0D2EF2",
@@ -5063,12 +5140,15 @@
         "SF": "unchanged",
         "OF": "unchanged"
       },
-      "memory_order": "No memory access.",
+      "memory_order": "Restartable sequence of ordinary TSO accesses in increasing element order; completed stores remain visible if a later element faults.",
       "exceptions": [
-        "INVALID_OP for malformed encoding or unavailable feature"
+        "INVALID_OP for malformed encoding or unavailable feature",
+        "GPF for non-canonical address",
+        "ALIGN_CHECK when required alignment is violated",
+        "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 1556
+      "source_line": 1635
     },
     {
       "id": "SB-BASE-CPYW-001-9ED267",
@@ -5104,12 +5184,15 @@
         "SF": "unchanged",
         "OF": "unchanged"
       },
-      "memory_order": "No memory access.",
+      "memory_order": "Restartable sequence of ordinary TSO accesses in increasing element order; completed stores remain visible if a later element faults.",
       "exceptions": [
-        "INVALID_OP for malformed encoding or unavailable feature"
+        "INVALID_OP for malformed encoding or unavailable feature",
+        "GPF for non-canonical address",
+        "ALIGN_CHECK when required alignment is violated",
+        "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 1557
+      "source_line": 1636
     },
     {
       "id": "SB-BASE-MEMFILL-001-72D7FA",
@@ -5145,12 +5228,15 @@
         "SF": "unchanged",
         "OF": "unchanged"
       },
-      "memory_order": "No memory access.",
+      "memory_order": "Restartable sequence of ordinary TSO accesses in increasing element order; completed stores remain visible if a later element faults.",
       "exceptions": [
-        "INVALID_OP for malformed encoding or unavailable feature"
+        "INVALID_OP for malformed encoding or unavailable feature",
+        "GPF for non-canonical address",
+        "ALIGN_CHECK when required alignment is violated",
+        "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 1558
+      "source_line": 1637
     },
     {
       "id": "SB-BASE-LOCK-001-07605A",
@@ -5193,7 +5279,7 @@
         "PAGE_FAULT for translation or permission failure"
       ],
       "status": "reserved",
-      "source_line": 1570
+      "source_line": 1649
     },
     {
       "id": "SB-BASE-XCHG-002-CDFAC7",
@@ -5236,7 +5322,7 @@
         "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 1571
+      "source_line": 1650
     },
     {
       "id": "SB-BASE-CMPXCHG-001-B83EBB",
@@ -5282,7 +5368,7 @@
         "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 1572
+      "source_line": 1651
     },
     {
       "id": "SB-BASE-ATADD-001-1E18C1",
@@ -5326,7 +5412,7 @@
         "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 1573
+      "source_line": 1652
     },
     {
       "id": "SB-BASE-ATSUB-001-16C451",
@@ -5370,7 +5456,7 @@
         "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 1574
+      "source_line": 1653
     },
     {
       "id": "SB-BASE-ATAND-001-470E22",
@@ -5414,7 +5500,7 @@
         "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 1575
+      "source_line": 1654
     },
     {
       "id": "SB-BASE-ATOR-001-A39363",
@@ -5458,7 +5544,7 @@
         "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 1576
+      "source_line": 1655
     },
     {
       "id": "SB-BASE-ATXOR-001-ED0CAB",
@@ -5502,7 +5588,7 @@
         "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 1577
+      "source_line": 1656
     },
     {
       "id": "SB-BASE-LL-001-E14FDB",
@@ -5546,7 +5632,7 @@
         "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 1578
+      "source_line": 1657
     },
     {
       "id": "SB-BASE-SC-001-BA5AF7",
@@ -5591,7 +5677,7 @@
         "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 1579
+      "source_line": 1658
     },
     {
       "id": "SB-BASE-FENCE-001-402CAB",
@@ -5634,7 +5720,7 @@
         "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 1580
+      "source_line": 1659
     },
     {
       "id": "SB-BASE-LFENCE-001-F195F0",
@@ -5677,7 +5763,7 @@
         "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 1581
+      "source_line": 1660
     },
     {
       "id": "SB-BASE-SFENCE-001-49FF06",
@@ -5720,7 +5806,7 @@
         "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 1582
+      "source_line": 1661
     },
     {
       "id": "SB-BASE-MFENCE-001-706F5A",
@@ -5763,7 +5849,7 @@
         "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 1583
+      "source_line": 1662
     },
     {
       "id": "SB-BASE-LOCKNOP-001-56B3A3",
@@ -5806,7 +5892,7 @@
         "PAGE_FAULT for translation or permission failure"
       ],
       "status": "reserved",
-      "source_line": 1584
+      "source_line": 1663
     },
     {
       "id": "SB-BASE-XCHG128-001-5888A3",
@@ -5850,7 +5936,7 @@
         "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 1585
+      "source_line": 1664
     },
     {
       "id": "SB-BASE-XBEGIN-001-26F343",
@@ -5892,7 +5978,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1597
+      "source_line": 1676
     },
     {
       "id": "SB-BASE-XBEGINA-001-272A9D",
@@ -5934,7 +6020,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1598
+      "source_line": 1677
     },
     {
       "id": "SB-BASE-XEND-001-A12213",
@@ -5975,7 +6061,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1599
+      "source_line": 1678
     },
     {
       "id": "SB-BASE-XABORT-001-3963FA",
@@ -6016,7 +6102,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1600
+      "source_line": 1679
     },
     {
       "id": "SB-BASE-XABORT-002-C55CE0",
@@ -6057,7 +6143,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1601
+      "source_line": 1680
     },
     {
       "id": "SB-BASE-XTEST-001-82A66D",
@@ -6097,7 +6183,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1602
+      "source_line": 1681
     },
     {
       "id": "SB-BASE-XRESUME-001-16218A",
@@ -6137,7 +6223,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "reserved",
-      "source_line": 1603
+      "source_line": 1682
     },
     {
       "id": "SB-BASE-XSTATUS-001-BE699F",
@@ -6177,7 +6263,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1604
+      "source_line": 1683
     },
     {
       "id": "SB-BASE-HLT-001-81C05B",
@@ -6218,7 +6304,7 @@
         "GPF when current privilege is insufficient"
       ],
       "status": "normative",
-      "source_line": 1616
+      "source_line": 1695
     },
     {
       "id": "SB-BASE-RESET-001-7C7BA0",
@@ -6259,7 +6345,7 @@
         "GPF when current privilege is insufficient"
       ],
       "status": "normative",
-      "source_line": 1617
+      "source_line": 1696
     },
     {
       "id": "SB-BASE-RDCR-001-3D89DA",
@@ -6309,7 +6395,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1618
+      "source_line": 1697
     },
     {
       "id": "SB-BASE-WRCR-001-A353F5",
@@ -6360,7 +6446,7 @@
         "GPF when current privilege is insufficient"
       ],
       "status": "normative",
-      "source_line": 1619
+      "source_line": 1698
     },
     {
       "id": "SB-BASE-SYSCALL-001-9DDB5A",
@@ -6402,7 +6488,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1620
+      "source_line": 1699
     },
     {
       "id": "SB-BASE-SYSRET-001-F551FE",
@@ -6444,7 +6530,7 @@
         "GPF when current privilege is insufficient"
       ],
       "status": "normative",
-      "source_line": 1621
+      "source_line": 1700
     },
     {
       "id": "SB-BASE-IRET-001-11165E",
@@ -6486,7 +6572,7 @@
         "GPF when current privilege is insufficient"
       ],
       "status": "normative",
-      "source_line": 1622
+      "source_line": 1701
     },
     {
       "id": "SB-BASE-CLI-001-8B0281",
@@ -6527,7 +6613,7 @@
         "GPF when current privilege is insufficient"
       ],
       "status": "normative",
-      "source_line": 1623
+      "source_line": 1702
     },
     {
       "id": "SB-BASE-STI-001-2937EF",
@@ -6571,7 +6657,7 @@
         "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 1624
+      "source_line": 1703
     },
     {
       "id": "SB-BASE-WFI-001-349384",
@@ -6611,7 +6697,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1625
+      "source_line": 1704
     },
     {
       "id": "SB-BASE-RDTIME-001-24D30A",
@@ -6651,7 +6737,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1626
+      "source_line": 1705
     },
     {
       "id": "SB-BASE-RDTS-001-93A2E4",
@@ -6691,7 +6777,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1627
+      "source_line": 1706
     },
     {
       "id": "SB-BASE-SLEEP-001-2F358C",
@@ -6732,7 +6818,7 @@
         "GPF when current privilege is insufficient"
       ],
       "status": "normative",
-      "source_line": 1628
+      "source_line": 1707
     },
     {
       "id": "SB-BASE-GETPID-001-4B2542",
@@ -6772,7 +6858,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1629
+      "source_line": 1708
     },
     {
       "id": "SB-BASE-GETTID-001-CB4501",
@@ -6812,7 +6898,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1630
+      "source_line": 1709
     },
     {
       "id": "SB-BASE-PUSH-001-A42D46",
@@ -6848,12 +6934,15 @@
         "SF": "unchanged",
         "OF": "unchanged"
       },
-      "memory_order": "No memory access.",
+      "memory_order": "Ordinary TSO stack access using the active architectural stack pointer.",
       "exceptions": [
-        "INVALID_OP for malformed encoding or unavailable feature"
+        "INVALID_OP for malformed encoding or unavailable feature",
+        "GPF for non-canonical address",
+        "ALIGN_CHECK when required alignment is violated",
+        "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 1646
+      "source_line": 1725
     },
     {
       "id": "SB-BASE-POP-001-C68869",
@@ -6890,12 +6979,15 @@
         "SF": "unchanged",
         "OF": "unchanged"
       },
-      "memory_order": "No memory access.",
+      "memory_order": "Ordinary TSO stack access using the active architectural stack pointer.",
       "exceptions": [
-        "INVALID_OP for malformed encoding or unavailable feature"
+        "INVALID_OP for malformed encoding or unavailable feature",
+        "GPF for non-canonical address",
+        "ALIGN_CHECK when required alignment is violated",
+        "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 1647
+      "source_line": 1726
     },
     {
       "id": "SB-BASE-PUSHA-001-B28FD0",
@@ -6933,12 +7025,15 @@
         "SF": "unchanged",
         "OF": "unchanged"
       },
-      "memory_order": "No memory access.",
+      "memory_order": "Ordinary TSO stack access using the active architectural stack pointer.",
       "exceptions": [
-        "INVALID_OP for malformed encoding or unavailable feature"
+        "INVALID_OP for malformed encoding or unavailable feature",
+        "GPF for non-canonical address",
+        "ALIGN_CHECK when required alignment is violated",
+        "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 1648
+      "source_line": 1727
     },
     {
       "id": "SB-BASE-POPA-001-00F4E4",
@@ -6974,12 +7069,15 @@
         "SF": "unchanged",
         "OF": "unchanged"
       },
-      "memory_order": "No memory access.",
+      "memory_order": "Ordinary TSO stack access using the active architectural stack pointer.",
       "exceptions": [
-        "INVALID_OP for malformed encoding or unavailable feature"
+        "INVALID_OP for malformed encoding or unavailable feature",
+        "GPF for non-canonical address",
+        "ALIGN_CHECK when required alignment is violated",
+        "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 1649
+      "source_line": 1728
     },
     {
       "id": "SB-BASE-ENTER-001-E37018",
@@ -7017,12 +7115,15 @@
         "SF": "unchanged",
         "OF": "unchanged"
       },
-      "memory_order": "No memory access.",
+      "memory_order": "Ordinary TSO stack access using the active architectural stack pointer.",
       "exceptions": [
-        "INVALID_OP for malformed encoding or unavailable feature"
+        "INVALID_OP for malformed encoding or unavailable feature",
+        "GPF for non-canonical address",
+        "ALIGN_CHECK when required alignment is violated",
+        "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 1650
+      "source_line": 1729
     },
     {
       "id": "SB-BASE-LEAVE-001-263A8F",
@@ -7059,12 +7160,15 @@
         "SF": "unchanged",
         "OF": "unchanged"
       },
-      "memory_order": "No memory access.",
+      "memory_order": "Ordinary TSO stack access using the active architectural stack pointer.",
       "exceptions": [
-        "INVALID_OP for malformed encoding or unavailable feature"
+        "INVALID_OP for malformed encoding or unavailable feature",
+        "GPF for non-canonical address",
+        "ALIGN_CHECK when required alignment is violated",
+        "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 1651
+      "source_line": 1730
     },
     {
       "id": "SB-BASE-PUSHF-001-DB5486",
@@ -7100,12 +7204,15 @@
         "SF": "unchanged",
         "OF": "unchanged"
       },
-      "memory_order": "No memory access.",
+      "memory_order": "Ordinary TSO stack access using the active architectural stack pointer.",
       "exceptions": [
-        "INVALID_OP for malformed encoding or unavailable feature"
+        "INVALID_OP for malformed encoding or unavailable feature",
+        "GPF for non-canonical address",
+        "ALIGN_CHECK when required alignment is violated",
+        "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 1652
+      "source_line": 1731
     },
     {
       "id": "SB-BASE-POPF-001-397FCF",
@@ -7143,12 +7250,15 @@
         "SF": "unchanged",
         "OF": "unchanged"
       },
-      "memory_order": "No memory access.",
+      "memory_order": "Ordinary TSO stack access using the active architectural stack pointer.",
       "exceptions": [
-        "INVALID_OP for malformed encoding or unavailable feature"
+        "INVALID_OP for malformed encoding or unavailable feature",
+        "GPF for non-canonical address",
+        "ALIGN_CHECK when required alignment is violated",
+        "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 1653
+      "source_line": 1732
     },
     {
       "id": "SB-BASE-PUSHQ-001-BA4D9A",
@@ -7184,12 +7294,15 @@
         "SF": "unchanged",
         "OF": "unchanged"
       },
-      "memory_order": "No memory access.",
+      "memory_order": "Ordinary TSO stack access using the active architectural stack pointer.",
       "exceptions": [
-        "INVALID_OP for malformed encoding or unavailable feature"
+        "INVALID_OP for malformed encoding or unavailable feature",
+        "GPF for non-canonical address",
+        "ALIGN_CHECK when required alignment is violated",
+        "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 1654
+      "source_line": 1733
     },
     {
       "id": "SB-BASE-POPQ-001-F4EB1E",
@@ -7226,12 +7339,15 @@
         "SF": "unchanged",
         "OF": "unchanged"
       },
-      "memory_order": "No memory access.",
+      "memory_order": "Ordinary TSO stack access using the active architectural stack pointer.",
       "exceptions": [
-        "INVALID_OP for malformed encoding or unavailable feature"
+        "INVALID_OP for malformed encoding or unavailable feature",
+        "GPF for non-canonical address",
+        "ALIGN_CHECK when required alignment is violated",
+        "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 1655
+      "source_line": 1734
     },
     {
       "id": "SB-BASE-VADD-001-86D518",
@@ -7274,7 +7390,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1667
+      "source_line": 1746
     },
     {
       "id": "SB-BASE-VSUB-001-0B29E7",
@@ -7317,7 +7433,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1668
+      "source_line": 1747
     },
     {
       "id": "SB-BASE-VMUL-001-89C2AB",
@@ -7360,7 +7476,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1669
+      "source_line": 1748
     },
     {
       "id": "SB-BASE-VDIV-001-C6CFF7",
@@ -7404,7 +7520,7 @@
         "DIV_ZERO or floating-point divide-by-zero before destination write"
       ],
       "status": "normative",
-      "source_line": 1670
+      "source_line": 1749
     },
     {
       "id": "SB-BASE-VAND-001-B0692D",
@@ -7447,7 +7563,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1671
+      "source_line": 1750
     },
     {
       "id": "SB-BASE-VOR-001-D44337",
@@ -7490,7 +7606,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1672
+      "source_line": 1751
     },
     {
       "id": "SB-BASE-VXOR-001-8B1B79",
@@ -7533,7 +7649,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1673
+      "source_line": 1752
     },
     {
       "id": "SB-BASE-VSHL-001-F13925",
@@ -7576,7 +7692,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1674
+      "source_line": 1753
     },
     {
       "id": "SB-BASE-VSHR-001-3B288C",
@@ -7619,7 +7735,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1675
+      "source_line": 1754
     },
     {
       "id": "SB-BASE-VDUP-001-5130DC",
@@ -7660,7 +7776,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1676
+      "source_line": 1755
     },
     {
       "id": "SB-BASE-VLD-001-48C7B3",
@@ -7705,7 +7821,7 @@
         "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 1677
+      "source_line": 1756
     },
     {
       "id": "SB-BASE-VST-001-2CC67D",
@@ -7749,7 +7865,7 @@
         "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 1678
+      "source_line": 1757
     },
     {
       "id": "SB-BASE-VABS-001-39CA62",
@@ -7792,7 +7908,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1679
+      "source_line": 1758
     },
     {
       "id": "SB-BASE-VMAX-001-CEA1D0",
@@ -7835,7 +7951,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1680
+      "source_line": 1759
     },
     {
       "id": "SB-BASE-VMIN-001-D5B21F",
@@ -7878,7 +7994,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 1681
+      "source_line": 1760
     },
     {
       "id": "SB-BASE-FADD-001-F2F7A4",
@@ -7922,7 +8038,7 @@
         "FPU_ERROR or SIMD_ERROR for an unmasked IEEE exception"
       ],
       "status": "normative",
-      "source_line": 1693
+      "source_line": 1772
     },
     {
       "id": "SB-BASE-FSUB-001-F34F11",
@@ -7966,7 +8082,7 @@
         "FPU_ERROR or SIMD_ERROR for an unmasked IEEE exception"
       ],
       "status": "normative",
-      "source_line": 1694
+      "source_line": 1773
     },
     {
       "id": "SB-BASE-FMUL-001-8BDFA6",
@@ -8010,7 +8126,7 @@
         "FPU_ERROR or SIMD_ERROR for an unmasked IEEE exception"
       ],
       "status": "normative",
-      "source_line": 1695
+      "source_line": 1774
     },
     {
       "id": "SB-BASE-FDIV-001-4BD6F4",
@@ -8055,7 +8171,7 @@
         "FPU_ERROR or SIMD_ERROR for an unmasked IEEE exception"
       ],
       "status": "normative",
-      "source_line": 1696
+      "source_line": 1775
     },
     {
       "id": "SB-BASE-FSQRT-001-47AFE5",
@@ -8099,7 +8215,7 @@
         "FPU_ERROR or SIMD_ERROR for an unmasked IEEE exception"
       ],
       "status": "normative",
-      "source_line": 1697
+      "source_line": 1776
     },
     {
       "id": "SB-BASE-FCMP-001-D67F55",
@@ -8142,7 +8258,7 @@
         "FPU_ERROR or SIMD_ERROR for an unmasked IEEE exception"
       ],
       "status": "normative",
-      "source_line": 1698
+      "source_line": 1777
     },
     {
       "id": "SB-BASE-FCVTI-001-5611EE",
@@ -8183,7 +8299,7 @@
         "FPU_ERROR or SIMD_ERROR for an unmasked IEEE exception"
       ],
       "status": "normative",
-      "source_line": 1699
+      "source_line": 1778
     },
     {
       "id": "SB-BASE-FCVTS-001-AAB18C",
@@ -8208,7 +8324,7 @@
       ],
       "description": "Convert float Fd to integer Ra",
       "operation": [
-        "convert IEEE source to signed integer using FPCR rounding; invalid result raises or returns signed_min when masked"
+        "convert IEEE source to signed integer by truncation toward zero; invalid result raises or returns signed_min when masked"
       ],
       "flags": {
         "CF": "unchanged",
@@ -8224,7 +8340,7 @@
         "FPU_ERROR or SIMD_ERROR for an unmasked IEEE exception"
       ],
       "status": "normative",
-      "source_line": 1700
+      "source_line": 1779
     },
     {
       "id": "SB-BASE-FNEG-001-420048",
@@ -8268,7 +8384,7 @@
         "FPU_ERROR or SIMD_ERROR for an unmasked IEEE exception"
       ],
       "status": "normative",
-      "source_line": 1701
+      "source_line": 1780
     },
     {
       "id": "SB-BASE-FABS-001-7B16C1",
@@ -8312,7 +8428,7 @@
         "FPU_ERROR or SIMD_ERROR for an unmasked IEEE exception"
       ],
       "status": "normative",
-      "source_line": 1702
+      "source_line": 1781
     },
     {
       "id": "SB-FPX-FMADD-001-284B7B",
@@ -8358,7 +8474,7 @@
         "FPU_ERROR or SIMD_ERROR for an unmasked IEEE exception"
       ],
       "status": "normative",
-      "source_line": 1703
+      "source_line": 1782
     },
     {
       "id": "SB-FPX-FMSUB-001-AB7D05",
@@ -8404,7 +8520,7 @@
         "FPU_ERROR or SIMD_ERROR for an unmasked IEEE exception"
       ],
       "status": "normative",
-      "source_line": 1704
+      "source_line": 1783
     },
     {
       "id": "SB-FPX-FNMADD-001-7BA631",
@@ -8450,7 +8566,7 @@
         "FPU_ERROR or SIMD_ERROR for an unmasked IEEE exception"
       ],
       "status": "normative",
-      "source_line": 1705
+      "source_line": 1784
     },
     {
       "id": "SB-FPX-FNMSUB-001-4BC56E",
@@ -8496,7 +8612,7 @@
         "FPU_ERROR or SIMD_ERROR for an unmasked IEEE exception"
       ],
       "status": "normative",
-      "source_line": 1706
+      "source_line": 1785
     },
     {
       "id": "SB-FPX-FMIN-001-FB3760",
@@ -8542,7 +8658,7 @@
         "FPU_ERROR or SIMD_ERROR for an unmasked IEEE exception"
       ],
       "status": "normative",
-      "source_line": 1707
+      "source_line": 1786
     },
     {
       "id": "SB-FPX-FMAX-001-83292E",
@@ -8588,7 +8704,7 @@
         "FPU_ERROR or SIMD_ERROR for an unmasked IEEE exception"
       ],
       "status": "normative",
-      "source_line": 1708
+      "source_line": 1787
     },
     {
       "id": "SB-FPX-FRECIP-001-231DA0",
@@ -8634,7 +8750,7 @@
         "FPU_ERROR or SIMD_ERROR for an unmasked IEEE exception"
       ],
       "status": "normative",
-      "source_line": 1709
+      "source_line": 1788
     },
     {
       "id": "SB-FPX-FRSQRT-001-00BDEC",
@@ -8680,7 +8796,7 @@
         "FPU_ERROR or SIMD_ERROR for an unmasked IEEE exception"
       ],
       "status": "normative",
-      "source_line": 1710
+      "source_line": 1789
     },
     {
       "id": "SB-FPX-FRND-001-67E182",
@@ -8726,7 +8842,7 @@
         "FPU_ERROR or SIMD_ERROR for an unmasked IEEE exception"
       ],
       "status": "normative",
-      "source_line": 1711
+      "source_line": 1790
     },
     {
       "id": "SB-FPX-FRNDZ-001-6EB040",
@@ -8772,7 +8888,7 @@
         "FPU_ERROR or SIMD_ERROR for an unmasked IEEE exception"
       ],
       "status": "normative",
-      "source_line": 1712
+      "source_line": 1791
     },
     {
       "id": "SB-FPX-FCVT.S2D-001-5623A0",
@@ -8815,7 +8931,7 @@
         "FPU_ERROR or SIMD_ERROR for an unmasked IEEE exception"
       ],
       "status": "normative",
-      "source_line": 1713
+      "source_line": 1792
     },
     {
       "id": "SB-FPX-FCVT.D2S-001-BE0CB7",
@@ -8858,7 +8974,7 @@
         "FPU_ERROR or SIMD_ERROR for an unmasked IEEE exception"
       ],
       "status": "normative",
-      "source_line": 1714
+      "source_line": 1793
     },
     {
       "id": "SB-FPX-FCVTINT-001-0F2574",
@@ -8901,7 +9017,7 @@
         "FPU_ERROR or SIMD_ERROR for an unmasked IEEE exception"
       ],
       "status": "normative",
-      "source_line": 1715
+      "source_line": 1794
     },
     {
       "id": "SB-FPX-FCLASS-001-9A82A0",
@@ -8944,7 +9060,7 @@
         "FPU_ERROR or SIMD_ERROR for an unmasked IEEE exception"
       ],
       "status": "normative",
-      "source_line": 1716
+      "source_line": 1795
     },
     {
       "id": "SB-FPX-FCHS-001-BF47A5",
@@ -8990,7 +9106,7 @@
         "FPU_ERROR or SIMD_ERROR for an unmasked IEEE exception"
       ],
       "status": "normative",
-      "source_line": 1717
+      "source_line": 1796
     },
     {
       "id": "SB-FPX-FTEST-001-D9F746",
@@ -9033,7 +9149,7 @@
         "FPU_ERROR or SIMD_ERROR for an unmasked IEEE exception"
       ],
       "status": "normative",
-      "source_line": 1718
+      "source_line": 1797
     },
     {
       "id": "SB-AVX-VFMADD-001-050BB5",
@@ -9078,7 +9194,7 @@
         "FPU_ERROR or SIMD_ERROR for an unmasked IEEE exception"
       ],
       "status": "normative",
-      "source_line": 2265
+      "source_line": 2344
     },
     {
       "id": "SB-AVX-VFMSUB-001-A8225B",
@@ -9123,7 +9239,7 @@
         "FPU_ERROR or SIMD_ERROR for an unmasked IEEE exception"
       ],
       "status": "normative",
-      "source_line": 2266
+      "source_line": 2345
     },
     {
       "id": "SB-AVX-VFNMADD-001-857ADB",
@@ -9168,7 +9284,7 @@
         "FPU_ERROR or SIMD_ERROR for an unmasked IEEE exception"
       ],
       "status": "normative",
-      "source_line": 2267
+      "source_line": 2346
     },
     {
       "id": "SB-AVX-VFMADD_ROUND-001-2C6421",
@@ -9213,7 +9329,7 @@
         "FPU_ERROR or SIMD_ERROR for an unmasked IEEE exception"
       ],
       "status": "normative",
-      "source_line": 2268
+      "source_line": 2347
     },
     {
       "id": "SB-AVX-VPERMUTE-001-39809E",
@@ -9257,7 +9373,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2269
+      "source_line": 2348
     },
     {
       "id": "SB-AVX-VSHUFFLE-001-EE4394",
@@ -9301,7 +9417,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2270
+      "source_line": 2349
     },
     {
       "id": "SB-AVX-VBLEND-001-EC1938",
@@ -9345,7 +9461,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2271
+      "source_line": 2350
     },
     {
       "id": "SB-AVX-VTEST-001-B8E5B6",
@@ -9389,7 +9505,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2272
+      "source_line": 2351
     },
     {
       "id": "SB-AVX-VPMADD-001-AE6313",
@@ -9433,7 +9549,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2273
+      "source_line": 2352
     },
     {
       "id": "SB-AVX-VREDUCE_ADD-001-74730C",
@@ -9477,7 +9593,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2274
+      "source_line": 2353
     },
     {
       "id": "SB-AVX-VREDUCE_MUL-001-DDFF67",
@@ -9521,7 +9637,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2275
+      "source_line": 2354
     },
     {
       "id": "SB-AVX-VCOMPARE_LT-001-94F459",
@@ -9565,7 +9681,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2276
+      "source_line": 2355
     },
     {
       "id": "SB-AVX-VCOMPARE_GT-001-D45ACE",
@@ -9609,7 +9725,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2277
+      "source_line": 2356
     },
     {
       "id": "SB-AVX-VINSERT-001-504DA8",
@@ -9653,7 +9769,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2278
+      "source_line": 2357
     },
     {
       "id": "SB-AVX-VEXTRACT-001-5D1DD0",
@@ -9697,7 +9813,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2279
+      "source_line": 2358
     },
     {
       "id": "SB-AVX-VGATHER-001-3DC1C6",
@@ -9736,12 +9852,15 @@
         "SF": "unchanged",
         "OF": "unchanged"
       },
-      "memory_order": "No memory access.",
+      "memory_order": "Lane-ordered ordinary TSO accesses with the instruction's documented partial-progress state on fault.",
       "exceptions": [
-        "INVALID_OP for malformed encoding or unavailable feature"
+        "INVALID_OP for malformed encoding or unavailable feature",
+        "GPF for non-canonical address",
+        "ALIGN_CHECK when required alignment is violated",
+        "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 2280
+      "source_line": 2359
     },
     {
       "id": "SB-AVX-VSCATTER-001-24AA1B",
@@ -9780,12 +9899,15 @@
         "SF": "unchanged",
         "OF": "unchanged"
       },
-      "memory_order": "No memory access.",
+      "memory_order": "Lane-ordered ordinary TSO accesses with the instruction's documented partial-progress state on fault.",
       "exceptions": [
-        "INVALID_OP for malformed encoding or unavailable feature"
+        "INVALID_OP for malformed encoding or unavailable feature",
+        "GPF for non-canonical address",
+        "ALIGN_CHECK when required alignment is violated",
+        "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 2281
+      "source_line": 2360
     },
     {
       "id": "SB-AVX-VALIGN-001-9A9906",
@@ -9829,7 +9951,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2282
+      "source_line": 2361
     },
     {
       "id": "SB-AVX-VBSWAP-001-6AC685",
@@ -9873,7 +9995,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2283
+      "source_line": 2362
     },
     {
       "id": "SB-AVX-VPACK-001-B00D89",
@@ -9917,7 +10039,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2284
+      "source_line": 2363
     },
     {
       "id": "SB-AVX-VUNPACK-001-ED602A",
@@ -9961,7 +10083,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2285
+      "source_line": 2364
     },
     {
       "id": "SB-AVX-VMASKMOV-001-06D275",
@@ -10003,7 +10125,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "reserved",
-      "source_line": 2286
+      "source_line": 2365
     },
     {
       "id": "SB-AVX-VPMUL-001-A5E860",
@@ -10047,7 +10169,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2287
+      "source_line": 2366
     },
     {
       "id": "SB-AVX-VPERM2-001-4F1B84",
@@ -10091,7 +10213,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2288
+      "source_line": 2367
     },
     {
       "id": "SB-AVX-VCOMPRESS-001-CC6C2E",
@@ -10135,7 +10257,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2289
+      "source_line": 2368
     },
     {
       "id": "SB-AVX-VEXPAND-001-6E2E17",
@@ -10179,7 +10301,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2290
+      "source_line": 2369
     },
     {
       "id": "SB-AVX-VROUND-001-5A8E12",
@@ -10223,7 +10345,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2291
+      "source_line": 2370
     },
     {
       "id": "SB-AVX-VRECIP_EST-001-D34D50",
@@ -10267,7 +10389,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2292
+      "source_line": 2371
     },
     {
       "id": "SB-AVX-VRSQRT_EST-001-CC9CBD",
@@ -10311,7 +10433,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2293
+      "source_line": 2372
     },
     {
       "id": "SB-AVX-VFMADD_SUB-001-1E5EFD",
@@ -10356,7 +10478,7 @@
         "FPU_ERROR or SIMD_ERROR for an unmasked IEEE exception"
       ],
       "status": "normative",
-      "source_line": 2294
+      "source_line": 2373
     },
     {
       "id": "SB-AVX-VZEROUPPER-001-9F5A86",
@@ -10398,7 +10520,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2295
+      "source_line": 2374
     },
     {
       "id": "SB-AVX-VZEROALL-001-6C7570",
@@ -10440,7 +10562,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2296
+      "source_line": 2375
     },
     {
       "id": "SB-AVX-VPMAX-001-D56854",
@@ -10484,7 +10606,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2297
+      "source_line": 2376
     },
     {
       "id": "SB-AVX-VPMIN-001-733F6C",
@@ -10528,7 +10650,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2298
+      "source_line": 2377
     },
     {
       "id": "SB-AVX-VGATHERQ-001-091CDD",
@@ -10567,12 +10689,15 @@
         "SF": "unchanged",
         "OF": "unchanged"
       },
-      "memory_order": "No memory access.",
+      "memory_order": "Lane-ordered ordinary TSO accesses with the instruction's documented partial-progress state on fault.",
       "exceptions": [
-        "INVALID_OP for malformed encoding or unavailable feature"
+        "INVALID_OP for malformed encoding or unavailable feature",
+        "GPF for non-canonical address",
+        "ALIGN_CHECK when required alignment is violated",
+        "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 2299
+      "source_line": 2378
     },
     {
       "id": "SB-AVX-VSCATTERQ-001-C19347",
@@ -10611,12 +10736,15 @@
         "SF": "unchanged",
         "OF": "unchanged"
       },
-      "memory_order": "No memory access.",
+      "memory_order": "Lane-ordered ordinary TSO accesses with the instruction's documented partial-progress state on fault.",
       "exceptions": [
-        "INVALID_OP for malformed encoding or unavailable feature"
+        "INVALID_OP for malformed encoding or unavailable feature",
+        "GPF for non-canonical address",
+        "ALIGN_CHECK when required alignment is violated",
+        "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 2300
+      "source_line": 2379
     },
     {
       "id": "SB-AVX-VFPCLASS-001-F1D39F",
@@ -10661,7 +10789,7 @@
         "FPU_ERROR or SIMD_ERROR for an unmasked IEEE exception"
       ],
       "status": "normative",
-      "source_line": 2301
+      "source_line": 2380
     },
     {
       "id": "SB-AVX-VCOMPAND-001-6EF619",
@@ -10703,7 +10831,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "reserved",
-      "source_line": 2302
+      "source_line": 2381
     },
     {
       "id": "SB-AVX-VMATRIX_MUL-001-5D7A51",
@@ -10745,7 +10873,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "reserved",
-      "source_line": 2303
+      "source_line": 2382
     },
     {
       "id": "SB-AVX-VCONVERT-001-B29069",
@@ -10787,7 +10915,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "reserved",
-      "source_line": 2304
+      "source_line": 2383
     },
     {
       "id": "SB-AVX-VREDUCE_MAX-001-BF5A46",
@@ -10831,7 +10959,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2305
+      "source_line": 2384
     },
     {
       "id": "SB-AVX-VREDUCE_MIN-001-B2E13B",
@@ -10875,7 +11003,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2306
+      "source_line": 2385
     },
     {
       "id": "SB-AVX-VMULADDSUB-001-D55EA3",
@@ -10919,7 +11047,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2307
+      "source_line": 2386
     },
     {
       "id": "SB-CRYPTO-AESENC-001-7011C5",
@@ -10961,7 +11089,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2322
+      "source_line": 2407
     },
     {
       "id": "SB-CRYPTO-AESDEC-001-B731DC",
@@ -11003,7 +11131,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2323
+      "source_line": 2408
     },
     {
       "id": "SB-CRYPTO-AESIMC-001-31EBD1",
@@ -11045,7 +11173,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2324
+      "source_line": 2409
     },
     {
       "id": "SB-CRYPTO-AESKEYGEN_ASSIST-001-8EE1BB",
@@ -11087,7 +11215,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "reserved",
-      "source_line": 2325
+      "source_line": 2410
     },
     {
       "id": "SB-CRYPTO-PCLMULQDQ-001-16F93E",
@@ -11129,7 +11257,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2326
+      "source_line": 2411
     },
     {
       "id": "SB-CRYPTO-GHASH-001-5D3453",
@@ -11171,7 +11299,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2327
+      "source_line": 2412
     },
     {
       "id": "SB-CRYPTO-GCM_ENC_BLOCK-001-EB6D09",
@@ -11213,7 +11341,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "reserved",
-      "source_line": 2328
+      "source_line": 2413
     },
     {
       "id": "SB-CRYPTO-GCM_DEC_BLOCK-001-20F694",
@@ -11255,7 +11383,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "reserved",
-      "source_line": 2329
+      "source_line": 2414
     },
     {
       "id": "SB-CRYPTO-SHA1_MSG1-001-DC41E3",
@@ -11297,7 +11425,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2330
+      "source_line": 2415
     },
     {
       "id": "SB-CRYPTO-SHA1_MSG2-001-EEB766",
@@ -11339,7 +11467,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2331
+      "source_line": 2416
     },
     {
       "id": "SB-CRYPTO-SHA256_RNDS2-001-8D194A",
@@ -11381,7 +11509,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "reserved",
-      "source_line": 2332
+      "source_line": 2417
     },
     {
       "id": "SB-CRYPTO-SHA256_SIG0-001-651E4C",
@@ -11423,7 +11551,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2333
+      "source_line": 2418
     },
     {
       "id": "SB-CRYPTO-SHA256_SIG1-001-BA052F",
@@ -11465,7 +11593,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2334
+      "source_line": 2419
     },
     {
       "id": "SB-CRYPTO-RNG_SEED-001-D7780D",
@@ -11508,7 +11636,7 @@
         "GPF when current privilege is insufficient"
       ],
       "status": "reserved",
-      "source_line": 2335
+      "source_line": 2420
     },
     {
       "id": "SB-CRYPTO-RNG_GET-001-DF8126",
@@ -11550,7 +11678,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "reserved",
-      "source_line": 2336
+      "source_line": 2421
     },
     {
       "id": "SB-CRYPTO-POLY_MUL-001-2701E0",
@@ -11592,7 +11720,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2337
+      "source_line": 2422
     },
     {
       "id": "SB-CRYPTO-CTR_XOR-001-ED3305",
@@ -11634,7 +11762,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "reserved",
-      "source_line": 2338
+      "source_line": 2423
     },
     {
       "id": "SB-CRYPTO-AEAD_INIT-001-5201D8",
@@ -11676,7 +11804,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "reserved",
-      "source_line": 2339
+      "source_line": 2424
     },
     {
       "id": "SB-CRYPTO-AEAD_FINAL-001-69E15A",
@@ -11718,7 +11846,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "reserved",
-      "source_line": 2340
+      "source_line": 2425
     },
     {
       "id": "SB-CRYPTO-AESGCM_ENC-001-FAC700",
@@ -11760,7 +11888,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "reserved",
-      "source_line": 2341
+      "source_line": 2426
     },
     {
       "id": "SB-CRYPTO-AESGCM_DEC-001-2BA531",
@@ -11802,7 +11930,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "reserved",
-      "source_line": 2342
+      "source_line": 2427
     },
     {
       "id": "SB-CRYPTO-SM4_ENC-001-4BC2CB",
@@ -11844,7 +11972,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "reserved",
-      "source_line": 2343
+      "source_line": 2428
     },
     {
       "id": "SB-CRYPTO-SM4_DEC-001-28F6A9",
@@ -11886,7 +12014,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "reserved",
-      "source_line": 2344
+      "source_line": 2429
     },
     {
       "id": "SB-CRYPTO-CLMUL_RED-001-109812",
@@ -11928,7 +12056,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "reserved",
-      "source_line": 2345
+      "source_line": 2430
     },
     {
       "id": "SB-DSP-MAC32-001-C1EC29",
@@ -11970,7 +12098,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2360
+      "source_line": 2445
     },
     {
       "id": "SB-DSP-MAC64-001-93E51B",
@@ -12012,7 +12140,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2361
+      "source_line": 2446
     },
     {
       "id": "SB-DSP-MACS-001-80D419",
@@ -12054,7 +12182,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2362
+      "source_line": 2447
     },
     {
       "id": "SB-DSP-MSUB-001-558345",
@@ -12096,7 +12224,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2363
+      "source_line": 2448
     },
     {
       "id": "SB-DSP-SATSUB-001-FB0805",
@@ -12138,7 +12266,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2364
+      "source_line": 2449
     },
     {
       "id": "SB-DSP-SATADD-001-13986C",
@@ -12180,7 +12308,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2365
+      "source_line": 2450
     },
     {
       "id": "SB-DSP-FIXED_MUL-001-92AA3B",
@@ -12222,7 +12350,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2366
+      "source_line": 2451
     },
     {
       "id": "SB-DSP-FIXED_ADD-001-CF95DE",
@@ -12264,7 +12392,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2367
+      "source_line": 2452
     },
     {
       "id": "SB-DSP-FIR_STEP-001-11247C",
@@ -12306,7 +12434,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "reserved",
-      "source_line": 2368
+      "source_line": 2453
     },
     {
       "id": "SB-DSP-IIR_STEP-001-243FC9",
@@ -12348,7 +12476,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "reserved",
-      "source_line": 2369
+      "source_line": 2454
     },
     {
       "id": "SB-DSP-CMPLX_MUL-001-B05B27",
@@ -12390,7 +12518,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2370
+      "source_line": 2455
     },
     {
       "id": "SB-DSP-BITREV-001-4D6D6B",
@@ -12432,7 +12560,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2371
+      "source_line": 2456
     },
     {
       "id": "SB-DSP-CONV_STEP-001-4A4766",
@@ -12474,7 +12602,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "reserved",
-      "source_line": 2372
+      "source_line": 2457
     },
     {
       "id": "SB-DSP-FFT_STAGE-001-FEC93B",
@@ -12516,7 +12644,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "reserved",
-      "source_line": 2373
+      "source_line": 2458
     },
     {
       "id": "SB-DSP-PACK_SAT-001-BA5980",
@@ -12558,7 +12686,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2374
+      "source_line": 2459
     },
     {
       "id": "SB-DSP-UNPACK_EXP-001-175289",
@@ -12600,7 +12728,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2375
+      "source_line": 2460
     },
     {
       "id": "SB-DSP-CLAMP-001-4B0A0D",
@@ -12642,7 +12770,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2376
+      "source_line": 2461
     },
     {
       "id": "SB-DSP-ACCUMULATE-001-917B0B",
@@ -12684,7 +12812,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2377
+      "source_line": 2462
     },
     {
       "id": "SB-DSP-DOTP-001-33015B",
@@ -12726,7 +12854,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2378
+      "source_line": 2463
     },
     {
       "id": "SB-DSP-SUMDOTP-001-2AF17F",
@@ -12768,7 +12896,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2379
+      "source_line": 2464
     },
     {
       "id": "SB-DSP-RSHIFT_ROUND-001-93D0A9",
@@ -12810,7 +12938,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2380
+      "source_line": 2465
     },
     {
       "id": "SB-DSP-LSHIFT-001-BBC84F",
@@ -12852,7 +12980,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2381
+      "source_line": 2466
     },
     {
       "id": "SB-DSP-SLLV-001-D4A61E",
@@ -12894,7 +13022,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2382
+      "source_line": 2467
     },
     {
       "id": "SB-DSP-SRLV-001-56C9AA",
@@ -12936,7 +13064,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2383
+      "source_line": 2468
     },
     {
       "id": "SB-DSP-SRAV-001-6417D0",
@@ -12978,7 +13106,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2384
+      "source_line": 2469
     },
     {
       "id": "SB-DSP-RNDQ-001-3738B5",
@@ -13020,7 +13148,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2385
+      "source_line": 2470
     },
     {
       "id": "SB-DSP-CLZ_FAST-001-61BEE5",
@@ -13062,7 +13190,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2386
+      "source_line": 2471
     },
     {
       "id": "SB-DSP-TZCNT_FAST-001-CA0225",
@@ -13104,7 +13232,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2387
+      "source_line": 2472
     },
     {
       "id": "SB-DSP-MAD32-001-19118A",
@@ -13146,7 +13274,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2388
+      "source_line": 2473
     },
     {
       "id": "SB-SYSX-QUERY-001-FFAD8F",
@@ -13188,7 +13316,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2403
+      "source_line": 2488
     },
     {
       "id": "SB-SYSX-IN-001-CE854A",
@@ -13231,7 +13359,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2404
+      "source_line": 2489
     },
     {
       "id": "SB-SYSX-OUT-001-1DB66B",
@@ -13274,7 +13402,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2405
+      "source_line": 2490
     },
     {
       "id": "SB-SYSX-XSAVE-001-87007D",
@@ -13312,12 +13440,15 @@
         "SF": "unchanged",
         "OF": "unchanged"
       },
-      "memory_order": "No memory access.",
+      "memory_order": "Architectural multi-byte memory access with the validation and atomicity contract stated by the instruction.",
       "exceptions": [
-        "INVALID_OP for malformed encoding or unavailable feature"
+        "INVALID_OP for malformed encoding or unavailable feature",
+        "GPF for non-canonical address",
+        "ALIGN_CHECK when required alignment is violated",
+        "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 2406
+      "source_line": 2491
     },
     {
       "id": "SB-SYSX-XRSTOR-001-942774",
@@ -13355,12 +13486,15 @@
         "SF": "unchanged",
         "OF": "unchanged"
       },
-      "memory_order": "No memory access.",
+      "memory_order": "Architectural multi-byte memory access with the validation and atomicity contract stated by the instruction.",
       "exceptions": [
-        "INVALID_OP for malformed encoding or unavailable feature"
+        "INVALID_OP for malformed encoding or unavailable feature",
+        "GPF for non-canonical address",
+        "ALIGN_CHECK when required alignment is violated",
+        "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 2407
+      "source_line": 2492
     },
     {
       "id": "SB-SYSX-ISYNC-001-85D024",
@@ -13406,7 +13540,7 @@
         "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 2408
+      "source_line": 2493
     },
     {
       "id": "SB-SYSX-INVTLB-001-820D9C",
@@ -13449,7 +13583,7 @@
         "GPF when current privilege is insufficient"
       ],
       "status": "normative",
-      "source_line": 2409
+      "source_line": 2494
     },
     {
       "id": "SB-SYSX-INVTLBASID-001-6CA17C",
@@ -13492,7 +13626,7 @@
         "GPF when current privilege is insufficient"
       ],
       "status": "normative",
-      "source_line": 2410
+      "source_line": 2495
     },
     {
       "id": "SB-SYSX-INVTLBALL-001-97E083",
@@ -13535,7 +13669,7 @@
         "GPF when current privilege is insufficient"
       ],
       "status": "normative",
-      "source_line": 2411
+      "source_line": 2496
     },
     {
       "id": "SB-SYSX-SENDIPI-001-EBED24",
@@ -13578,7 +13712,7 @@
         "GPF when current privilege is insufficient"
       ],
       "status": "normative",
-      "source_line": 2412
+      "source_line": 2497
     },
     {
       "id": "SB-SYSX-EOI-001-3DE70D",
@@ -13621,7 +13755,7 @@
         "GPF when current privilege is insufficient"
       ],
       "status": "normative",
-      "source_line": 2413
+      "source_line": 2498
     },
     {
       "id": "SB-SYSX-VMENTER-001-5722AE",
@@ -13659,13 +13793,16 @@
         "SF": "unchanged",
         "OF": "unchanged"
       },
-      "memory_order": "No memory access.",
+      "memory_order": "Architectural multi-byte memory access with the validation and atomicity contract stated by the instruction.",
       "exceptions": [
         "INVALID_OP for malformed encoding or unavailable feature",
-        "GPF when current privilege is insufficient"
+        "GPF when current privilege is insufficient",
+        "GPF for non-canonical address",
+        "ALIGN_CHECK when required alignment is violated",
+        "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 2414
+      "source_line": 2499
     },
     {
       "id": "SB-SYSX-VMRESUME-001-C4431B",
@@ -13703,13 +13840,16 @@
         "SF": "unchanged",
         "OF": "unchanged"
       },
-      "memory_order": "No memory access.",
+      "memory_order": "Architectural multi-byte memory access with the validation and atomicity contract stated by the instruction.",
       "exceptions": [
         "INVALID_OP for malformed encoding or unavailable feature",
-        "GPF when current privilege is insufficient"
+        "GPF when current privilege is insufficient",
+        "GPF for non-canonical address",
+        "ALIGN_CHECK when required alignment is violated",
+        "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 2415
+      "source_line": 2500
     },
     {
       "id": "SB-SYSX-VMREAD-001-C05686",
@@ -13752,7 +13892,7 @@
         "GPF when current privilege is insufficient"
       ],
       "status": "normative",
-      "source_line": 2416
+      "source_line": 2501
     },
     {
       "id": "SB-SYSX-VMWRITE-001-0156FC",
@@ -13795,7 +13935,7 @@
         "GPF when current privilege is insufficient"
       ],
       "status": "normative",
-      "source_line": 2417
+      "source_line": 2502
     },
     {
       "id": "SB-SYSX-ENDBR-001-AAD169",
@@ -13837,7 +13977,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2418
+      "source_line": 2503
     },
     {
       "id": "SB-SYSX-WRSS-001-85CB61",
@@ -13875,13 +14015,16 @@
         "SF": "unchanged",
         "OF": "unchanged"
       },
-      "memory_order": "No memory access.",
+      "memory_order": "Architectural multi-byte memory access with the validation and atomicity contract stated by the instruction.",
       "exceptions": [
         "INVALID_OP for malformed encoding or unavailable feature",
-        "GPF when current privilege is insufficient"
+        "GPF when current privilege is insufficient",
+        "GPF for non-canonical address",
+        "ALIGN_CHECK when required alignment is violated",
+        "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 2419
+      "source_line": 2504
     },
     {
       "id": "SB-SYSX-RDPMC-001-69EF0A",
@@ -13924,7 +14067,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2420
+      "source_line": 2505
     },
     {
       "id": "SB-SYSX-RNGGET-001-71C333",
@@ -13967,7 +14110,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2421
+      "source_line": 2506
     },
     {
       "id": "SB-SYSX-MLAUNCH-001-E41714",
@@ -14010,7 +14153,7 @@
         "GPF when current privilege is insufficient"
       ],
       "status": "reserved",
-      "source_line": 2422
+      "source_line": 2507
     },
     {
       "id": "SB-SYSX-SAVECTX-001-C68442",
@@ -14048,12 +14191,15 @@
         "SF": "unchanged",
         "OF": "unchanged"
       },
-      "memory_order": "No memory access.",
+      "memory_order": "Architectural multi-byte memory access with the validation and atomicity contract stated by the instruction.",
       "exceptions": [
-        "INVALID_OP for malformed encoding or unavailable feature"
+        "INVALID_OP for malformed encoding or unavailable feature",
+        "GPF for non-canonical address",
+        "ALIGN_CHECK when required alignment is violated",
+        "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 2423
+      "source_line": 2508
     },
     {
       "id": "SB-SYSX-LOADCTX-001-9AA675",
@@ -14091,13 +14237,16 @@
         "SF": "unchanged",
         "OF": "unchanged"
       },
-      "memory_order": "No memory access.",
+      "memory_order": "Architectural multi-byte memory access with the validation and atomicity contract stated by the instruction.",
       "exceptions": [
         "INVALID_OP for malformed encoding or unavailable feature",
-        "GPF when current privilege is insufficient"
+        "GPF when current privilege is insufficient",
+        "GPF for non-canonical address",
+        "ALIGN_CHECK when required alignment is violated",
+        "PAGE_FAULT for translation or permission failure"
       ],
       "status": "normative",
-      "source_line": 2424
+      "source_line": 2509
     },
     {
       "id": "SB-SYSX-GETCPL-001-FD6788",
@@ -14139,7 +14288,7 @@
         "INVALID_OP for malformed encoding or unavailable feature"
       ],
       "status": "normative",
-      "source_line": 2425
+      "source_line": 2510
     },
     {
       "id": "SB-SYSX-SETMODE-001-7FE93D",
@@ -14183,7 +14332,7 @@
         "GPF when current privilege is insufficient"
       ],
       "status": "normative",
-      "source_line": 2426
+      "source_line": 2511
     },
     {
       "id": "SB-FPX-FLD-RC2-001",
@@ -14269,6 +14418,670 @@
       "exceptions": [
         "INVALID_OP for malformed encoding or unavailable feature",
         "ALIGN_CHECK, PAGE_FAULT, or GPF before architectural modification"
+      ],
+      "status": "normative",
+      "source_line": 0
+    },
+    {
+      "id": "SB-BASE-ADC-001-V31",
+      "mnemonic": "ADC",
+      "syntax": "ADC Rdst, Rsrc",
+      "category": "Arithmetic",
+      "encoding": {
+        "map": "base",
+        "opcode": [
+          216
+        ],
+        "format": "R-type",
+        "operand_binding": "ModR/M.reg = Rdst; ModR/M.r/m = Rsrc."
+      },
+      "feature": "BASE",
+      "privilege": "user",
+      "modes": [
+        "Clownfish",
+        "Tetra",
+        "Dragonet",
+        "Droplet"
+      ],
+      "description": "Add source and carry flag to destination",
+      "operation": [
+        "carry_in <- CF",
+        "sum <- unsigned(dst) + unsigned(src) + carry_in",
+        "dst <- low_width_bits(sum)",
+        "update arithmetic FLAGS including carry_out"
+      ],
+      "flags": {
+        "CF": "defined",
+        "PF": "defined",
+        "AF": "defined",
+        "ZF": "defined",
+        "SF": "defined",
+        "OF": "defined"
+      },
+      "memory_order": "No memory access.",
+      "exceptions": [
+        "INVALID_OP for malformed encoding or unavailable feature"
+      ],
+      "status": "normative",
+      "source_line": 0
+    },
+    {
+      "id": "SB-BASE-SBB-001-V31",
+      "mnemonic": "SBB",
+      "syntax": "SBB Rdst, Rsrc",
+      "category": "Arithmetic",
+      "encoding": {
+        "map": "base",
+        "opcode": [
+          217
+        ],
+        "format": "R-type",
+        "operand_binding": "ModR/M.reg = Rdst; ModR/M.r/m = Rsrc."
+      },
+      "feature": "BASE",
+      "privilege": "user",
+      "modes": [
+        "Clownfish",
+        "Tetra",
+        "Dragonet",
+        "Droplet"
+      ],
+      "description": "Subtract source and borrow flag from destination",
+      "operation": [
+        "borrow_in <- CF",
+        "difference <- unsigned(dst) - unsigned(src) - borrow_in",
+        "dst <- low_width_bits(difference)",
+        "update arithmetic FLAGS including borrow_out"
+      ],
+      "flags": {
+        "CF": "defined",
+        "PF": "defined",
+        "AF": "defined",
+        "ZF": "defined",
+        "SF": "defined",
+        "OF": "defined"
+      },
+      "memory_order": "No memory access.",
+      "exceptions": [
+        "INVALID_OP for malformed encoding or unavailable feature"
+      ],
+      "status": "normative",
+      "source_line": 0
+    },
+    {
+      "id": "SB-BASE-UMULH-001-V31",
+      "mnemonic": "UMULH",
+      "syntax": "UMULH Rdst, Rsrc",
+      "category": "Arithmetic",
+      "encoding": {
+        "map": "base",
+        "opcode": [
+          218
+        ],
+        "format": "R-type (unsigned high bits)",
+        "operand_binding": "ModR/M.reg = Rdst; ModR/M.r/m = Rsrc."
+      },
+      "feature": "BASE",
+      "privilege": "user",
+      "modes": [
+        "Clownfish",
+        "Tetra",
+        "Dragonet",
+        "Droplet"
+      ],
+      "description": "Return the high half of an unsigned full-width product",
+      "operation": [
+        "product <- unsigned(dst) * unsigned(src) at twice operand width",
+        "dst <- high_width_bits(product)"
+      ],
+      "flags": {
+        "CF": "unchanged",
+        "PF": "unchanged",
+        "AF": "unchanged",
+        "ZF": "unchanged",
+        "SF": "unchanged",
+        "OF": "unchanged"
+      },
+      "memory_order": "No memory access.",
+      "exceptions": [
+        "INVALID_OP for malformed encoding or unavailable feature"
+      ],
+      "status": "normative",
+      "source_line": 0
+    },
+    {
+      "id": "SB-BASE-FCVTU-001-V31",
+      "mnemonic": "FCVTU",
+      "syntax": "FCVTU Fd, Ra",
+      "category": "Floating Point",
+      "encoding": {
+        "map": "base",
+        "opcode": [
+          219
+        ],
+        "format": "R-type (unsigned conversion)",
+        "operand_binding": "ModR/M.reg = Fd; ModR/M.r/m = Ra; VectorCtl selects the scalar IEEE format."
+      },
+      "feature": "FP",
+      "privilege": "user",
+      "modes": [
+        "Clownfish",
+        "Tetra",
+        "Dragonet",
+        "Droplet"
+      ],
+      "description": "Convert an unsigned integer to a scalar IEEE value",
+      "operation": [
+        "convert unsigned integer source to destination IEEE format using FPCR rounding",
+        "update FPSR; raise an unmasked FPU_ERROR before writeback"
+      ],
+      "flags": {
+        "CF": "unchanged",
+        "PF": "unchanged",
+        "AF": "unchanged",
+        "ZF": "unchanged",
+        "SF": "unchanged",
+        "OF": "unchanged"
+      },
+      "memory_order": "No memory access.",
+      "exceptions": [
+        "INVALID_OP for malformed encoding or unavailable feature",
+        "FPU_ERROR for an unmasked IEEE exception"
+      ],
+      "status": "normative",
+      "source_line": 0
+    },
+    {
+      "id": "SB-BASE-FCVTUS-001-V31",
+      "mnemonic": "FCVTUS",
+      "syntax": "FCVTUS Ra, Fs",
+      "category": "Floating Point",
+      "encoding": {
+        "map": "base",
+        "opcode": [
+          220
+        ],
+        "format": "R-type (unsigned conversion)",
+        "operand_binding": "ModR/M.reg = Ra; ModR/M.r/m = Fs; VectorCtl selects the scalar IEEE format."
+      },
+      "feature": "FP",
+      "privilege": "user",
+      "modes": [
+        "Clownfish",
+        "Tetra",
+        "Dragonet",
+        "Droplet"
+      ],
+      "description": "Convert a scalar IEEE value to an unsigned integer",
+      "operation": [
+        "convert IEEE source to unsigned integer by truncation toward zero",
+        "invalid result raises FPU_ERROR or returns zero when masked"
+      ],
+      "flags": {
+        "CF": "unchanged",
+        "PF": "unchanged",
+        "AF": "unchanged",
+        "ZF": "unchanged",
+        "SF": "unchanged",
+        "OF": "unchanged"
+      },
+      "memory_order": "No memory access.",
+      "exceptions": [
+        "INVALID_OP for malformed encoding or unavailable feature",
+        "FPU_ERROR for an unmasked IEEE exception"
+      ],
+      "status": "normative",
+      "source_line": 0
+    },
+    {
+      "id": "SB-AVX-VCOMPARE_EQ-001-V31",
+      "mnemonic": "VCOMPARE_EQ",
+      "syntax": "VCOMPARE_EQ Vd, Va, Vb",
+      "category": "Advanced Vector Extensions",
+      "encoding": {
+        "map": "AVX",
+        "opcode": [
+          255,
+          1,
+          43
+        ],
+        "format": "V-type",
+        "operand_binding": "ModR/M.reg = Vd; ModR/M.r/m = Va; XOP0 = Vb; VectorCtl is required."
+      },
+      "feature": "AVX",
+      "privilege": "user",
+      "modes": [
+        "Clownfish",
+        "Tetra",
+        "Dragonet",
+        "Droplet"
+      ],
+      "description": "Per-lane predicate for a[i] == b[i]",
+      "operation": [
+        "result[i] <- all_ones if a[i] == b[i] else zero",
+        "apply encoded merge/zero mask policy",
+        "commit complete vector destination atomically"
+      ],
+      "flags": {
+        "CF": "unchanged",
+        "PF": "unchanged",
+        "AF": "unchanged",
+        "ZF": "unchanged",
+        "SF": "unchanged",
+        "OF": "unchanged"
+      },
+      "memory_order": "No memory access.",
+      "exceptions": [
+        "INVALID_OP for malformed encoding or unavailable feature",
+        "SIMD_ERROR for an invalid vector-control combination"
+      ],
+      "status": "normative",
+      "source_line": 0
+    },
+    {
+      "id": "SB-AVX-VCOMPARE_NE-001-V31",
+      "mnemonic": "VCOMPARE_NE",
+      "syntax": "VCOMPARE_NE Vd, Va, Vb",
+      "category": "Advanced Vector Extensions",
+      "encoding": {
+        "map": "AVX",
+        "opcode": [
+          255,
+          1,
+          44
+        ],
+        "format": "V-type",
+        "operand_binding": "ModR/M.reg = Vd; ModR/M.r/m = Va; XOP0 = Vb; VectorCtl is required."
+      },
+      "feature": "AVX",
+      "privilege": "user",
+      "modes": [
+        "Clownfish",
+        "Tetra",
+        "Dragonet",
+        "Droplet"
+      ],
+      "description": "Per-lane predicate for a[i] != b[i]",
+      "operation": [
+        "result[i] <- all_ones if a[i] != b[i] else zero",
+        "apply encoded merge/zero mask policy",
+        "commit complete vector destination atomically"
+      ],
+      "flags": {
+        "CF": "unchanged",
+        "PF": "unchanged",
+        "AF": "unchanged",
+        "ZF": "unchanged",
+        "SF": "unchanged",
+        "OF": "unchanged"
+      },
+      "memory_order": "No memory access.",
+      "exceptions": [
+        "INVALID_OP for malformed encoding or unavailable feature",
+        "SIMD_ERROR for an invalid vector-control combination"
+      ],
+      "status": "normative",
+      "source_line": 0
+    },
+    {
+      "id": "SB-AVX-VCOMPARE_ULT-001-V31",
+      "mnemonic": "VCOMPARE_ULT",
+      "syntax": "VCOMPARE_ULT Vd, Va, Vb",
+      "category": "Advanced Vector Extensions",
+      "encoding": {
+        "map": "AVX",
+        "opcode": [
+          255,
+          1,
+          45
+        ],
+        "format": "V-type",
+        "operand_binding": "ModR/M.reg = Vd; ModR/M.r/m = Va; XOP0 = Vb; VectorCtl is required."
+      },
+      "feature": "AVX",
+      "privilege": "user",
+      "modes": [
+        "Clownfish",
+        "Tetra",
+        "Dragonet",
+        "Droplet"
+      ],
+      "description": "Per-lane predicate for unsigned(a[i]) < unsigned(b[i])",
+      "operation": [
+        "result[i] <- all_ones if unsigned(a[i]) < unsigned(b[i]) else zero",
+        "apply encoded merge/zero mask policy",
+        "commit complete vector destination atomically"
+      ],
+      "flags": {
+        "CF": "unchanged",
+        "PF": "unchanged",
+        "AF": "unchanged",
+        "ZF": "unchanged",
+        "SF": "unchanged",
+        "OF": "unchanged"
+      },
+      "memory_order": "No memory access.",
+      "exceptions": [
+        "INVALID_OP for malformed encoding or unavailable feature",
+        "SIMD_ERROR for an invalid vector-control combination"
+      ],
+      "status": "normative",
+      "source_line": 0
+    },
+    {
+      "id": "SB-AVX-VCOMPARE_UGT-001-V31",
+      "mnemonic": "VCOMPARE_UGT",
+      "syntax": "VCOMPARE_UGT Vd, Va, Vb",
+      "category": "Advanced Vector Extensions",
+      "encoding": {
+        "map": "AVX",
+        "opcode": [
+          255,
+          1,
+          46
+        ],
+        "format": "V-type",
+        "operand_binding": "ModR/M.reg = Vd; ModR/M.r/m = Va; XOP0 = Vb; VectorCtl is required."
+      },
+      "feature": "AVX",
+      "privilege": "user",
+      "modes": [
+        "Clownfish",
+        "Tetra",
+        "Dragonet",
+        "Droplet"
+      ],
+      "description": "Per-lane predicate for unsigned(a[i]) > unsigned(b[i])",
+      "operation": [
+        "result[i] <- all_ones if unsigned(a[i]) > unsigned(b[i]) else zero",
+        "apply encoded merge/zero mask policy",
+        "commit complete vector destination atomically"
+      ],
+      "flags": {
+        "CF": "unchanged",
+        "PF": "unchanged",
+        "AF": "unchanged",
+        "ZF": "unchanged",
+        "SF": "unchanged",
+        "OF": "unchanged"
+      },
+      "memory_order": "No memory access.",
+      "exceptions": [
+        "INVALID_OP for malformed encoding or unavailable feature",
+        "SIMD_ERROR for an invalid vector-control combination"
+      ],
+      "status": "normative",
+      "source_line": 0
+    },
+    {
+      "id": "SB-AVX-VNOT-001-V31",
+      "mnemonic": "VNOT",
+      "syntax": "VNOT Vd, Va",
+      "category": "Advanced Vector Extensions",
+      "encoding": {
+        "map": "AVX",
+        "opcode": [
+          255,
+          1,
+          47
+        ],
+        "format": "V-type",
+        "operand_binding": "ModR/M.reg = Vd; ModR/M.r/m = Va; VectorCtl is required."
+      },
+      "feature": "AVX",
+      "privilege": "user",
+      "modes": [
+        "Clownfish",
+        "Tetra",
+        "Dragonet",
+        "Droplet"
+      ],
+      "description": "Per-lane vector bitwise complement",
+      "operation": [
+        "result[i] <- bitwise_not(a[i])",
+        "apply encoded merge/zero mask policy",
+        "commit complete vector destination atomically"
+      ],
+      "flags": {
+        "CF": "unchanged",
+        "PF": "unchanged",
+        "AF": "unchanged",
+        "ZF": "unchanged",
+        "SF": "unchanged",
+        "OF": "unchanged"
+      },
+      "memory_order": "No memory access.",
+      "exceptions": [
+        "INVALID_OP for malformed encoding or unavailable feature",
+        "SIMD_ERROR for an invalid vector-control combination"
+      ],
+      "status": "normative",
+      "source_line": 0
+    },
+    {
+      "id": "SB-SYSX-WINNEW-001-V10",
+      "mnemonic": "WINNEW",
+      "syntax": "WINNEW",
+      "category": "Architectural System Extensions",
+      "encoding": {
+        "map": "SYSX",
+        "opcode": [
+          255,
+          4,
+          27
+        ],
+        "format": "X-type (no operands)",
+        "operand_binding": "No ModR/M, XOP, immediate, or displacement bytes."
+      },
+      "feature": "WINDOW",
+      "privilege": "user",
+      "modes": [
+        "Clownfish",
+        "Tetra",
+        "Dragonet",
+        "Droplet"
+      ],
+      "description": "Advance to a fresh logical register window without control transfer",
+      "operation": [
+        "validate window state and spill-area configuration",
+        "create a child window; map caller R24-R31 to child R8-R15",
+        "initialize child R16-R31 to zero",
+        "make the child window current atomically"
+      ],
+      "flags": {
+        "CF": "unchanged",
+        "PF": "unchanged",
+        "AF": "unchanged",
+        "ZF": "unchanged",
+        "SF": "unchanged",
+        "OF": "unchanged"
+      },
+      "memory_order": "May perform transparent window spill or restore memory accesses; those accesses are ordered as ordinary core-context loads/stores and complete before retirement.",
+      "exceptions": [
+        "INVALID_OP for malformed encoding or unavailable WINDOW feature",
+        "GPF when CR4.WINDOW_ENABLE is clear",
+        "GPF for invalid or exhausted WSP configuration",
+        "ALIGN_CHECK or PAGE_FAULT before architectural modification if a transparent spill/restore fails"
+      ],
+      "status": "normative",
+      "source_line": 0
+    },
+    {
+      "id": "SB-SYSX-WINPREV-001-V10",
+      "mnemonic": "WINPREV",
+      "syntax": "WINPREV",
+      "category": "Architectural System Extensions",
+      "encoding": {
+        "map": "SYSX",
+        "opcode": [
+          255,
+          4,
+          28
+        ],
+        "format": "X-type (no operands)",
+        "operand_binding": "No ModR/M, XOP, immediate, or displacement bytes."
+      },
+      "feature": "WINDOW",
+      "privilege": "user",
+      "modes": [
+        "Clownfish",
+        "Tetra",
+        "Dragonet",
+        "Droplet"
+      ],
+      "description": "Restore the previous logical register window without returning",
+      "operation": [
+        "require a previous logical window",
+        "propagate child R8-R15 through the overlap to parent R24-R31",
+        "make the parent window current atomically; restore it transparently if spilled"
+      ],
+      "flags": {
+        "CF": "unchanged",
+        "PF": "unchanged",
+        "AF": "unchanged",
+        "ZF": "unchanged",
+        "SF": "unchanged",
+        "OF": "unchanged"
+      },
+      "memory_order": "May perform transparent window spill or restore memory accesses; those accesses are ordered as ordinary core-context loads/stores and complete before retirement.",
+      "exceptions": [
+        "INVALID_OP for malformed encoding or unavailable WINDOW feature",
+        "GPF when CR4.WINDOW_ENABLE is clear",
+        "GPF for window underflow or invalid WSP configuration",
+        "ALIGN_CHECK or PAGE_FAULT before architectural modification if a transparent spill/restore fails"
+      ],
+      "status": "normative",
+      "source_line": 0
+    },
+    {
+      "id": "SB-SYSX-WINRESERVE-001-V10",
+      "mnemonic": "WINRESERVE",
+      "syntax": "WINRESERVE",
+      "category": "Architectural System Extensions",
+      "encoding": {
+        "map": "SYSX",
+        "opcode": [
+          255,
+          4,
+          29
+        ],
+        "format": "X-type (no operands)",
+        "operand_binding": "No ModR/M, XOP, immediate, or displacement bytes."
+      },
+      "feature": "WINDOW",
+      "privilege": "user",
+      "modes": [
+        "Clownfish",
+        "Tetra",
+        "Dragonet",
+        "Droplet"
+      ],
+      "description": "Hint that another logical window will be needed soon",
+      "operation": [
+        "optionally prepare microarchitectural resident capacity",
+        "do not spill, fault, or change architectural window state"
+      ],
+      "flags": {
+        "CF": "unchanged",
+        "PF": "unchanged",
+        "AF": "unchanged",
+        "ZF": "unchanged",
+        "SF": "unchanged",
+        "OF": "unchanged"
+      },
+      "memory_order": "No memory access.",
+      "exceptions": [
+        "INVALID_OP for malformed encoding or unavailable WINDOW feature",
+        "GPF when CR4.WINDOW_ENABLE is clear"
+      ],
+      "status": "normative",
+      "source_line": 0
+    },
+    {
+      "id": "SB-SYSX-WINPIN-001-V10",
+      "mnemonic": "WINPIN",
+      "syntax": "WINPIN",
+      "category": "Architectural System Extensions",
+      "encoding": {
+        "map": "SYSX",
+        "opcode": [
+          255,
+          4,
+          30
+        ],
+        "format": "X-type (no operands)",
+        "operand_binding": "No ModR/M, XOP, immediate, or displacement bytes."
+      },
+      "feature": "WINDOW",
+      "privilege": "user",
+      "modes": [
+        "Clownfish",
+        "Tetra",
+        "Dragonet",
+        "Droplet"
+      ],
+      "description": "Request advisory retention of the current logical window",
+      "operation": [
+        "increment the current window retention hint count",
+        "do not prevent a spill required for correctness or forward progress"
+      ],
+      "flags": {
+        "CF": "unchanged",
+        "PF": "unchanged",
+        "AF": "unchanged",
+        "ZF": "unchanged",
+        "SF": "unchanged",
+        "OF": "unchanged"
+      },
+      "memory_order": "No memory access.",
+      "exceptions": [
+        "INVALID_OP for malformed encoding or unavailable WINDOW feature",
+        "GPF when CR4.WINDOW_ENABLE is clear"
+      ],
+      "status": "normative",
+      "source_line": 0
+    },
+    {
+      "id": "SB-SYSX-WINRELEASE-001-V10",
+      "mnemonic": "WINRELEASE",
+      "syntax": "WINRELEASE",
+      "category": "Architectural System Extensions",
+      "encoding": {
+        "map": "SYSX",
+        "opcode": [
+          255,
+          4,
+          31
+        ],
+        "format": "X-type (no operands)",
+        "operand_binding": "No ModR/M, XOP, immediate, or displacement bytes."
+      },
+      "feature": "WINDOW",
+      "privilege": "user",
+      "modes": [
+        "Clownfish",
+        "Tetra",
+        "Dragonet",
+        "Droplet"
+      ],
+      "description": "Release one advisory window-retention request",
+      "operation": [
+        "require a nonzero retention hint count",
+        "decrement the current window retention hint count"
+      ],
+      "flags": {
+        "CF": "unchanged",
+        "PF": "unchanged",
+        "AF": "unchanged",
+        "ZF": "unchanged",
+        "SF": "unchanged",
+        "OF": "unchanged"
+      },
+      "memory_order": "No memory access.",
+      "exceptions": [
+        "INVALID_OP for malformed encoding or unavailable WINDOW feature",
+        "GPF when CR4.WINDOW_ENABLE is clear",
+        "GPF for an unbalanced release"
       ],
       "status": "normative",
       "source_line": 0

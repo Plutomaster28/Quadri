@@ -19,6 +19,12 @@ python tools/generate_llvm_tablegen.py
 powershell -ExecutionPolicy Bypass -File tools/validate_llvm_tablegen.ps1
 ```
 
+On Linux, first run `python3 tools/generate_llvm_tablegen.py --check`, then use
+`tools/build_llvm_backend.py` and `tools/test_llvm_backend.py` with LLVM 22.1.4
+as described in `PROJECT_MAP_AND_WSL_MIGRATION.md`. The PowerShell scripts remain
+the Windows harness. Both workflows exercise MC, code generation, ELF, frontend,
+linker, utility, and reference-execution paths before packaging.
+
 Do not assign opcode values in LLVM by hand. The generated records are an adapter
 over the ratified ISA database, not a second instruction registry.
 
@@ -43,13 +49,17 @@ two-register `DIV`, `MOD`, `UMUL`, `UDIV`, saturating arithmetic, NAND/NOR/XNOR,
 rotate, min/max, and SGT family. SelectionDAG emits the applicable native i32
 divide, remainder, saturation, rotate, and signed min/max instructions.
 
-The generated slice contains all 310 instruction records from the
-architecture's 310 normative entries. The MC layer exposes all 149 normative
-SeaBird `BASE` mnemonics, all 10 scalar `FP` mnemonics, all 15 base `SIMD`
-mnemonics, all 23 `SYSX` mnemonics, all 18 `FPX` mnemonics, all 10 normative
+The generated slice contains all 325 instruction records from the
+architecture's 325 normative entries. The MC layer exposes all 152 normative
+SeaBird `BASE` mnemonics, all 12 scalar `FP` mnemonics, all 15 base `SIMD`
+mnemonics, all 28 `SYSX` mnemonics, all 18 `FPX` mnemonics, all 10 normative
 `CRYPTO` mnemonics, all 25 normative `DSP` mnemonics, all 7 `TXN` entries,
-all 14 normative `ATOMICS` entries, all 39 normative `AVX` mnemonics, and all 125
+all 14 normative `ATOMICS` entries, all 44 normative `AVX` mnemonics, and all 128
 mandatory Tritium mnemonics.
+The `axium-m-v1` SB32 CPU enables PAE32 and the register-window ABI. Its
+generated objects carry `EF_SB_WINDOWED_ABI|EF_SB_PAE32_REQUIRED`; call
+lowering uses outgoing R24-R31, incoming R8-R15, and the R8/R9-to-R24/R25
+return overlap. The five `WIN*` SYSX operations are feature-gated.
 This includes immediate,
 compare, control,
 stack, bitfield/BMI, atomic/ordering, system-register, pair-memory, and SYSX

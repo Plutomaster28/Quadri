@@ -1,5 +1,5 @@
-version=0.1.0
-tag=tuna
+version=1.0.0
+tag=marlin
 channel=standard
-name=Foundation Edition
-architecture=SeaBird 3.0-rc2
+name=Advanced Processor Edition
+architecture=SeaBird 3.2

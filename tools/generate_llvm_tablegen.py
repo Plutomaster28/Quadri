@@ -52,6 +52,9 @@ RECORDS = {
     "CLZ": ("UnaryRR", "CLZrr"),
     "CTZ": ("UnaryRR", "CTZrr"),
     "POPC": ("UnaryRR", "POPCrr"),
+    "ADC": ("CarryALURR", "ADCrr"),
+    "SBB": ("CarryALURR", "SBBrr"),
+    "UMULH": ("ALURR", "UMULHrr"),
     "AND": ("ALURR", "ANDrr"),
     "OR": ("ALURR", "ORrr"),
     "XOR": ("ALURR", "XORrr"),
@@ -115,9 +118,9 @@ RECORDS = {
     "STX": ("StoreQ", "STXrr"),
     "LDN": ("LoadQ", "LDNrr"),
     "STN": ("StoreQ", "STNrr"),
-    "CPYB": ("TernaryRR", "CPYBrrr"),
-    "CPYW": ("TernaryRR", "CPYWrrr"),
-    "MEMFILL": ("TernaryRR", "MEMFILLrrr"),
+    "CPYB": ("StringCopy", "CPYBrrr"),
+    "CPYW": ("StringCopy", "CPYWrrr"),
+    "MEMFILL": ("StringFill", "MEMFILLrrr"),
     "FADD": ("FPBinary", "FADD64"),
     "FSUB": ("FPBinary", "FSUB64"),
     "FMUL": ("FPBinary", "FMUL64"),
@@ -146,6 +149,8 @@ RECORDS = {
     "FTEST": ("FPXUnary", "FTEST64"),
     "FLD": ("FPXLoad", "FLD64"),
     "FST": ("FPXStore", "FST64"),
+    "FCVTU": ("IntToFP", "FCVTU64"),
+    "FCVTUS": ("FPToInt", "FCVTUS64"),
     "AESENC": ("CryptoBinary", "AESENC128"),
     "AESDEC": ("CryptoBinary", "AESDEC128"),
     "AESIMC": ("CryptoUnary", "AESIMC128"),
@@ -220,6 +225,11 @@ RECORDS = {
     "VREDUCE_MAX": ("AVXUnary", "VREDUCE_MAX128"),
     "VREDUCE_MIN": ("AVXUnary", "VREDUCE_MIN128"),
     "VMULADDSUB": ("AVXBinary", "VMULADDSUB128"),
+    "VCOMPARE_EQ": ("AVXBinary", "VCOMPARE_EQ128"),
+    "VCOMPARE_NE": ("AVXBinary", "VCOMPARE_NE128"),
+    "VCOMPARE_ULT": ("AVXBinary", "VCOMPARE_ULT128"),
+    "VCOMPARE_UGT": ("AVXBinary", "VCOMPARE_UGT128"),
+    "VNOT": ("AVXUnary", "VNOT128"),
     "XBEGIN": ("TxnBeginRel", "XBEGIN"),
     "XBEGINA": ("TxnBeginAbs", "XBEGINA"),
     "XEND": ("TxnNoOperand", "XEND"),
@@ -299,6 +309,11 @@ RECORDS = {
     "LOADCTX": ("SysXMemory", "LOADCTX"),
     "GETCPL": ("SysXReadReg", "GETCPL"),
     "SETMODE": ("SysXImm", "SETMODE"),
+    "WINNEW": ("WindowTransition", "WINNEW"),
+    "WINPREV": ("WindowTransition", "WINPREV"),
+    "WINRESERVE": ("SysXNoOperand", "WINRESERVE"),
+    "WINPIN": ("SysXNoOperand", "WINPIN"),
+    "WINRELEASE": ("SysXNoOperand", "WINRELEASE"),
     "PUSH": ("PushReg", "PUSH"),
     "POP": ("PopReg", "POP"),
     "PUSHA": ("NoOperand", "PUSHA"),
@@ -336,7 +351,7 @@ VARIANT_RECORDS = (
 # SeaBird record must not silently widen the embedded profile.
 TRITIUM_MANDATORY = frozenset("""
 MOV MOVI MOVZX MOVSX MOVHI MOVLO MOVSWP LDI LDB LDH LDW STB STH STW LEA LEAS XCHG
-ADD ADDI SUB SUBI MUL MULI DIV DIVI MOD MODI NEG INC DEC MULH UMUL UDIV ADDS ADDU
+ADD ADDI SUB SUBI MUL MULI DIV DIVI MOD MODI NEG INC DEC MULH UMUL UDIV ADDS ADDU ADC SBB UMULH
 SUBS SUBU ABS CLZ CTZ POPC AND OR XOR NOT NAND NOR XNOR SHL SHR SAR ROL ROR BSET
 BCLR BTOG BTST MASK EXT CMP CMPI CMPS CMPU TST TSTI MAX MIN SLT SGT JMP JMPA CALL
 CALLA RET JE JNE JG JGE JL JLE JC JNC JO JNO JS JNS JZR JNZR BRR TRAP YIELD PUSH
@@ -403,7 +418,9 @@ def render() -> str:
             body = f'def {def_name} : NoOperand<"{mnemonic.lower()}", 0x{opcode:02X}, "{inst["encoding"]["format"]}">;'
         else:
             body = f'def {def_name} : {record_class}<"{mnemonic.lower()}", 0x{opcode:02X}>;'
-        if mnemonic not in TRITIUM_ALLOWED:
+        if inst["feature"] == "WINDOW":
+            body = f"let Predicates = [HasRegisterWindows] in {body}"
+        elif mnemonic not in TRITIUM_ALLOWED:
             body = f"let Predicates = [NotTritium] in {body}"
         lines.append(body)
     for inst, record_class, def_name in load_variants():

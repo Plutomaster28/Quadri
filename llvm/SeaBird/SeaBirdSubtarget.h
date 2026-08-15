@@ -19,6 +19,8 @@ class SeaBirdSubtarget final : public SeaBirdGenSubtargetInfo {
   bool HasMPU = false;
   bool HasAtomics = false;
   bool HasFixedMulDiv = false;
+  bool HasPAE32 = false;
+  bool HasRegisterWindows = false;
   SeaBirdInstrInfo InstrInfo;
   SeaBirdFrameLowering FrameLowering;
   SeaBirdTargetLowering TLInfo;
@@ -37,6 +39,8 @@ public:
   bool hasMPU() const { return HasMPU; }
   bool hasAtomics() const { return HasAtomics; }
   bool hasFixedMulDiv() const { return HasFixedMulDiv; }
+  bool hasPAE32() const { return HasPAE32; }
+  bool hasRegisterWindows() const { return HasRegisterWindows; }
   MVT getScalarVT() const { return Is64Bit ? MVT::i64 : MVT::i32; }
   void ParseSubtargetFeatures(StringRef CPU, StringRef TuneCPU, StringRef FS);
   const SeaBirdInstrInfo *getInstrInfo() const override { return &InstrInfo; }

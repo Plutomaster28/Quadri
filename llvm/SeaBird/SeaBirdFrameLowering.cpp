@@ -36,7 +36,7 @@ void SeaBirdFrameLowering::emitPrologue(MachineFunction &MF,
     BuildMI(MBB, I, DL,
             TII.get(STI.is64Bit() ? SeaBird::STQrr : SeaBird::STWrr32))
         .addReg(SeaBird::R7)
-        .addReg(SeaBird::R4)
+        .addReg(SeaBird::NOIDX)
         .addImm(1)
         .addImm(0)
         .addReg(SeaBird::R6)
@@ -91,7 +91,7 @@ void SeaBirdFrameLowering::emitEpilogue(MachineFunction &MF,
             TII.get(STI.is64Bit() ? SeaBird::LDQrr : SeaBird::LDWrr32),
             SeaBird::R6)
         .addReg(SeaBird::R7)
-        .addReg(SeaBird::R4)
+        .addReg(SeaBird::NOIDX)
         .addImm(1)
         .addImm(0)
         .setMIFlag(MachineInstr::FrameDestroy);

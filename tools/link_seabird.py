@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Static SeaBird linker for freestanding ELF64 objects."""
+"""Static SeaBird linker for freestanding ELF32 and ELF64 objects."""
 
 import argparse
 import struct
@@ -7,6 +7,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 EM_SEABIRD = 0x5342
+EF_SB_WINDOWED_ABI = 0x1
+EF_SB_PAE32_REQUIRED = 0x2
 SECTION_ORDER = (".text", ".rodata", ".data", ".tdata", ".tbss", ".bss")
 RELOC_WIDTH = {1: 2, 2: 4, 3: 8}
 R_SB_PCREL32 = 7
@@ -30,6 +32,9 @@ class ObjectFile:
     sections: dict[str, InputSection]
     symbols: list
     relocs: list
+    elf_class: int
+    pointer_size: int
+    e_flags: int = 0
     index_locations: dict[int, tuple[str, int]] = field(default_factory=dict)
 
 
@@ -51,11 +56,24 @@ def output_section_name(name):
 
 def read_object(path):
     data = Path(path).read_bytes()
-    if data[:6] != b"\x7fELF\x02\x01" or struct.unpack_from("<H", data, 18)[0] != EM_SEABIRD:
-        raise ValueError(f"{path}: not a little-endian ELF64 SeaBird object")
-    shoff = struct.unpack_from("<Q", data, 40)[0]
-    shentsize, shnum, shstrndx = struct.unpack_from("<HHH", data, 58)
-    headers = [struct.unpack_from("<IIQQQQIIQQ", data, shoff + i * shentsize)
+    if len(data) < 52 or data[:4] != b"\x7fELF" or data[5] != 1:
+        raise ValueError(f"{path}: not a little-endian ELF object")
+    elf_class = data[4]
+    if elf_class not in (1, 2) or struct.unpack_from("<H", data, 18)[0] != EM_SEABIRD:
+        raise ValueError(f"{path}: not a little-endian SeaBird ELF32/ELF64 object")
+    if elf_class == 2:
+        pointer_size = 8
+        shoff = struct.unpack_from("<Q", data, 40)[0]
+        shentsize, shnum, shstrndx = struct.unpack_from("<HHH", data, 58)
+        section_format = "<IIQQQQIIQQ"
+        flags_offset = 48
+    else:
+        pointer_size = 4
+        shoff = struct.unpack_from("<I", data, 32)[0]
+        shentsize, shnum, shstrndx = struct.unpack_from("<HHH", data, 46)
+        section_format = "<IIIIIIIIII"
+        flags_offset = 36
+    headers = [struct.unpack_from(section_format, data, shoff + i * shentsize)
                for i in range(shnum)]
     shstr = headers[shstrndx]
     names = data[shstr[4]:shstr[4] + shstr[5]]
@@ -86,7 +104,12 @@ def read_object(path):
     strings = data[str_sh[4]:str_sh[4] + str_sh[5]]
     symbols = []
     for offset in range(sym_sh[4], sym_sh[4] + sym_sh[5], sym_sh[9]):
-        name, info, _, shndx, value, size = struct.unpack_from("<IBBHQQ", data, offset)
+        if elf_class == 2:
+            name, info, _, shndx, value, size = struct.unpack_from(
+                "<IBBHQQ", data, offset)
+        else:
+            name, value, size, info, _, shndx = struct.unpack_from(
+                "<IIIBBH", data, offset)
         symbols.append((cstring(strings, name), info >> 4, shndx, value, size))
 
     relocs = []
@@ -100,17 +123,45 @@ def read_object(path):
             continue
         _, rela_sh = named[relocation_name]
         for offset in range(rela_sh[4], rela_sh[4] + rela_sh[5], rela_sh[9]):
-            place, info, addend = struct.unpack_from("<QQq", data, offset)
-            relocs.append((section_name, local_base + place, info >> 32,
-                           info & 0xFFFFFFFF, addend))
+            if elf_class == 2:
+                place, info, addend = struct.unpack_from("<QQq", data, offset)
+                symbol_index, kind = info >> 32, info & 0xFFFFFFFF
+            else:
+                place, info, addend = struct.unpack_from("<IIi", data, offset)
+                symbol_index, kind = info >> 8, info & 0xFF
+            relocs.append((section_name, local_base + place, symbol_index,
+                           kind, addend))
     return ObjectFile(
-        Path(path), input_sections, symbols, relocs, index_locations)
+        Path(path), input_sections, symbols, relocs, elf_class, pointer_size,
+        struct.unpack_from("<I", data, flags_offset)[0], index_locations)
+
+
+def merge_elf_flags(objects):
+    """Validate ABI identity and accumulate compatible environment needs."""
+    window_modes = {
+        bool(obj.e_flags & EF_SB_WINDOWED_ABI) for obj in objects
+    }
+    if len(window_modes) != 1:
+        details = ", ".join(f"{obj.path}=0x{obj.e_flags:x}" for obj in objects)
+        raise ValueError(f"incompatible SeaBird window ABI flags: {details}")
+    output = EF_SB_WINDOWED_ABI if next(iter(window_modes)) else 0
+    if any(obj.e_flags & EF_SB_PAE32_REQUIRED for obj in objects):
+        output |= EF_SB_PAE32_REQUIRED
+    return output
 
 
 def link(paths, load_base=0, page_separate=False):
     objects = [read_object(path) for path in paths]
+    elf_classes = {obj.elf_class for obj in objects}
+    if len(elf_classes) != 1:
+        details = ", ".join(
+            f"{obj.path}=ELF{obj.pointer_size * 8}" for obj in objects)
+        raise ValueError(f"cannot mix SeaBird ELF classes: {details}")
+    pointer_size = objects[0].pointer_size
+    output_flags = merge_elf_flags(objects)
     image = bytearray()
     boundaries = {}
+    boundaries["_e_flags"] = (output_flags, output_flags)
     first_writable = next((name for name in (".data", ".tdata", ".tbss", ".bss")
                            if any(name in obj.sections for obj in objects)), None)
     for section_name in SECTION_ORDER:
@@ -145,8 +196,11 @@ def link(paths, load_base=0, page_separate=False):
         for section_name, offset, symbol_index, kind, addend in obj.relocs:
             place = obj.sections[section_name].base + offset
             if kind == R_SB_RELATIVE:
-                image[place:place + 8] = (load_base + addend).to_bytes(
-                    8, "little", signed=False)
+                value_to_write = load_base + addend
+                if not 0 <= value_to_write < (1 << (pointer_size * 8)):
+                    raise ValueError("relative relocation overflow")
+                image[place:place + pointer_size] = value_to_write.to_bytes(
+                    pointer_size, "little", signed=False)
                 continue
             name, _, shndx, value, _ = obj.symbols[symbol_index]
             target_location = obj.index_locations.get(shndx)
@@ -174,12 +228,17 @@ def link(paths, load_base=0, page_separate=False):
                     raise ValueError(f"TLS_LE relocation targets non-TLS symbol: {name}")
                 tls_base = boundaries[".tdata"][0]
                 value_to_write = target - tls_base + addend
-                image[place:place + 8] = value_to_write.to_bytes(8, "little", signed=True)
+                image[place:place + pointer_size] = value_to_write.to_bytes(
+                    pointer_size, "little", signed=True)
             elif kind in (R_SB_JUMP_SLOT, R_SB_GLOB_DAT):
                 value_to_write = load_base + target + addend
-                image[place:place + 8] = value_to_write.to_bytes(8, "little")
+                if not 0 <= value_to_write < (1 << (pointer_size * 8)):
+                    raise ValueError(f"pointer relocation overflow for {name}")
+                image[place:place + pointer_size] = value_to_write.to_bytes(
+                    pointer_size, "little")
             else:
                 raise ValueError(f"{obj.path}: unsupported relocation {kind}")
+    boundaries["_elf_class"] = (objects[0].elf_class, pointer_size)
     return image, definitions, boundaries
 
 
@@ -188,7 +247,13 @@ def make_executable(image, definitions, boundaries, entry_name, base):
         raise ValueError(f"entry symbol is undefined: {entry_name}")
     file_offset = 0x1000
     entry = base + definitions[entry_name]
-    ident = b"\x7fELF\x02\x01\x01\x00" + bytes(8)
+    elf_class, pointer_size = boundaries.get("_elf_class", (2, 8))
+    if elf_class not in (1, 2):
+        raise ValueError(f"unsupported ELF class: {elf_class}")
+    address_limit = 1 << (pointer_size * 8)
+    if not 0 <= entry < address_limit or not 0 <= base < address_limit:
+        raise ValueError(f"ELF{pointer_size * 8} address overflow")
+    ident = b"\x7fELF" + bytes((elf_class, 1, 1, 0)) + bytes(8)
     groups = []
     text_start, text_end = boundaries[".text"]
     ro_start, ro_end = boundaries[".rodata"]
@@ -200,29 +265,54 @@ def make_executable(image, definitions, boundaries, entry_name, base):
         groups.append((text_start, text_end, text_end, 5))
     if ro_end > ro_start:
         groups.append((ro_start, ro_end, ro_end, 4))
-    writable_start = min(start for start, end in
-                         (boundaries[".data"], boundaries[".tdata"],
-                          boundaries[".bss"], boundaries[".tbss"])
-                         if end > start) if any(end > start for start, end in
-                         (boundaries[".data"], boundaries[".tdata"],
-                          boundaries[".bss"], boundaries[".tbss"])) else 0
-    writable_file_end = max(data_end, tdata_end)
-    writable_mem_end = max(bss_end, tbss_end, writable_file_end)
-    if writable_mem_end > writable_start:
+    writable_ranges = [
+        boundaries[name] for name in (".data", ".tdata", ".bss", ".tbss")
+        if boundaries[name][1] > boundaries[name][0]
+    ]
+    writable_start = min((start for start, _ in writable_ranges), default=0)
+    file_backed_ranges = [
+        boundaries[name] for name in (".data", ".tdata")
+        if boundaries[name][1] > boundaries[name][0]
+    ]
+    writable_file_end = max((end for _, end in file_backed_ranges),
+                            default=writable_start)
+    writable_mem_end = max((end for _, end in writable_ranges),
+                           default=writable_start)
+    if writable_ranges:
         groups.append((writable_start, writable_file_end, writable_mem_end, 6))
-    header = ident + struct.pack(
-        "<HHIQQQIHHHHHH", 2, EM_SEABIRD, 1, entry, 64, 0, 0,
-        64, 56, len(groups) + (1 if tdata_end > tdata_start else 0), 0, 0, 0)
-    programs = b"".join(struct.pack(
-        "<IIQQQQQQ", 1, flags, file_offset + start, base + start,
-        base + start, file_end - start, mem_end - start, 0x1000)
-        for start, file_end, mem_end, flags in groups)
-    if tdata_end > tdata_start:
-        programs += struct.pack("<IIQQQQQQ", 7, 4, file_offset + tdata_start,
-                                base + tdata_start, base + tdata_start,
-                                tdata_end - tdata_start, tbss_end - tdata_start,
-                                16)
-    file_image_end = writable_file_end if writable_mem_end > writable_file_end else len(image)
+    e_flags = boundaries.get("_e_flags", (0, 0))[0]
+    program_count = len(groups) + (1 if tdata_end > tdata_start else 0)
+    if elf_class == 2:
+        header_size, program_size = 64, 56
+        header = ident + struct.pack(
+            "<HHIQQQIHHHHHH", 2, EM_SEABIRD, 1, entry, header_size, 0,
+            e_flags, header_size, program_size, program_count, 0, 0, 0)
+        programs = b"".join(struct.pack(
+            "<IIQQQQQQ", 1, flags, file_offset + start, base + start,
+            base + start, file_end - start, mem_end - start, 0x1000)
+            for start, file_end, mem_end, flags in groups)
+        if tdata_end > tdata_start:
+            programs += struct.pack(
+                "<IIQQQQQQ", 7, 4, file_offset + tdata_start,
+                base + tdata_start, base + tdata_start,
+                tdata_end - tdata_start, tbss_end - tdata_start, 16)
+    else:
+        header_size, program_size = 52, 32
+        header = ident + struct.pack(
+            "<HHIIIIIHHHHHH", 2, EM_SEABIRD, 1, entry, header_size, 0,
+            e_flags, header_size, program_size, program_count, 0, 0, 0)
+        programs = b"".join(struct.pack(
+            "<IIIIIIII", 1, file_offset + start, base + start,
+            base + start, file_end - start, mem_end - start, flags, 0x1000)
+            for start, file_end, mem_end, flags in groups)
+        if tdata_end > tdata_start:
+            programs += struct.pack(
+                "<IIIIIIII", 7, file_offset + tdata_start,
+                base + tdata_start, base + tdata_start,
+                tdata_end - tdata_start, tbss_end - tdata_start, 4, 16)
+    file_image_end = (writable_file_end
+                      if writable_ranges and writable_mem_end > writable_file_end
+                      else len(image))
     return (header + programs + bytes(file_offset - len(header) - len(programs)) +
             image[:file_image_end])
 

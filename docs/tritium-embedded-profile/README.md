@@ -9,5 +9,12 @@ C:\msys64\ucrt64\bin\xelatex.exe main.tex
 C:\msys64\ucrt64\bin\xelatex.exe main.tex
 ```
 
+On Linux/WSL:
+
+```sh
+xelatex -interaction=nonstopmode -halt-on-error main.tex
+xelatex -interaction=nonstopmode -halt-on-error main.tex
+```
+
 XeLaTeX is preferred because the minimal UCRT64 pdfLaTeX installation may not
 include all bitmap font-generation dependencies.

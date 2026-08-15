@@ -45,6 +45,8 @@ public:
     return !Is64Bit && VT == MVT::i32;
   }
   bool ShouldShrinkFPConstant(EVT) const override { return false; }
+  EVT getSetCCResultType(const DataLayout &DL, LLVMContext &Context,
+                         EVT VT) const override;
   bool CanLowerReturn(CallingConv::ID CallConv, MachineFunction &MF,
                       bool IsVarArg,
                       const SmallVectorImpl<ISD::OutputArg> &Outs,

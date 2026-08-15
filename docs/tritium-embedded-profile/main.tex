@@ -145,6 +145,12 @@ Virtualization & Excluded & Virtualization, TSX-style transactions, shadow stack
 \subsection{Register and Encoding Compatibility}
 Tritium implements all 32 SeaBird GPRs. OR32 remains required because R8--R31 are architecturally visible in Tetra mode. MOVHI, SIB, register displacement, and wide-prefix rules are unchanged. Subregister writes zero-extend into the 32-bit Tetra GPR.
 
+Tritium decodes the SeaBird v3.1 \texttt{FD id} performance-marker prefix and
+may ignore every marker. Markers never alter WCET-visible architectural
+semantics, exception behavior, memory ordering, or lockstep comparison state;
+the reference Tritium profile reports no marker optimizations in query leaf
+\texttt{0x0006}.
+
 \callout{A smaller physical implementation may use a compact register-file macro, but it may not hide registers or reinterpret their encodings.}
 
 \section{Required Instruction Subset}
@@ -329,6 +335,6 @@ Release & Profile conformance corpus passes on RTL and gate-level simulation.\\
 \texttt{\ProfileID{} / \ParentISA{} / Tetra / deterministic safety subset}
 
 \subsection*{Source Basis}
-Meisei Tritium Embedded Processor Preliminary Datasheet v1 Draft; SeaBird v3.0 RC2 machine-readable specification and architecture manuals in this repository. This document defines an implementation profile and does not override parent instruction semantics.
+Meisei Tritium Embedded Processor Preliminary Datasheet v1 Draft; SeaBird architecture 3.2 machine-readable specification and architecture manuals in this repository. This document defines an implementation profile and does not override parent instruction semantics.
 
 \end{document}

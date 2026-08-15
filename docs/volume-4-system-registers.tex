@@ -10,7 +10,7 @@
 \AtBeginEnvironment{longtable}{\footnotesize}\AtBeginEnvironment{table}{\footnotesize}
 \lstset{basicstyle=\ttfamily\small,breaklines=true,showstringspaces=false,frame=single,numbers=left,numberstyle=\tiny\color{gray},backgroundcolor=\color{gray!8}}
 \pagestyle{fancy}\fancyhf{}
-\fancyhead[L]{\small\sffamily SeaBird ISA Volume 4}\fancyhead[R]{\small\sffamily Version 3.0 RC1}
+\fancyhead[L]{\small\sffamily SeaBird ISA Volume 4}\fancyhead[R]{\small\sffamily Architecture 3.2 / SDK 1.0}
 \fancyfoot[C]{\thepage}\setlength{\headheight}{14pt}
 \titleformat{\section}{\Large\bfseries\sffamily}{\thesection}{0.8em}{}
 \titleformat{\subsection}{\large\bfseries\sffamily}{\thesubsection}{0.8em}{}
@@ -20,8 +20,8 @@
 \begin{document}
 \begin{titlepage}\centering\vspace*{2cm}
 {\Huge\bfseries SeaBird ISA\\[0.3cm]}{\LARGE Volume 4: System Registers\\[0.5cm]}
-{\Large Version 3.0 Release Candidate 1}\vfill
-{\large Machine-readable architecture revision 1\\June 27, 2026}\vfill
+{\Large Architecture 3.2 / SDK 1.0}\vfill
+{\large Machine-readable architecture 3.2\\August 14, 2026}\vfill
 \end{titlepage}
 \tableofcontents\clearpage
 \subsection{System-Register Namespace}
@@ -53,6 +53,10 @@ System registers are 16-bit numbered resources accessed by RDCR and WRCR. Number
 0x0018 & SYSMASK & FLAGS bits cleared on SYSCALL entry. \\
 0x0019 & PID & Operating-system process identifier; CPL3 read-only. \\
 0x001A & TID & Operating-system thread identifier; CPL3 read-only. \\
+0x001B & WSPBR & Register-window spill-area base; 64-byte aligned. \\
+0x001C & WSP & Current byte position within the bounded spill area. \\
+0x001D & WDEPTH & Read-only logical depth and spilled-window count. \\
+0x001E & WSTATUS & Spill limit, current pin count, and window status. \\
 0x0020 & TIMER & Monotonic timer count. \\
 0x0021 & TIMERCMP & Local timer interrupt deadline. \\
 0x0022 & FREQ & Timer frequency in hertz; read-only. \\
@@ -69,6 +73,27 @@ System registers are 16-bit numbered resources accessed by RDCR and WRCR. Number
 0x0310--0x033F & MPU descriptors & Sixteen three-register region descriptors: MPUBASE$n$, MPULIMIT$n$, and MPUATTR$n$. \\
 0x8000--0xFFFF & Vendor registers & Implementation-specific; never required by portable software. \\ \bottomrule
 \end{longtable}
+
+The register-window state registers are fixed 64-bit resources. WSPBR bits
+63:6 hold a 64-byte-aligned virtual base and WSP bits 63:6 hold the next-free
+byte offset; their low six bits are zero. WDEPTH bits 31:0 are the logical
+depth (root zero) and bits 63:32 are the spilled-window count. WSTATUS bits
+31:0 are the writable exclusive spill limit in 64-byte units, bits 47:32 are
+the read-only pin count, and read-only bits 48, 49, and 50 are
+ASSIST\_PENDING, AREA\_EXHAUSTED, and AT\_ROOT. Other bits read zero.
+
+WSPBR, WSP, and the WSTATUS limit are writable only with windowing disabled at
+depth zero. Reset clears base, offset, limit, spills, pins, and assist state and
+sets AT\_ROOT. Enabling requires QUERY support, CR1.REGISTER\_WINDOWS, aligned
+nonzero spill configuration, depth zero, no pins, and no pending assist.
+Otherwise WRCR raises GPF without changing state.
+
+A spill record stores R8--R31 in increasing number order, with each value in
+little-endian active pointer width and zero padding through the 64-byte-aligned
+mode stride. The payload/stride pairs for Clownfish, Tetra, Dragonet, and
+Droplet are 48/64, 96/128, 192/192, and 384/384 bytes. A spill writes at
+WSPBR+WSP before advancing WSP; a restore decrements WSP before reading. The
+complete record and bounds are validated before either update commits.
 
 System registers replace an unstructured model-specific-register space. Standard numbers and bits are architecture-owned and stable. Vendor registers must be discoverable by vendor and implementation identifiers and must not alter base-ISA behavior when left at reset values.
 

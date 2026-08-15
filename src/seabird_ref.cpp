@@ -19,11 +19,23 @@ struct Cpu {
     std::array<std::array<std::uint64_t, 2>, 32> v{};
     std::array<std::uint8_t, 65536> memory{};
     bool cf = false, zf = false, sf = false, of = false;
+    bool console_enabled = false;
+    std::vector<std::string> console_input;
+    std::size_t console_cursor = 0;
+    std::string console_output;
+    bool window_enabled = false;
+    std::vector<std::array<std::uint64_t, 24>> windows;
+    std::vector<unsigned> window_pin_counts;
 
-    Cpu() { r[7] = memory.size(); }
+    Cpu() {
+        r[7] = memory.size();
+        windows.emplace_back();
+        window_pin_counts.push_back(0);
+    }
 };
 
 struct Decoded {
+    std::uint8_t marker = 0;
     std::uint8_t opcode = 0;
     std::uint8_t reg = 0;
     std::uint8_t rm = 0;
@@ -35,12 +47,15 @@ struct Decoded {
     bool vector_memory = false;
     bool int_to_fp = false;
     bool fp_to_int = false;
+    bool unsigned_conversion = false;
     bool scalar_fp_load = false;
     bool scalar_fp_store = false;
     unsigned scalar_fp_bytes = 8;
     std::uint8_t third = 0;
     std::uint64_t immediate = 0;
     std::uint16_t system_register = 0;
+    std::uint8_t extension_group = 0;
+    std::uint8_t extension_subopcode = 0;
     std::size_t size = 0;
 };
 
@@ -54,6 +69,14 @@ std::uint64_t read_le(const std::vector<std::uint8_t>& code, std::size_t& p, uns
 Decoded decode_at(const std::vector<std::uint8_t>& code, std::size_t start,
                   unsigned operand_bytes = 8) {
     std::size_t p = start;
+    Decoded d;
+    if (p < code.size() && code[p] == 0xFD) {
+        if (p + 2 > code.size()) throw std::runtime_error("truncated performance marker");
+        d.marker = code[p + 1];
+        if (d.marker == 0 || d.marker > 10)
+            throw std::runtime_error("unknown performance marker");
+        p += 2;
+    }
     bool has_orex = false;
     bool has_vector = false;
     unsigned operand_width_code = 0;
@@ -66,15 +89,24 @@ Decoded decode_at(const std::vector<std::uint8_t>& code, std::size_t start,
         p += 2;
     }
     if (p >= code.size()) throw std::runtime_error("truncated instruction");
-    Decoded d;
     d.opcode = code[p++];
     d.vector_memory = has_vector && (d.opcode == 0xA1 || d.opcode == 0xA2);
-    d.int_to_fp = has_vector && d.opcode == 0xAC;
-    d.fp_to_int = has_vector && d.opcode == 0xAD;
+    d.int_to_fp = has_vector && (d.opcode == 0xAC || d.opcode == 0xDB);
+    d.fp_to_int = has_vector && (d.opcode == 0xAD || d.opcode == 0xDC);
+    d.unsigned_conversion = d.opcode == 0xDB || d.opcode == 0xDC;
     if (d.opcode == 0xFF) {
-        if (p + 2 > code.size() || code[p++] != 0x05)
+        if (p + 2 > code.size())
+            throw std::runtime_error("truncated extension opcode");
+        d.extension_group = code[p++];
+        d.extension_subopcode = code[p++];
+        if (d.extension_group == 0x04 && d.extension_subopcode >= 0x1B &&
+            d.extension_subopcode <= 0x1F) {
+            d.size = p - start;
+            return d;
+        }
+        if (d.extension_group != 0x05)
             throw std::runtime_error("unsupported extension opcode");
-        const auto subopcode = code[p++];
+        const auto subopcode = d.extension_subopcode;
         d.scalar_fp_load = subopcode == 0x10;
         d.scalar_fp_store = subopcode == 0x11;
         if (!d.scalar_fp_load && !d.scalar_fp_store)
@@ -166,6 +198,40 @@ Decoded decode_at(const std::vector<std::uint8_t>& code, std::size_t start,
     return d;
 }
 
+void save_visible_window(Cpu& cpu) {
+    for (unsigned reg = 8; reg < 32; ++reg)
+        cpu.windows.back()[reg - 8] = cpu.r[reg];
+}
+
+void load_visible_window(Cpu& cpu) {
+    for (unsigned reg = 8; reg < 32; ++reg)
+        cpu.r[reg] = cpu.windows.back()[reg - 8];
+}
+
+void advance_window(Cpu& cpu) {
+    if (!cpu.window_enabled)
+        throw std::runtime_error("register-window extension is disabled");
+    save_visible_window(cpu);
+    std::array<std::uint64_t, 24> child{};
+    for (unsigned lane = 0; lane < 8; ++lane)
+        child[lane] = cpu.r[24 + lane];
+    cpu.windows.push_back(child);
+    cpu.window_pin_counts.push_back(0);
+    load_visible_window(cpu);
+}
+
+void restore_previous_window(Cpu& cpu) {
+    if (!cpu.window_enabled || cpu.windows.size() <= 1)
+        throw std::runtime_error("register-window underflow");
+    save_visible_window(cpu);
+    const auto child = cpu.windows.back();
+    cpu.windows.pop_back();
+    cpu.window_pin_counts.pop_back();
+    for (unsigned lane = 0; lane < 8; ++lane)
+        cpu.windows.back()[16 + lane] = child[lane];
+    load_visible_window(cpu);
+}
+
 Decoded decode(const std::vector<std::uint8_t>& code, unsigned operand_bytes = 8) {
     Decoded d = decode_at(code, 0, operand_bytes);
     if (d.size != code.size()) throw std::runtime_error("unexpected trailing bytes");
@@ -187,20 +253,39 @@ void flags_sub(Cpu& cpu, std::uint64_t a, std::uint64_t b, std::uint64_t result)
 }
 
 void execute(Cpu& cpu, const Decoded& d) {
+    if (d.extension_group == 0x04) {
+        switch (d.extension_subopcode) {
+        case 0x1B: advance_window(cpu); return;
+        case 0x1C: restore_previous_window(cpu); return;
+        case 0x1D: return;
+        case 0x1E: ++cpu.window_pin_counts.back(); return;
+        case 0x1F:
+            if (cpu.window_pin_counts.back() == 0)
+                throw std::runtime_error("unbalanced WINRELEASE");
+            --cpu.window_pin_counts.back();
+            return;
+        default: throw std::runtime_error("unsupported SYSX execution opcode");
+        }
+    }
     if (d.int_to_fp) {
         if (d.scalar_fp_bytes == 4) {
-            const float value = static_cast<float>(static_cast<std::int64_t>(cpu.r[d.rm]));
+            const float value = d.unsigned_conversion
+                ? static_cast<float>(cpu.r[d.rm])
+                : static_cast<float>(static_cast<std::int64_t>(cpu.r[d.rm]));
             cpu.v[d.reg] = {};
             std::memcpy(&cpu.v[d.reg][0], &value, sizeof(value));
             return;
         }
         if (d.scalar_fp_bytes == 16) {
-            const __float128 value = static_cast<__float128>(
-                static_cast<std::int64_t>(cpu.r[d.rm]));
+            const __float128 value = d.unsigned_conversion
+                ? static_cast<__float128>(cpu.r[d.rm])
+                : static_cast<__float128>(static_cast<std::int64_t>(cpu.r[d.rm]));
             std::memcpy(cpu.v[d.reg].data(), &value, sizeof(value));
             return;
         }
-        const double value = static_cast<double>(static_cast<std::int64_t>(cpu.r[d.rm]));
+        const double value = d.unsigned_conversion
+            ? static_cast<double>(cpu.r[d.rm])
+            : static_cast<double>(static_cast<std::int64_t>(cpu.r[d.rm]));
         std::memcpy(&cpu.v[d.reg][0], &value, sizeof(value));
         cpu.v[d.reg][1] = 0;
         return;
@@ -209,19 +294,24 @@ void execute(Cpu& cpu, const Decoded& d) {
         if (d.scalar_fp_bytes == 4) {
             float value = 0;
             std::memcpy(&value, &cpu.v[d.rm][0], sizeof(value));
-            cpu.r[d.reg] = static_cast<std::uint64_t>(static_cast<std::int64_t>(value));
+            cpu.r[d.reg] = d.unsigned_conversion
+                ? static_cast<std::uint64_t>(value)
+                : static_cast<std::uint64_t>(static_cast<std::int64_t>(value));
             return;
         }
         if (d.scalar_fp_bytes == 16) {
             __float128 value = 0;
             std::memcpy(&value, cpu.v[d.rm].data(), sizeof(value));
-            cpu.r[d.reg] = static_cast<std::uint64_t>(
-                static_cast<std::int64_t>(value));
+            cpu.r[d.reg] = d.unsigned_conversion
+                ? static_cast<std::uint64_t>(value)
+                : static_cast<std::uint64_t>(static_cast<std::int64_t>(value));
             return;
         }
         double value = 0;
         std::memcpy(&value, &cpu.v[d.rm][0], sizeof(value));
-        cpu.r[d.reg] = static_cast<std::uint64_t>(static_cast<std::int64_t>(value));
+        cpu.r[d.reg] = d.unsigned_conversion
+            ? static_cast<std::uint64_t>(value)
+            : static_cast<std::uint64_t>(static_cast<std::int64_t>(value));
         return;
     }
     if (d.vector) {
@@ -379,7 +469,56 @@ void execute(Cpu& cpu, const Decoded& d) {
     case 0x00: dst = src; break;
     case 0x01: cpu.r[d.rm] = d.immediate; break;
     case 0x20: { auto a = dst; dst += src; flags_add(cpu, a, src, dst); break; }
+    case 0x21: {
+        auto &value = cpu.r[d.rm];
+        const auto old = value;
+        value += d.immediate;
+        flags_add(cpu, old, d.immediate, value);
+        break;
+    }
     case 0x22: { auto a = dst; dst -= src; flags_sub(cpu, a, src, dst); break; }
+    case 0x23: {
+        auto &value = cpu.r[d.rm];
+        const auto old = value;
+        value -= d.immediate;
+        flags_sub(cpu, old, d.immediate, value);
+        break;
+    }
+    case 0x24: dst *= src; break;
+    case 0x25: cpu.r[d.rm] *= d.immediate; break;
+    case 0x26:
+        if (src == 0) throw std::runtime_error("signed division by zero");
+        dst = static_cast<std::uint64_t>(
+            static_cast<std::int64_t>(dst) / static_cast<std::int64_t>(src));
+        break;
+    case 0x27: {
+        const auto divisor = static_cast<std::int64_t>(d.immediate);
+        if (divisor == 0) throw std::runtime_error("signed division by zero");
+        auto &value = cpu.r[d.rm];
+        value = static_cast<std::uint64_t>(
+            static_cast<std::int64_t>(value) / divisor);
+        break;
+    }
+    case 0x28:
+        if (src == 0) throw std::runtime_error("signed remainder by zero");
+        dst = static_cast<std::uint64_t>(
+            static_cast<std::int64_t>(dst) % static_cast<std::int64_t>(src));
+        break;
+    case 0x29: {
+        const auto divisor = static_cast<std::int64_t>(d.immediate);
+        if (divisor == 0) throw std::runtime_error("signed remainder by zero");
+        auto &value = cpu.r[d.rm];
+        value = static_cast<std::uint64_t>(
+            static_cast<std::int64_t>(value) % divisor);
+        break;
+    }
+    case 0x2A: dst = -dst; break;
+    case 0x2B: ++dst; break;
+    case 0x2C: --dst; break;
+    case 0x2F:
+        if (src == 0) throw std::runtime_error("unsigned division by zero");
+        dst /= src;
+        break;
     case 0x40: dst &= src; cpu.cf = cpu.of = false; cpu.zf = dst == 0; cpu.sf = dst >> 63; break;
     case 0x41: dst |= src; cpu.cf = cpu.of = false; cpu.zf = dst == 0; cpu.sf = dst >> 63; break;
     case 0x42: dst ^= src; cpu.cf = cpu.of = false; cpu.zf = dst == 0; cpu.sf = dst >> 63; break;
@@ -393,6 +532,40 @@ void execute(Cpu& cpu, const Decoded& d) {
                   ? 1
                   : 0;
         break;
+    case 0xD8: {
+        const auto a = dst;
+        const auto carry_in = static_cast<std::uint64_t>(cpu.cf);
+        const auto partial = a + src;
+        dst = partial + carry_in;
+        cpu.cf = partial < a || dst < partial;
+        cpu.zf = dst == 0;
+        cpu.sf = (dst >> 63) != 0;
+        cpu.of = ((~(a ^ src) & (a ^ dst)) >> 63) != 0;
+        break;
+    }
+    case 0xD9: {
+        const auto a = dst;
+        const auto borrow_in = static_cast<std::uint64_t>(cpu.cf);
+        const auto partial = a - src;
+        dst = partial - borrow_in;
+        cpu.cf = a < src || partial < borrow_in;
+        cpu.zf = dst == 0;
+        cpu.sf = (dst >> 63) != 0;
+        cpu.of = (((a ^ src) & (a ^ dst)) >> 63) != 0;
+        break;
+    }
+    case 0xDA: {
+        const std::uint64_t a_low = static_cast<std::uint32_t>(dst);
+        const std::uint64_t a_high = dst >> 32;
+        const std::uint64_t b_low = static_cast<std::uint32_t>(src);
+        const std::uint64_t b_high = src >> 32;
+        const std::uint64_t low_product = a_low * b_low;
+        const std::uint64_t cross = a_high * b_low + (low_product >> 32);
+        const std::uint64_t cross_low =
+            (cross & 0xFFFFFFFFULL) + a_low * b_high;
+        dst = a_high * b_high + (cross >> 32) + (cross_low >> 32);
+        break;
+    }
     default: throw std::runtime_error("unsupported reference execution opcode");
     }
 }
@@ -405,7 +578,7 @@ void run_function(Cpu& cpu, const std::vector<std::uint8_t>& code,
                   std::size_t entry) {
     std::size_t pc = entry;
     std::vector<std::size_t> returns;
-    for (unsigned steps = 0; steps < 1024; ++steps) {
+    for (unsigned steps = 0; steps < 100000; ++steps) {
         if (pc >= code.size()) throw std::runtime_error("PC outside code image");
         Decoded d = decode_at(code, pc);
         pc += d.size;
@@ -420,13 +593,64 @@ void run_function(Cpu& cpu, const std::vector<std::uint8_t>& code,
             pc = static_cast<std::size_t>(target);
             cpu.r[7] += 8;
             returns.pop_back();
+            if (cpu.window_enabled)
+                restore_previous_window(cpu);
             continue;
         }
         if (d.opcode == 0x82) {
-            if (cpu.r[0] == 2)
+            if (!cpu.console_enabled && cpu.r[0] == 2) {
                 cpu.r[0] = 42;
-            else
+                continue;
+            }
+            if (!cpu.console_enabled)
                 throw std::runtime_error("unsupported hosted syscall");
+            auto next_input = [&]() {
+                if (cpu.console_cursor < cpu.console_input.size())
+                    return cpu.console_input[cpu.console_cursor++];
+                std::string token;
+                if (!(std::cin >> token))
+                    throw std::runtime_error("console input exhausted");
+                return token;
+            };
+            auto emit = [&](const std::string &text) {
+                cpu.console_output += text;
+                std::cout << text << std::flush;
+            };
+            switch (cpu.r[0]) {
+            case 1:
+                cpu.r[0] = static_cast<std::uint64_t>(
+                    std::stoll(next_input(), nullptr, 0));
+                break;
+            case 2:
+                emit(std::to_string(static_cast<std::int64_t>(cpu.r[1])));
+                cpu.r[0] = 0;
+                break;
+            case 3:
+                emit(std::string(
+                    1, static_cast<char>(cpu.r[1] & 0xFF)));
+                cpu.r[0] = 0;
+                break;
+            case 4: {
+                std::size_t address = static_cast<std::size_t>(cpu.r[1]);
+                std::string text;
+                while (address < cpu.memory.size() && cpu.memory[address])
+                    text.push_back(static_cast<char>(cpu.memory[address++]));
+                if (address == cpu.memory.size())
+                    throw std::runtime_error("unterminated console string");
+                emit(text);
+                cpu.r[0] = 0;
+                break;
+            }
+            case 5: {
+                const std::string token = next_input();
+                if (token.empty())
+                    throw std::runtime_error("empty console character input");
+                cpu.r[0] = static_cast<unsigned char>(token.front());
+                break;
+            }
+            default:
+                throw std::runtime_error("unsupported console syscall");
+            }
             continue;
         }
         if (d.opcode == 0x5E) {
@@ -436,19 +660,24 @@ void run_function(Cpu& cpu, const std::vector<std::uint8_t>& code,
                 cpu.memory[static_cast<std::size_t>(cpu.r[7]) + i] =
                     static_cast<std::uint8_t>(pc >> (i * 8));
             returns.push_back(pc);
+            if (cpu.window_enabled)
+                advance_window(cpu);
             pc = static_cast<std::size_t>(
                 static_cast<std::int64_t>(pc) +
                 static_cast<std::int32_t>(d.immediate));
             continue;
         }
         if (d.opcode == 0x5F) {
+            const auto target = cpu.r[d.rm];
             if (cpu.r[7] < 8) throw std::runtime_error("return stack overflow");
             cpu.r[7] -= 8;
             for (unsigned i = 0; i < 8; ++i)
                 cpu.memory[static_cast<std::size_t>(cpu.r[7]) + i] =
                     static_cast<std::uint8_t>(pc >> (i * 8));
             returns.push_back(pc);
-            pc = static_cast<std::size_t>(cpu.r[d.rm]);
+            if (cpu.window_enabled)
+                advance_window(cpu);
+            pc = static_cast<std::size_t>(target);
             continue;
         }
         if (d.opcode == 0x5C) {
@@ -741,6 +970,27 @@ void self_test() {
     cpu.r[8] = 7;
     auto add = decode({0xFE, 0x80, 0x20, 0xC8, 0x05});
     require(add.reg == 9 && add.rm == 8, "OREX register decode");
+    for (std::uint8_t marker = 1; marker <= 10; ++marker) {
+        auto marked_ret = decode({0xFD, marker, 0x60});
+        require(marked_ret.marker == marker && marked_ret.opcode == 0x60 &&
+                    marked_ret.size == 3,
+                "performance marker decode");
+    }
+    auto marked_add = decode({0xFD, 0x08, 0xFE, 0x80, 0x20, 0xC8, 0x05});
+    require(marked_add.marker == 8 && marked_add.reg == 9 &&
+                marked_add.rm == 8,
+            "performance marker before OREX decode");
+    Cpu marked_branch_cpu;
+    marked_branch_cpu.zf = true;
+    run_function(marked_branch_cpu,
+                 {0xFD, 0x02, 0x61, 0x00, 0x00, 0x00, 0x00, 0x60}, 0);
+    bool rejected_unknown_marker = false;
+    try {
+        (void)decode({0xFD, 0x0B, 0x60});
+    } catch (const std::runtime_error &) {
+        rejected_unknown_marker = true;
+    }
+    require(rejected_unknown_marker, "unknown performance marker rejection");
     auto rdcr = decode({0x80, 0xC1, 0x00, 0x03});
     require(rdcr.rm == 1 && rdcr.system_register == 0x0300,
             "RDCR wide system-register decode");
@@ -749,6 +999,25 @@ void self_test() {
             "WRCR OREX and wide system-register decode");
     execute(cpu, add);
     require(cpu.r[9] == 11, "high-register ADD execution");
+
+    Cpu extended_integer_cpu;
+    extended_integer_cpu.r[0] = UINT64_MAX;
+    extended_integer_cpu.r[1] = 0;
+    extended_integer_cpu.cf = true;
+    execute(extended_integer_cpu, decode({0xD8, 0xC1}));
+    require(extended_integer_cpu.r[0] == 0 && extended_integer_cpu.cf,
+            "ADC carry-chain execution");
+    extended_integer_cpu.r[0] = 0;
+    extended_integer_cpu.cf = true;
+    execute(extended_integer_cpu, decode({0xD9, 0xC1}));
+    require(extended_integer_cpu.r[0] == UINT64_MAX &&
+                extended_integer_cpu.cf,
+            "SBB borrow-chain execution");
+    extended_integer_cpu.r[0] = UINT64_MAX;
+    extended_integer_cpu.r[1] = UINT64_MAX;
+    execute(extended_integer_cpu, decode({0xDA, 0xC1}));
+    require(extended_integer_cpu.r[0] == UINT64_MAX - 1,
+            "UMULH execution");
 
     auto movi = decode({0xFE, 0x80, 0x01, 0xC0, 0x04, 0x88, 0x77, 0x66, 0x55,
                         0x44, 0x33, 0x22, 0x11});
@@ -776,6 +1045,37 @@ void self_test() {
     float fp32_result = 0;
     std::memcpy(&fp32_result, &cpu.v[0][0], sizeof(fp32_result));
     require(fp32_result == 3.75f, "binary32 FADD execution");
+    cpu.r[1] = std::uint64_t(1) << 63;
+    execute(cpu, decode({0xFE, 0x40, 0xDB, 0xC1, 0x18}));
+    double unsigned_fp = 0;
+    std::memcpy(&unsigned_fp, &cpu.v[0][0], sizeof(unsigned_fp));
+    require(unsigned_fp == 9223372036854775808.0,
+            "unsigned integer to binary64 execution");
+    const double unsigned_fraction = 123.75;
+    std::memcpy(&cpu.v[1][0], &unsigned_fraction, sizeof(unsigned_fraction));
+    execute(cpu, decode({0xFE, 0x40, 0xDC, 0xC1, 0x18}));
+    require(cpu.r[0] == 123,
+            "binary64 to unsigned integer truncation execution");
+
+    Cpu window_cpu;
+    window_cpu.window_enabled = true;
+    window_cpu.r[24] = 41;
+    execute(window_cpu, decode({0xFF, 0x04, 0x1B}));
+    require(window_cpu.windows.size() == 2 && window_cpu.r[8] == 41 &&
+                window_cpu.r[16] == 0,
+            "WINNEW overlap and local isolation");
+    window_cpu.r[8] = 42;
+    window_cpu.r[16] = 99;
+    execute(window_cpu, decode({0xFF, 0x04, 0x1E}));
+    execute(window_cpu, decode({0xFF, 0x04, 0x1F}));
+    execute(window_cpu, decode({0xFF, 0x04, 0x1C}));
+    require(window_cpu.windows.size() == 1 && window_cpu.r[24] == 42 &&
+                window_cpu.r[16] == 0,
+            "WINPREV overlap and parent restoration");
+    const auto reuse_call = decode({0xFD, 0x09, 0x5E, 0, 0, 0, 0});
+    const auto leaf_call = decode({0xFD, 0x0A, 0x5E, 0, 0, 0, 0});
+    require(reuse_call.marker == 9 && leaf_call.marker == 10,
+            "register-window call markers");
     std::cout << "SeaBird reference-model self-test passed\n";
 }
 
@@ -783,6 +1083,18 @@ void self_test() {
 
 int main(int argc, char** argv) {
     try {
+        if (argc >= 3 && std::string(argv[1]) == "--console") {
+            const auto code = read_binary(argv[2]);
+            if (code.size() > Cpu{}.memory.size())
+                throw std::runtime_error("console image exceeds reference memory");
+            Cpu cpu;
+            cpu.console_enabled = true;
+            for (int index = 3; index < argc; ++index)
+                cpu.console_input.emplace_back(argv[index]);
+            std::copy(code.begin(), code.end(), cpu.memory.begin());
+            run_function(cpu, code, 0);
+            return 0;
+        }
         if (argc == 5 && std::string(argv[1]) == "--expect-result") {
             const auto code = read_binary(argv[2]);
             const auto entry =
@@ -901,6 +1213,7 @@ int main(int argc, char** argv) {
                      "--c-branch FILE | --c-memory FILE | --c-stack FILE | "
                      "--c-linked FILE | --c-indirect FILE | "
                      "--c-stack-args FILE | --c-ordered FILE\n";
+        std::cerr << "       seabird-ref --console FILE [INPUT ...]\n";
         return 2;
     } catch (const std::exception& e) {
         std::cerr << "reference model failure: " << e.what() << '\n';

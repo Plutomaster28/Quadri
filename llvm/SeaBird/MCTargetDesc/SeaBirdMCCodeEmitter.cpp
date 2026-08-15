@@ -47,6 +47,15 @@ public:
                          SmallVectorImpl<MCFixup> &Fixups,
                          const MCSubtargetInfo &STI) const override {
     const std::uint64_t Flags = MCII.get(Inst.getOpcode()).TSFlags;
+    const unsigned Marker = Inst.getFlags() & SeaBirdII::MarkerMask;
+    if (Marker != SeaBirdII::NoMarker) {
+      if (Marker > SeaBirdII::Leaf) {
+        Context.reportError(Inst.getLoc(), "unknown SeaBird performance marker");
+        return;
+      }
+      emitByte(Code, SeaBirdII::PerformanceMarkerEscape);
+      emitByte(Code, static_cast<std::uint8_t>(Marker));
+    }
     const unsigned Opcode = Flags & SeaBirdII::OpcodeMask;
     const unsigned Form = (Flags & SeaBirdII::FormMask) >> SeaBirdII::FormShift;
     const unsigned ExtensionGroup =
@@ -83,7 +92,8 @@ public:
           const unsigned Base =
               registerNumber(Inst.getOperand(MemoryOp).getReg());
           const MCRegister IndexReg = Inst.getOperand(MemoryOp + 1).getReg();
-          const bool HasIndex = IndexReg != SeaBird::R4;
+          const bool HasIndex = IndexReg != SeaBird::R4 &&
+                                IndexReg != SeaBird::NOIDX;
           const unsigned Index = HasIndex ? registerNumber(IndexReg) : 4;
           const std::int64_t Scale = Inst.getOperand(MemoryOp + 2).getImm();
           const std::int64_t Disp = Inst.getOperand(MemoryOp + 3).getImm();
@@ -252,7 +262,8 @@ public:
           const unsigned Base =
               registerNumber(Inst.getOperand(MemoryOp).getReg());
           const MCRegister IndexReg = Inst.getOperand(MemoryOp + 1).getReg();
-          const bool HasIndex = IndexReg != SeaBird::R4;
+          const bool HasIndex = IndexReg != SeaBird::R4 &&
+                                IndexReg != SeaBird::NOIDX;
           const unsigned Index = HasIndex ? registerNumber(IndexReg) : 4;
           const std::int64_t Scale = Inst.getOperand(MemoryOp + 2).getImm();
           const std::int64_t Disp = Inst.getOperand(MemoryOp + 3).getImm();
@@ -331,9 +342,7 @@ public:
         emitByte(Code, Opcode);
       };
 
-      if (Inst.getOpcode() == SeaBird::ISYNC ||
-          Inst.getOpcode() == SeaBird::INVTLBALL ||
-          Inst.getOpcode() == SeaBird::ENDBR) {
+      if (Form == SeaBirdII::NoOperand) {
         EmitSysXOpcode();
         return;
       }
@@ -451,7 +460,8 @@ public:
 
       const unsigned Base = registerNumber(Inst.getOperand(0).getReg());
       const MCRegister IndexReg = Inst.getOperand(1).getReg();
-      const bool HasIndex = IndexReg != SeaBird::R4;
+      const bool HasIndex = IndexReg != SeaBird::R4 &&
+                            IndexReg != SeaBird::NOIDX;
       const unsigned Index = HasIndex ? registerNumber(IndexReg) : 4;
       const std::int64_t Scale = Inst.getOperand(2).getImm();
       const std::int64_t Disp = Inst.getOperand(3).getImm();
@@ -549,8 +559,12 @@ public:
         const MCExpr *Bias = MCConstantExpr::create(4, Context);
         const MCExpr *Expr =
             MCBinaryExpr::createSub(Target.getExpr(), Bias, Context);
+        // The marker prefix, when present, precedes the opcode.  Anchor the
+        // relocation at the current output position instead of assuming the
+        // displacement always begins at byte one.
         Fixups.push_back(MCFixup::create(
-            1, Expr, MCFixupKind(SeaBird::fixup_seabird_pcrel32), true));
+            Code.size(), Expr, MCFixupKind(SeaBird::fixup_seabird_pcrel32),
+            true));
         emitLittleEndian(Code, 0, 4);
       }
       return;
@@ -756,7 +770,8 @@ public:
       const unsigned Dst1 = registerNumber(Inst.getOperand(0).getReg());
       const unsigned Dst2 = registerNumber(Inst.getOperand(1).getReg());
       const unsigned Base = registerNumber(Inst.getOperand(2).getReg());
-      if (Inst.getOperand(3).getReg() != SeaBird::R4 ||
+      if ((Inst.getOperand(3).getReg() != SeaBird::R4 &&
+           Inst.getOperand(3).getReg() != SeaBird::NOIDX) ||
           Inst.getOperand(4).getImm() != 1 ||
           Inst.getOperand(5).getImm() != 0) {
         Context.reportError(
@@ -819,7 +834,8 @@ public:
       const unsigned Reg = vectorNumber(Inst.getOperand(RegOp).getReg());
       const unsigned Base = registerNumber(Inst.getOperand(MemoryOp).getReg());
       const MCRegister IndexReg = Inst.getOperand(MemoryOp + 1).getReg();
-      const bool HasIndex = IndexReg != SeaBird::R4;
+      const bool HasIndex = IndexReg != SeaBird::R4 &&
+                            IndexReg != SeaBird::NOIDX;
       const unsigned Index = HasIndex ? registerNumber(IndexReg) : 4;
       const std::int64_t Scale = Inst.getOperand(MemoryOp + 2).getImm();
       const std::int64_t Disp = Inst.getOperand(MemoryOp + 3).getImm();
@@ -868,7 +884,8 @@ public:
       const unsigned Reg = vectorNumber(Inst.getOperand(RegOp).getReg());
       const unsigned Base = registerNumber(Inst.getOperand(MemoryOp).getReg());
       const MCRegister IndexReg = Inst.getOperand(MemoryOp + 1).getReg();
-      const bool HasIndex = IndexReg != SeaBird::R4;
+      const bool HasIndex = IndexReg != SeaBird::R4 &&
+                            IndexReg != SeaBird::NOIDX;
       const unsigned Index = HasIndex ? registerNumber(IndexReg) : 4;
       const std::int64_t Scale = Inst.getOperand(MemoryOp + 2).getImm();
       const std::int64_t Disp = Inst.getOperand(MemoryOp + 3).getImm();
@@ -952,7 +969,8 @@ public:
           MemoryOnly ? 0 : registerNumber(Inst.getOperand(RegOp).getReg());
       const unsigned Base = registerNumber(Inst.getOperand(MemoryOp).getReg());
       const MCRegister IndexReg = Inst.getOperand(MemoryOp + 1).getReg();
-      const bool HasIndex = IndexReg != SeaBird::R4;
+      const bool HasIndex = IndexReg != SeaBird::R4 &&
+                            IndexReg != SeaBird::NOIDX;
       const unsigned Index = HasIndex ? registerNumber(IndexReg) : 4;
       const std::int64_t Scale = Inst.getOperand(MemoryOp + 2).getImm();
       const std::int64_t Disp = Inst.getOperand(MemoryOp + 3).getImm();

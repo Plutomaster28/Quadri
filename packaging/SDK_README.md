@@ -1,7 +1,9 @@
-# SeaBird SDK v0.1.0 — tuna
+# SeaBird SDK v1.0.0 — marlin
 
-This package is the SeaBird Foundation Edition developer SDK.
-`tuna` identifies the official standard build for this release. The SDK is
+This package is the SeaBird Advanced Processor Edition SDK, containing the
+SeaBird 3.2 ISA, PAE32, register windows, performance markers, qualified
+LLVM/Clang binaries, reference tooling, and conformance material.
+`marlin` identifies the official standard build for this release. The SDK is
 distributed under the Apache License 2.0; see `LICENSE`.
 
 ## Quick start
@@ -20,7 +22,9 @@ python3 bin/link_seabird.py --format binary -o c-smoke.bin c-smoke.o
 llvm-objcopy -O ihex --only-section=.text c-smoke.o c-smoke.hex
 ```
 
-For Tritium, use `--target=seabird32-unknown-none -mcpu=tritium-v1`.
+For Tritium, use `--target=seabird32-unknown-none -mcpu=tritium-v1`. For the
+PAE32/register-window Axium profile, use
+`--target=seabird32-unknown-none -mcpu=axium-m-v1`.
 
 ## Included commands
 
@@ -32,15 +36,22 @@ For Tritium, use `--target=seabird32-unknown-none -mcpu=tritium-v1`.
 - `llvm-ar`, `llvm-ranlib`: static archive tools
 - `llvm-objcopy`: object-section binary and Intel HEX conversion
 - `llvm-strip`: symbol/debug metadata removal
-- `link_seabird.py`: current static SeaBird64 linker
+- `link_seabird.py`: static ELF32/ELF64 SeaBird linker and flat-image writer
+- `seabird-ref`: executable ISA/reference-model and console-image runner
+- `pebble-xlate`: x86-to-SeaBird translation prototype
 
 The packaged Clang resource headers, minimal runtime sources, ISA database,
-examples, status documents, release notes, and SHA-256 manifest are included.
+extension specifications, TeX/PDF manuals, examples, reference-model sources,
+three conformance vector sets, status documents, release notes, and SHA-256
+manifest are included.
 
-This is a developer alpha. Read `RELEASE_NOTES.md` and `COMPILER_STATUS.md`
-before selecting it for a production hardware or ABI freeze.
+This is the qualified architecture 3.2 / SDK 1.0 Linux x86_64 tool bundle. It
+was built from LLVM 22.1.4 with assertions enabled and ships its exact source
+commit, configuration, qualification results, and tool hashes in
+`toolchain-build.json`. Read `VALIDATION.md` and `COMPILER_STATUS.md` before
+deployment.
 
-The current loadable ELF writer emits a compact segment-oriented executable
+The loadable ELF writer emits a compact segment-oriented executable
 without ordinary output sections. Use `link_seabird.py --format binary` for a
 linked flat image; use `llvm-objcopy` on relocatable objects when extracting or
 converting individual sections.

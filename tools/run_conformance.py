@@ -14,6 +14,23 @@ def run(*args):
     subprocess.run(args, cwd=ROOT, check=True)
 
 
+def test_elf_flag_merge():
+    from link_seabird import ObjectFile, merge_elf_flags
+
+    def obj(name, flags):
+        return ObjectFile(Path(name), {}, [], [], 2, 8, e_flags=flags)
+
+    if merge_elf_flags([obj("generic.o", 0), obj("pae.o", 2)]) != 2:
+        raise SystemExit("PAE requirement was not propagated by linker")
+    if merge_elf_flags([obj("window.o", 1), obj("window-pae.o", 3)]) != 3:
+        raise SystemExit("windowed PAE requirement was not propagated by linker")
+    try:
+        merge_elf_flags([obj("ordinary.o", 0), obj("window.o", 1)])
+    except ValueError:
+        return
+    raise SystemExit("linker accepted mixed ordinary/windowed ABI objects")
+
+
 def main():
     vectors = json.loads((ROOT / "tests/ratification-vectors.json").read_text())
     expected_priority = [
@@ -24,13 +41,20 @@ def main():
         raise SystemExit("exception priority vector does not match Volume 2")
     if len({case["name"] for case in vectors["memory_litmus"]}) != len(vectors["memory_litmus"]):
         raise SystemExit("duplicate memory litmus name")
+    test_elf_flag_merge()
 
     run(PYTHON, "tools/build_isa_spec.py")
     run(PYTHON, "tools/generate_golden_vectors.py")
     run(PYTHON, "tools/verify_ratification.py")
+    run(PYTHON, "tools/verify_documentation.py")
     run(PYTHON, "tools/independent_oracle.py")
+    run(PYTHON, "tools/pae_oracle.py")
     run("g++", "-std=c++17", "-O2", "-Wall", "-Wextra", "-pedantic", "src/seabird_ref.cpp", "-o", "seabird-ref.exe")
     run(str(ROOT / "seabird-ref.exe"), "--self-test")
+    example_manifest = ROOT / "build/example-programs/manifest.json"
+    if example_manifest.exists():
+        run(PYTHON, "tools/test_example_programs.py",
+            "--reference", str(ROOT / "seabird-ref.exe"))
     varargs_object = ROOT / "build/llvm-tests/varargs.o"
     if varargs_object.exists():
         from link_seabird import link

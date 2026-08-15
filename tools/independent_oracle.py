@@ -18,7 +18,7 @@ EVENT_CATEGORIES = {
 }
 MEMORY = {"LD", "ST", "LDI", "LDB", "LDH", "LDW", "LDQ", "STB", "STH", "STW", "STQ", "LDP", "STP"}
 CONTROL = {"JMP", "JMPA", "CALL", "CALLA", "RET", "JE", "JNE", "JG", "JGE", "JL", "JLE", "JC", "JNC", "JO", "JNO", "JS", "JNS", "JZR", "JNZR", "BRR", "TRAP", "YIELD"}
-FP = {"FADD", "FSUB", "FMUL", "FDIV", "FSQRT", "FCMP", "FCVTI", "FCVTS", "FNEG", "FABS", "FMADD", "FMSUB", "FNMADD", "FNMSUB", "FMIN", "FMAX", "FRECIP", "FRSQRT", "FRND", "FRNDZ", "FCVT.S2D", "FCVT.D2S", "FCVTINT", "FCLASS", "FCHS", "FTEST"}
+FP = {"FADD", "FSUB", "FMUL", "FDIV", "FSQRT", "FCMP", "FCVTI", "FCVTS", "FCVTU", "FCVTUS", "FNEG", "FABS", "FMADD", "FMSUB", "FNMADD", "FNMSUB", "FMIN", "FMAX", "FRECIP", "FRSQRT", "FRND", "FRNDZ", "FCVT.S2D", "FCVT.D2S", "FCVTINT", "FCLASS", "FCHS", "FTEST"}
 COUNT_ZERO = {"CLZ", "CTZ", "LZCNT", "TZCNT", "TZCNTV", "CLZ_FAST", "TZCNT_FAST"}
 DIVIDE = {"DIV", "DIVI", "UDIV", "MOD", "MODI"}
 
@@ -62,9 +62,27 @@ def edge(vector):
     if op == "ADD64":
         value = (a + b) & MASK64
         return {"value":value, "CF":int(a + b > MASK64), "ZF":int(value == 0), "SF":value >> 63, "OF":int(((~(a ^ b) & (a ^ value)) >> 63) & 1)}
+    if op == "ADC64":
+        carry = vector["carry"]
+        total = a + b + carry; value = total & MASK64
+        signed_a = a - (1 << 64) if a >> 63 else a
+        signed_b = b - (1 << 64) if b >> 63 else b
+        signed_total = signed_a + signed_b + carry
+        return {"value":value, "CF":int(total > MASK64), "ZF":int(value == 0),
+                "SF":value >> 63, "OF":int(signed_total < -(1 << 63) or signed_total > (1 << 63) - 1)}
     if op == "SUB64":
         value = (a - b) & MASK64
         return {"value":value, "CF":int(a < b), "ZF":int(value == 0), "SF":value >> 63, "OF":int((((a ^ b) & (a ^ value)) >> 63) & 1)}
+    if op == "SBB64":
+        borrow = vector["borrow"]; value = (a - b - borrow) & MASK64
+        signed_a = a - (1 << 64) if a >> 63 else a
+        signed_b = b - (1 << 64) if b >> 63 else b
+        signed_total = signed_a - signed_b - borrow
+        return {"value":value, "CF":int(a < b + borrow), "ZF":int(value == 0),
+                "SF":value >> 63, "OF":int(signed_total < -(1 << 63) or signed_total > (1 << 63) - 1)}
+    if op == "UMULH64": return (a * b) >> 64
+    if op == "FCVTU64": return float(a)
+    if op == "FCVTUS64": return int(a)
     if op == "SHL64": return (a << (b & 63)) & MASK64
     if op == "SAR64":
         signed = a - (1 << 64) if a & (1 << 63) else a

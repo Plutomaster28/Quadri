@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "architecture_version": "3.0-rc2",
+  "architecture_version": "3.2",
   "vectors": [
     {
       "instruction_id": "SB-BASE-MOV-001-AE65A4",
@@ -8998,6 +8998,451 @@
       "expected": {
         "kind": "scalar",
         "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-ADC-001-V31",
+      "mnemonic": "ADC",
+      "category": "Arithmetic",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-SBB-001-V31",
+      "mnemonic": "SBB",
+      "category": "Arithmetic",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-UMULH-001-V31",
+      "mnemonic": "UMULH",
+      "category": "Arithmetic",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "scalar",
+        "value": 0
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-FCVTU-001-V31",
+      "mnemonic": "FCVTU",
+      "category": "Floating Point",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "fp",
+        "value": "+zero"
+      }
+    },
+    {
+      "instruction_id": "SB-BASE-FCVTUS-001-V31",
+      "mnemonic": "FCVTUS",
+      "category": "Floating Point",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "fp",
+        "value": "+zero"
+      }
+    },
+    {
+      "instruction_id": "SB-AVX-VCOMPARE_EQ-001-V31",
+      "mnemonic": "VCOMPARE_EQ",
+      "category": "Advanced Vector Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-AVX-VCOMPARE_NE-001-V31",
+      "mnemonic": "VCOMPARE_NE",
+      "category": "Advanced Vector Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-AVX-VCOMPARE_ULT-001-V31",
+      "mnemonic": "VCOMPARE_ULT",
+      "category": "Advanced Vector Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-AVX-VCOMPARE_UGT-001-V31",
+      "mnemonic": "VCOMPARE_UGT",
+      "category": "Advanced Vector Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-AVX-VNOT-001-V31",
+      "mnemonic": "VNOT",
+      "category": "Advanced Vector Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "vector",
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "instruction_id": "SB-SYSX-WINNEW-001-V10",
+      "mnemonic": "WINNEW",
+      "category": "Architectural System Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "system:WINNEW"
+      }
+    },
+    {
+      "instruction_id": "SB-SYSX-WINPREV-001-V10",
+      "mnemonic": "WINPREV",
+      "category": "Architectural System Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "system:WINPREV"
+      }
+    },
+    {
+      "instruction_id": "SB-SYSX-WINRESERVE-001-V10",
+      "mnemonic": "WINRESERVE",
+      "category": "Architectural System Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "system:WINRESERVE"
+      }
+    },
+    {
+      "instruction_id": "SB-SYSX-WINPIN-001-V10",
+      "mnemonic": "WINPIN",
+      "category": "Architectural System Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "system:WINPIN"
+      }
+    },
+    {
+      "instruction_id": "SB-SYSX-WINRELEASE-001-V10",
+      "mnemonic": "WINRELEASE",
+      "category": "Architectural System Extensions",
+      "case": "zero-identity-v1",
+      "inputs": {
+        "dst": 0,
+        "src": 0,
+        "aux": 0,
+        "imm": 0,
+        "lanes": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "flags": {
+          "CF": 0,
+          "ZF": 0,
+          "SF": 0,
+          "OF": 0
+        }
+      },
+      "expected": {
+        "kind": "event",
+        "event": "system:WINRELEASE"
       }
     }
   ]

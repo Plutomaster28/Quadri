@@ -1,9 +1,12 @@
 #include "MCTargetDesc/SeaBirdMCTargetDesc.h"
+#include "MCTargetDesc/SeaBirdBaseInfo.h"
 #include "TargetInfo/SeaBirdTargetInfo.h"
 #include "llvm/MC/MCAsmInfo.h"
 #include "llvm/MC/MCContext.h"
 #include "llvm/MC/MCExpr.h"
 #include "llvm/MC/MCInst.h"
+#include "llvm/MC/MCInstrDesc.h"
+#include "llvm/MC/MCInstrInfo.h"
 #include "llvm/MC/MCParser/AsmLexer.h"
 #include "llvm/MC/MCParser/MCAsmParser.h"
 #include "llvm/MC/MCParser/MCParsedAsmOperand.h"
@@ -11,6 +14,7 @@
 #include "llvm/MC/MCStreamer.h"
 #include "llvm/MC/MCSubtargetInfo.h"
 #include "llvm/MC/TargetRegistry.h"
+#include "llvm/ADT/StringSwitch.h"
 #include "llvm/Support/Casting.h"
 #include "llvm/Support/Compiler.h"
 #include "llvm/Support/SMLoc.h"
@@ -150,7 +154,24 @@ public:
 
 class SeaBirdAsmParser : public MCTargetAsmParser {
   MCAsmParser &Parser;
+  const MCInstrInfo &MII;
   bool Is64Bit;
+  unsigned PendingMarker = SeaBirdII::NoMarker;
+
+  static unsigned parseMarkerName(StringRef Name) {
+    return StringSwitch<unsigned>(Name.lower())
+        .Case("assume", SeaBirdII::Assume)
+        .Case("likely", SeaBirdII::Likely)
+        .Case("unlikely", SeaBirdII::Unlikely)
+        .Case("stream", SeaBirdII::Stream)
+        .Case("prefetch", SeaBirdII::Prefetch)
+        .Case("temporary", SeaBirdII::Temporary)
+        .Case("persistent", SeaBirdII::Persistent)
+        .Case("independent", SeaBirdII::Independent)
+        .Case("reuse", SeaBirdII::Reuse)
+        .Case("leaf", SeaBirdII::Leaf)
+        .Default(SeaBirdII::NoMarker);
+  }
 
 #define GET_ASSEMBLER_HEADER
 #include "SeaBirdGenAsmMatcher.inc"
@@ -233,7 +254,19 @@ class SeaBirdAsmParser : public MCTargetAsmParser {
 
   bool parseInstruction(ParseInstructionInfo &Info, StringRef Name,
                         SMLoc NameLoc, OperandVector &Operands) override {
-    Operands.push_back(SeaBirdOperand::createToken(Name.lower(), NameLoc));
+    PendingMarker = SeaBirdII::NoMarker;
+    StringRef Mnemonic = Name;
+    const size_t Dot = Name.find('.');
+    if (Dot != StringRef::npos) {
+      const unsigned ParsedMarker = parseMarkerName(Name.take_front(Dot));
+      if (ParsedMarker != SeaBirdII::NoMarker) {
+        PendingMarker = ParsedMarker;
+        Mnemonic = Name.drop_front(Dot + 1);
+        if (Mnemonic.empty())
+          return Error(NameLoc, "performance marker requires an instruction");
+      }
+    }
+    Operands.push_back(SeaBirdOperand::createToken(Mnemonic.lower(), NameLoc));
     if (Parser.getTok().is(AsmToken::EndOfStatement))
       return false;
 
@@ -277,6 +310,43 @@ class SeaBirdAsmParser : public MCTargetAsmParser {
     switch (MatchInstructionImpl(Operands, Inst, ErrorInfo,
                                  MatchingInlineAsm)) {
     case Match_Success:
+      if (PendingMarker != SeaBirdII::NoMarker) {
+        const MCInstrDesc &Desc = MII.get(Inst.getOpcode());
+        bool Valid = true;
+        switch (PendingMarker) {
+        case SeaBirdII::Assume:
+          Valid = Desc.mayLoad() || Desc.mayStore();
+          break;
+        case SeaBirdII::Likely:
+        case SeaBirdII::Unlikely:
+          Valid = Desc.isConditionalBranch();
+          break;
+        case SeaBirdII::Stream:
+          Valid = Desc.mayLoad() || Desc.mayStore();
+          break;
+        case SeaBirdII::Prefetch:
+          Valid = Desc.mayLoad();
+          break;
+        case SeaBirdII::Temporary:
+        case SeaBirdII::Persistent:
+          Valid = Desc.getNumDefs() != 0;
+          break;
+        case SeaBirdII::Independent:
+          Valid = !Desc.isBranch() && !Desc.isCall() && !Desc.isReturn() &&
+                  !Desc.isBarrier();
+          break;
+        case SeaBirdII::Reuse:
+        case SeaBirdII::Leaf:
+          Valid = Desc.isCall();
+          break;
+        default:
+          Valid = false;
+        }
+        if (!Valid)
+          return Error(IdLoc,
+                       "performance marker is not applicable to this instruction");
+      }
+      Inst.setFlags(PendingMarker);
       Out.emitInstruction(Inst, getSTI());
       Opcode = Inst.getOpcode();
       return false;
@@ -303,27 +373,32 @@ class SeaBirdAsmParser : public MCTargetAsmParser {
     StringRef CPU;
     if (DirectiveID.getString() == ".cpu") {
       if (Value == "generic" || Value == "seabird-gold" ||
-          Value == "seabird-platinum" || Value == "tritium-v1")
+          Value == "seabird-platinum" || Value == "tritium-v1" ||
+          Value == "axium-m-v1")
         CPU = Value;
       else
         return Error(DirectiveID.getLoc(),
                      "unknown SeaBird CPU; expected generic, seabird-gold, "
-                     "seabird-platinum, or tritium-v1");
+                     "seabird-platinum, tritium-v1, or axium-m-v1");
     } else {
       if (Value == "seabird" || Value == "seabird64")
         CPU = "generic";
       else if (Value == "tritium" || Value == "tritium-v1")
         CPU = "tritium-v1";
+      else if (Value == "axium-m" || Value == "axium-m-v1")
+        CPU = "axium-m-v1";
       else
         return Error(DirectiveID.getLoc(),
                      "unknown SeaBird architecture; expected seabird, "
-                     "seabird64, tritium, or tritium-v1");
+                     "seabird64, tritium, tritium-v1, axium-m, or axium-m-v1");
     }
 
-    if ((CPU == "tritium-v1") == Is64Bit)
+    if (((CPU == "tritium-v1") || (CPU == "axium-m-v1")) == Is64Bit)
       return Error(DirectiveID.getLoc(),
                    CPU == "tritium-v1"
                        ? "tritium-v1 requires a seabird32 object"
+                       : CPU == "axium-m-v1"
+                       ? "axium-m-v1 requires a seabird32 object"
                        : "the general-purpose SeaBird profile requires a "
                          "seabird64 object");
 
@@ -373,7 +448,7 @@ class SeaBirdAsmParser : public MCTargetAsmParser {
 public:
   SeaBirdAsmParser(const MCSubtargetInfo &STI, MCAsmParser &Parser,
                    const MCInstrInfo &MII, const MCTargetOptions &Options)
-      : MCTargetAsmParser(Options, STI, MII), Parser(Parser),
+      : MCTargetAsmParser(Options, STI, MII), Parser(Parser), MII(MII),
         Is64Bit(STI.getTargetTriple().isArch64Bit()) {
     Parser.addAliasForDirective(".word", ".2byte");
     Parser.addAliasForDirective(".dword", ".4byte");

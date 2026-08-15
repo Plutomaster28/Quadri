@@ -27,9 +27,9 @@ ROW_RE = re.compile(r"^(.+?)\s*&\s*(.+?)\s*&\s*(.+?)\s*&\s*(.+?)\s*\\\\\s*(?:\\b
 HEX_RE = re.compile(r"0x([0-9A-Fa-f]{2})")
 
 IMPORT_TOP_SECTIONS = {
-    "Instruction Encoding \\& Micro-Op Mapping", "Advanced Vector Extensions (43 instructions)",
-    "Cryptographic Extensions (24 instructions)",
-    "Digital Signal Processing (DSP) Extensions (29 instructions)",
+    "Instruction Encoding & Micro-Op Mapping", "Advanced Vector Extensions",
+    "Cryptographic Extensions",
+    "Digital Signal Processing (DSP) Extensions",
     "Architectural System Extensions",
 }
 
@@ -68,6 +68,24 @@ FLAG_NONE = {"CF": "unchanged", "PF": "unchanged", "AF": "unchanged", "ZF": "unc
 FLAG_ARITH = {"CF": "defined", "PF": "defined", "AF": "defined", "ZF": "defined", "SF": "defined", "OF": "defined"}
 FLAG_LOGIC = {"CF": "cleared", "PF": "defined", "AF": "undefined", "ZF": "defined", "SF": "defined", "OF": "cleared"}
 
+PERFORMANCE_MARKERS = {
+    "escape": 0xFD,
+    "ordering": "FD marker-id precedes the optional FE primary prefix and the instruction opcode; exactly zero or one marker is permitted per instruction.",
+    "unknown_id_behavior": "INVALID_OP before instruction decode or any architectural modification.",
+    "markers": [
+        {"id": 1, "name": "assume", "applicability": "Memory-accessing instructions.", "semantics": "The compiler expects ordinary completion. All standard faults, ordering, and recovery behavior remain unchanged."},
+        {"id": 2, "name": "likely", "applicability": "Conditional control-flow instructions.", "semantics": "The taken edge is expected to be hot."},
+        {"id": 3, "name": "unlikely", "applicability": "Conditional control-flow instructions.", "semantics": "The taken edge is expected to be cold."},
+        {"id": 4, "name": "stream", "applicability": "Memory-reading or memory-writing instructions.", "semantics": "The accessed cache lines are expected to have little near-term reuse."},
+        {"id": 5, "name": "prefetch", "applicability": "Memory-reading instructions.", "semantics": "The access is expected soon enough that an implementation may initiate translation or cache activity early; the instruction itself still executes normally."},
+        {"id": 6, "name": "temporary", "applicability": "Instructions that produce a register result.", "semantics": "The produced value is expected to have a short live range."},
+        {"id": 7, "name": "persistent", "applicability": "Instructions that produce a register result.", "semantics": "The produced value is expected to have a long live range."},
+        {"id": 8, "name": "independent", "applicability": "Non-serializing instructions.", "semantics": "Alias analysis found no dependency on adjacent independently marked instructions; implementations must preserve architectural dependencies regardless."},
+        {"id": 9, "name": "reuse", "applicability": "CALL and CALLA.", "semantics": "The logical call and window transition are unchanged; an implementation may reuse resident physical backing when it can prove the architectural window remains isolated."},
+        {"id": 10, "name": "leaf", "applicability": "CALL and CALLA.", "semantics": "Software expects the destination not to perform a windowed call. The logical window transition is unchanged and the hint may be ignored."},
+    ],
+}
+
 
 def clean_tex(value: str) -> str:
     value = value.replace("\\#", "#").replace("\\_", "_").replace("\\&", "&")
@@ -95,7 +113,7 @@ def parse_allocations() -> list[dict]:
     for line_no, raw in enumerate(SOURCE.read_text(encoding="utf-8").splitlines(), 1):
         top_match = TOP_SECTION_RE.match(raw)
         if top_match:
-            active = top_match.group(1) in IMPORT_TOP_SECTIONS
+            active = canonical_category(top_match.group(1)) in IMPORT_TOP_SECTIONS
         section_match = SECTION_RE.search(raw)
         if section_match:
             current = canonical_category(section_match.group(1))
@@ -108,6 +126,11 @@ def parse_allocations() -> list[dict]:
         if not HEX_RE.search(opcode_cell):
             continue
         mnemonic = mnemonic_of(syntax)
+        # Architecture 3.2 window operations are authored below with their
+        # complete state/fault contracts; the legacy table importer must not
+        # create a second generic SYSX entry for the documentation rows.
+        if mnemonic in {"WINNEW", "WINPREV", "WINRESERVE", "WINPIN", "WINRELEASE"}:
+            continue
         opcode = [int(x, 16) for x in HEX_RE.findall(opcode_cell)]
         if current == "Architectural System Extensions" and len(opcode) == 1:
             opcode = [0xFF, 0x04, opcode[0]]
@@ -228,9 +251,9 @@ def operation_for(row: dict) -> tuple[list[str], bool]:
         "TSTI": ["result <- a & zero_extend(imm); discard result"],
         "JMP": ["IP <- next_IP + sign_extend(relative_displacement)"],
         "JMPA": ["IP <- zero_extend(absolute_target, address_width)"],
-        "CALL": ["SP <- SP - pointer_bytes", "memory[SP, pointer_bytes] <- next_IP", "IP <- next_IP + sign_extend(relative_displacement)"],
-        "CALLA": ["SP <- SP - pointer_bytes", "memory[SP, pointer_bytes] <- next_IP", "IP <- absolute_target"],
-        "RET": ["target <- memory[SP, pointer_bytes]", "SP <- SP + pointer_bytes", "IP <- target"],
+        "CALL": ["SP <- SP - pointer_bytes", "memory[SP, pointer_bytes] <- next_IP", "if CR4.WINDOW_ENABLE then advance one logical register window", "IP <- next_IP + sign_extend(relative_displacement)"],
+        "CALLA": ["target <- absolute_target before any window transition", "SP <- SP - pointer_bytes", "memory[SP, pointer_bytes] <- next_IP", "if CR4.WINDOW_ENABLE then advance one logical register window", "IP <- target"],
+        "RET": ["target <- memory[SP, pointer_bytes]", "if CR4.WINDOW_ENABLE then validate and restore the previous logical register window", "SP <- SP + pointer_bytes", "IP <- target"],
         "BRR": ["IP <- low_address_bits(reg)"] ,
         "JZR": ["if reg == 0 then IP <- next_IP + sign_extend(displacement) else IP <- next_IP"],
         "JNZR": ["if reg != 0 then IP <- next_IP + sign_extend(displacement) else IP <- next_IP"],
@@ -447,7 +470,7 @@ def operation_for(row: dict) -> tuple[list[str], bool]:
     fp_special = {
         "FCMP": ["classify operands", "unordered: PF=1, ZF=1, CF=1; less: CF=1; equal: ZF=1; greater: all three clear", "clear OF, SF, AF"],
         "FCVTI": ["convert signed integer source to destination IEEE format using FPCR rounding"],
-        "FCVTS": ["convert IEEE source to signed integer using FPCR rounding; invalid result raises or returns signed_min when masked"],
+        "FCVTS": ["convert IEEE source to signed integer by truncation toward zero; invalid result raises or returns signed_min when masked"],
         "FCVT.S2D": ["convert binary32 source to exact binary64 destination"],
         "FCVT.D2S": ["convert binary64 source to binary32 using FPCR rounding"],
         "FCVTINT": ["convert between the source and encoded destination IEEE formats using FPCR rounding"],
@@ -591,6 +614,20 @@ def memory_order_for(row: dict) -> str:
         return "Atomic read-modify-write with acquire+release ordering; .SC form is sequentially consistent."
     if m in {"LFENCE", "SFENCE", "MFENCE", "FENCE", "ISYNC"}:
         return "Ordering is the operation itself."
+    if m == "PREFETCH":
+        return "Non-binding cache hint; creates no memory-order edge and suppresses address, translation, and permission faults."
+    if m in {"FLUSH", "INVIC", "INVDC"}:
+        return "Cache-maintenance operation ordered after older accesses to the addressed line; use the required fence or ISYNC before relying on global visibility or refetch."
+    if m in {"CPYB", "CPYW", "MEMFILL"}:
+        return "Restartable sequence of ordinary TSO accesses in increasing element order; completed stores remain visible if a later element faults."
+    if m in {"VGATHER", "VGATHERQ", "VSCATTER", "VSCATTERQ"}:
+        return "Lane-ordered ordinary TSO accesses with the instruction's documented partial-progress state on fault."
+    if m in {"CALL", "CALLA", "RET", "PUSH", "POP", "PUSHA", "POPA",
+             "ENTER", "LEAVE", "PUSHF", "POPF", "PUSHQ", "POPQ"}:
+        return "Ordinary TSO stack access using the active architectural stack pointer."
+    if m in {"XSAVE", "XRSTOR", "VMENTER", "VMRESUME", "WRSS",
+             "SAVECTX", "LOADCTX"}:
+        return "Architectural multi-byte memory access with the validation and atomicity contract stated by the instruction."
     if any(x in row["format"] for x in ("M-type", "+ M")) or m.startswith(("LD", "ST", "VLD", "VST")):
         return "Ordinary TSO access unless the instruction entry states atomic or device ordering."
     return "No memory access."
@@ -601,7 +638,7 @@ def exceptions_for(row: dict) -> list[str]:
     result = ["INVALID_OP for malformed encoding or unavailable feature"]
     if row["privilege"] != "user":
         result.append("GPF when current privilege is insufficient")
-    memory = memory_order_for(row) != "No memory access."
+    memory = memory_order_for(row) != "No memory access." and m != "PREFETCH"
     if memory:
         result += ["GPF for non-canonical address", "ALIGN_CHECK when required alignment is violated", "PAGE_FAULT for translation or permission failure"]
     if m in {"DIV", "DIVI", "UDIV", "MOD", "MODI", "VDIV", "FDIV"}:
@@ -678,6 +715,149 @@ def build_database(rows: list[dict]) -> dict:
                            "ALIGN_CHECK, PAGE_FAULT, or GPF before architectural modification"],
             "status": "normative", "source_line": 0,
         })
+    extra_instructions = [
+        {
+            "id": "SB-BASE-ADC-001-V31", "mnemonic": "ADC",
+            "syntax": "ADC Rdst, Rsrc", "category": "Arithmetic",
+            "encoding": {"map": "base", "opcode": [0xD8], "format": "R-type",
+                         "operand_binding": "ModR/M.reg = Rdst; ModR/M.r/m = Rsrc."},
+            "feature": "BASE", "privilege": "user", "modes": ALL_MODES,
+            "description": "Add source and carry flag to destination",
+            "operation": ["carry_in <- CF", "sum <- unsigned(dst) + unsigned(src) + carry_in",
+                          "dst <- low_width_bits(sum)", "update arithmetic FLAGS including carry_out"],
+            "flags": dict(FLAG_ARITH), "memory_order": "No memory access.",
+            "exceptions": ["INVALID_OP for malformed encoding or unavailable feature"],
+            "status": "normative", "source_line": 0,
+        },
+        {
+            "id": "SB-BASE-SBB-001-V31", "mnemonic": "SBB",
+            "syntax": "SBB Rdst, Rsrc", "category": "Arithmetic",
+            "encoding": {"map": "base", "opcode": [0xD9], "format": "R-type",
+                         "operand_binding": "ModR/M.reg = Rdst; ModR/M.r/m = Rsrc."},
+            "feature": "BASE", "privilege": "user", "modes": ALL_MODES,
+            "description": "Subtract source and borrow flag from destination",
+            "operation": ["borrow_in <- CF", "difference <- unsigned(dst) - unsigned(src) - borrow_in",
+                          "dst <- low_width_bits(difference)", "update arithmetic FLAGS including borrow_out"],
+            "flags": dict(FLAG_ARITH), "memory_order": "No memory access.",
+            "exceptions": ["INVALID_OP for malformed encoding or unavailable feature"],
+            "status": "normative", "source_line": 0,
+        },
+        {
+            "id": "SB-BASE-UMULH-001-V31", "mnemonic": "UMULH",
+            "syntax": "UMULH Rdst, Rsrc", "category": "Arithmetic",
+            "encoding": {"map": "base", "opcode": [0xDA], "format": "R-type (unsigned high bits)",
+                         "operand_binding": "ModR/M.reg = Rdst; ModR/M.r/m = Rsrc."},
+            "feature": "BASE", "privilege": "user", "modes": ALL_MODES,
+            "description": "Return the high half of an unsigned full-width product",
+            "operation": ["product <- unsigned(dst) * unsigned(src) at twice operand width",
+                          "dst <- high_width_bits(product)"],
+            "flags": dict(FLAG_NONE), "memory_order": "No memory access.",
+            "exceptions": ["INVALID_OP for malformed encoding or unavailable feature"],
+            "status": "normative", "source_line": 0,
+        },
+        {
+            "id": "SB-BASE-FCVTU-001-V31", "mnemonic": "FCVTU",
+            "syntax": "FCVTU Fd, Ra", "category": "Floating Point",
+            "encoding": {"map": "base", "opcode": [0xDB], "format": "R-type (unsigned conversion)",
+                         "operand_binding": "ModR/M.reg = Fd; ModR/M.r/m = Ra; VectorCtl selects the scalar IEEE format."},
+            "feature": "FP", "privilege": "user", "modes": ALL_MODES,
+            "description": "Convert an unsigned integer to a scalar IEEE value",
+            "operation": ["convert unsigned integer source to destination IEEE format using FPCR rounding",
+                          "update FPSR; raise an unmasked FPU_ERROR before writeback"],
+            "flags": dict(FLAG_NONE), "memory_order": "No memory access.",
+            "exceptions": ["INVALID_OP for malformed encoding or unavailable feature",
+                           "FPU_ERROR for an unmasked IEEE exception"],
+            "status": "normative", "source_line": 0,
+        },
+        {
+            "id": "SB-BASE-FCVTUS-001-V31", "mnemonic": "FCVTUS",
+            "syntax": "FCVTUS Ra, Fs", "category": "Floating Point",
+            "encoding": {"map": "base", "opcode": [0xDC], "format": "R-type (unsigned conversion)",
+                         "operand_binding": "ModR/M.reg = Ra; ModR/M.r/m = Fs; VectorCtl selects the scalar IEEE format."},
+            "feature": "FP", "privilege": "user", "modes": ALL_MODES,
+            "description": "Convert a scalar IEEE value to an unsigned integer",
+            "operation": ["convert IEEE source to unsigned integer by truncation toward zero",
+                          "invalid result raises FPU_ERROR or returns zero when masked"],
+            "flags": dict(FLAG_NONE), "memory_order": "No memory access.",
+            "exceptions": ["INVALID_OP for malformed encoding or unavailable feature",
+                           "FPU_ERROR for an unmasked IEEE exception"],
+            "status": "normative", "source_line": 0,
+        },
+    ]
+    for subopcode, mnemonic, relation in [
+        (0x2B, "VCOMPARE_EQ", "a[i] == b[i]"),
+        (0x2C, "VCOMPARE_NE", "a[i] != b[i]"),
+        (0x2D, "VCOMPARE_ULT", "unsigned(a[i]) < unsigned(b[i])"),
+        (0x2E, "VCOMPARE_UGT", "unsigned(a[i]) > unsigned(b[i])"),
+    ]:
+        extra_instructions.append({
+            "id": f"SB-AVX-{mnemonic}-001-V31", "mnemonic": mnemonic,
+            "syntax": f"{mnemonic} Vd, Va, Vb", "category": "Advanced Vector Extensions",
+            "encoding": {"map": "AVX", "opcode": [0xFF, 0x01, subopcode], "format": "V-type",
+                         "operand_binding": "ModR/M.reg = Vd; ModR/M.r/m = Va; XOP0 = Vb; VectorCtl is required."},
+            "feature": "AVX", "privilege": "user", "modes": ALL_MODES,
+            "description": f"Per-lane predicate for {relation}",
+            "operation": [f"result[i] <- all_ones if {relation} else zero",
+                          "apply encoded merge/zero mask policy", "commit complete vector destination atomically"],
+            "flags": dict(FLAG_NONE), "memory_order": "No memory access.",
+            "exceptions": ["INVALID_OP for malformed encoding or unavailable feature",
+                           "SIMD_ERROR for an invalid vector-control combination"],
+            "status": "normative", "source_line": 0,
+        })
+    extra_instructions.append({
+        "id": "SB-AVX-VNOT-001-V31", "mnemonic": "VNOT",
+        "syntax": "VNOT Vd, Va", "category": "Advanced Vector Extensions",
+        "encoding": {"map": "AVX", "opcode": [0xFF, 0x01, 0x2F], "format": "V-type",
+                     "operand_binding": "ModR/M.reg = Vd; ModR/M.r/m = Va; VectorCtl is required."},
+        "feature": "AVX", "privilege": "user", "modes": ALL_MODES,
+        "description": "Per-lane vector bitwise complement",
+        "operation": ["result[i] <- bitwise_not(a[i])", "apply encoded merge/zero mask policy",
+                      "commit complete vector destination atomically"],
+        "flags": dict(FLAG_NONE), "memory_order": "No memory access.",
+        "exceptions": ["INVALID_OP for malformed encoding or unavailable feature",
+                       "SIMD_ERROR for an invalid vector-control combination"],
+        "status": "normative", "source_line": 0,
+    })
+    for subopcode, mnemonic, description, operation, privilege in [
+        (0x1B, "WINNEW", "Advance to a fresh logical register window without control transfer",
+         ["validate window state and spill-area configuration", "create a child window; map caller R24-R31 to child R8-R15", "initialize child R16-R31 to zero", "make the child window current atomically"], "user"),
+        (0x1C, "WINPREV", "Restore the previous logical register window without returning",
+         ["require a previous logical window", "propagate child R8-R15 through the overlap to parent R24-R31", "make the parent window current atomically; restore it transparently if spilled"], "user"),
+        (0x1D, "WINRESERVE", "Hint that another logical window will be needed soon",
+         ["optionally prepare microarchitectural resident capacity", "do not spill, fault, or change architectural window state"], "user"),
+        (0x1E, "WINPIN", "Request advisory retention of the current logical window",
+         ["increment the current window retention hint count", "do not prevent a spill required for correctness or forward progress"], "user"),
+        (0x1F, "WINRELEASE", "Release one advisory window-retention request",
+         ["require a nonzero retention hint count", "decrement the current window retention hint count"], "user"),
+    ]:
+        may_spill = mnemonic in {"WINNEW", "WINPREV"}
+        window_exceptions = [
+            "INVALID_OP for malformed encoding or unavailable WINDOW feature",
+            "GPF when CR4.WINDOW_ENABLE is clear",
+        ]
+        if mnemonic == "WINNEW":
+            window_exceptions.append("GPF for invalid or exhausted WSP configuration")
+        elif mnemonic == "WINPREV":
+            window_exceptions.append("GPF for window underflow or invalid WSP configuration")
+        elif mnemonic == "WINRELEASE":
+            window_exceptions.append("GPF for an unbalanced release")
+        if may_spill:
+            window_exceptions.append("ALIGN_CHECK or PAGE_FAULT before architectural modification if a transparent spill/restore fails")
+        extra_instructions.append({
+            "id": f"SB-SYSX-{mnemonic}-001-V10", "mnemonic": mnemonic,
+            "syntax": mnemonic, "category": "Architectural System Extensions",
+            "encoding": {"map": "SYSX", "opcode": [0xFF, 0x04, subopcode],
+                         "format": "X-type (no operands)",
+                         "operand_binding": "No ModR/M, XOP, immediate, or displacement bytes."},
+            "feature": "WINDOW", "privilege": privilege, "modes": ALL_MODES,
+            "description": description, "operation": operation,
+            "flags": dict(FLAG_NONE),
+            "memory_order": ("May perform transparent window spill or restore memory accesses; those accesses are ordered as ordinary core-context loads/stores and complete before retirement."
+                             if may_spill else "No memory access."),
+            "exceptions": window_exceptions,
+            "status": "normative", "source_line": 0,
+        })
+    instructions.extend(extra_instructions)
     for alias, canonical in ALIASES.items():
         instructions.append({
             "id": f"SB-ALIAS-{alias}", "mnemonic": alias, "syntax": alias,
@@ -687,13 +867,21 @@ def build_database(rows: list[dict]) -> dict:
             "flags": dict(FLAG_NONE), "memory_order": "Inherited from canonical instruction.",
             "exceptions": ["Inherited from canonical instruction."], "status": "alias", "alias_of": canonical,
         })
-    return {"schema_version": 1, "architecture_version": "3.0-rc2", "instructions": instructions}
+    return {"schema_version": 2, "architecture_version": "3.2",
+            "performance_markers": PERFORMANCE_MARKERS,
+            "instructions": instructions}
 
 
 def validate(db: dict) -> None:
     required = {"id", "mnemonic", "syntax", "category", "encoding", "feature", "privilege", "modes", "description", "operation", "flags", "memory_order", "exceptions", "status"}
     ids = set()
     encodings: dict[tuple[int, ...], str] = {}
+    marker_ids = [x["id"] for x in db["performance_markers"]["markers"]]
+    marker_names = [x["name"] for x in db["performance_markers"]["markers"]]
+    if len(marker_ids) != len(set(marker_ids)) or len(marker_names) != len(set(marker_names)):
+        raise ValueError("duplicate performance marker ID or name")
+    if db["performance_markers"]["escape"] in {0xFE, 0xFF}:
+        raise ValueError("performance marker escape collides with an existing prefix")
     for inst in db["instructions"]:
         missing = required - inst.keys()
         if missing:
@@ -763,7 +951,7 @@ def write_tex(db: dict) -> None:
 \usepackage{tocloft}
 \pagestyle{fancy}\fancyhf{}
 \fancyhead[L]{\sffamily SeaBird Volume 2 -- Instruction Reference}
-\fancyhead[R]{\sffamily Version 3.0 RC1}
+\fancyhead[R]{\sffamily Architecture 3.2 / SDK 1.0}
 \fancyfoot[C]{\thepage}
 \setlength{\headheight}{14pt}
 \titleformat{\section}{\Large\bfseries\sffamily}{\thesection}{0.7em}{}
@@ -776,8 +964,8 @@ def write_tex(db: dict) -> None:
 \begin{document}
 \begin{titlepage}\centering\vspace*{2cm}
 {\Huge\bfseries SeaBird ISA\\[0.3cm]}{\LARGE Volume 2: Instruction Reference\\[0.4cm]}
-{\Large Version 3.0 Release Candidate 1}\vfill
-{\large Generated from the machine-readable architectural database\\June 27, 2026}\vfill
+{\Large Architecture 3.2 / SDK 1.0}\vfill
+{\large Generated from the machine-readable architectural database\\August 14, 2026}\vfill
 \end{titlepage}
 \tableofcontents\clearpage
 \section*{Status Legend}
@@ -795,11 +983,16 @@ def write_coverage(db: dict) -> None:
         "# SeaBird ISA Completion Ledger", "", "Generated by `tools/build_isa_spec.py`. Do not maintain counts by hand.", "",
         f"- Total entries: **{len(db['instructions'])}**", f"- Normative: **{counts['normative']}**",
         f"- Reserved: **{counts['reserved']}**", f"- Provisional: **{counts['provisional']}**", f"- Aliases: **{counts['alias']}**", "",
+        f"- Performance markers: **{len(db['performance_markers']['markers'])}** (prefix modifiers; not instruction entries)", "",
         "| Category | Normative | Reserved | Provisional | Alias | Total |", "|---|---:|---:|---:|---:|---:|",
     ]
     for category, status in sorted(category_counts.items()):
         total = sum(status.values())
         lines.append(f"| {category} | {status['normative']} | {status['reserved']} | {status['provisional']} | {status['alias']} | {total} |")
+    lines += ["", "## Performance Markers", "",
+              "| ID | Modifier | Applicability |", "|---:|---|---|"]
+    for marker in db["performance_markers"]["markers"]:
+        lines.append(f"| {marker['id']} | `{marker['name']}.` | {marker['applicability']} |")
     lines += ["", "## Provisional Entries", ""]
     for inst in sorted((x for x in db["instructions"] if x["status"] == "provisional"), key=lambda x: (x["category"], x["mnemonic"])):
         lines.append(f"- `{inst['syntax']}` ({inst['category']}, `{inst['id']}`)")

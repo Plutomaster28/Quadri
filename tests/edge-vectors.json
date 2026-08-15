@@ -34,6 +34,12 @@
     {"op":"FRND_POSITIVE","a":2.1,"expected":3},
     {"op":"FRND_NEGATIVE","a":-2.1,"expected":-3},
     {"op":"VGATHER_FAULT","old":[90,91,92,93],"loaded":[10,20],"mask":15,"fault_lane":2,"expected":{"dst":[10,20,92,93],"mask":12,"fault_lane":2}},
-    {"op":"VSCATTER_FAULT","values":[10,20,30,40],"mask":15,"fault_lane":2,"expected":{"stores":[[0,10],[1,20]],"mask":12,"fault_lane":2}}
+    {"op":"VSCATTER_FAULT","values":[10,20,30,40],"mask":15,"fault_lane":2,"expected":{"stores":[[0,10],[1,20]],"mask":12,"fault_lane":2}},
+    {"op":"ADC64","a":18446744073709551615,"b":0,"carry":1,"expected":{"value":0,"CF":1,"ZF":1,"SF":0,"OF":0}},
+    {"op":"SBB64","a":0,"b":0,"borrow":1,"expected":{"value":18446744073709551615,"CF":1,"ZF":0,"SF":1,"OF":0}},
+    {"op":"UMULH64","a":18446744073709551615,"b":18446744073709551615,"expected":18446744073709551614},
+    {"op":"FCVTU64","a":18446744073709551615,"expected":1.8446744073709552e19},
+    {"op":"FCVTUS64","a":9223372036854775808.0,"expected":9223372036854775808},
+    {"op":"FCVTUS64","a":123.75,"expected":123}
   ]
 }

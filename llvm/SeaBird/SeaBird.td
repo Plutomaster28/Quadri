@@ -15,6 +15,12 @@ def FeatureAtomics : SubtargetFeature<
 def FeatureFixedMulDiv : SubtargetFeature<
     "fixed-muldiv", "HasFixedMulDiv", "true",
     "Use fixed-latency integer multiply and divide">;
+def FeaturePAE32 : SubtargetFeature<
+    "pae32", "HasPAE32", "true",
+    "Enable the 36-bit physical-address extension for Tetra mode">;
+def FeatureRegisterWindows : SubtargetFeature<
+    "register-windows", "HasRegisterWindows", "true",
+    "Enable the SeaBird windowed calling convention and window operations">;
 
 include "SeaBirdRegisterInfo.td"
 include "SeaBirdCallingConv.td"
@@ -32,6 +38,8 @@ def SeaBirdSchedModel : SchedMachineModel {
 def : ProcessorModel<"generic", SeaBirdSchedModel, []>;
 def : ProcessorModel<"seabird-gold", SeaBirdSchedModel, []>;
 def : ProcessorModel<"seabird-platinum", SeaBirdSchedModel, []>;
+def : ProcessorModel<"axium-m-v1", SeaBirdSchedModel,
+    [FeatureTetra, FeaturePAE32, FeatureRegisterWindows, FeatureAtomics]>;
 def : ProcessorModel<"tritium-v1", SeaBirdSchedModel,
     [FeatureTritium, FeatureTetra, FeatureMPU, FeatureAtomics,
      FeatureFixedMulDiv]>;

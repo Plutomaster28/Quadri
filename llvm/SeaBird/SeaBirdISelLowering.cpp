@@ -50,8 +50,9 @@ SeaBirdTargetLowering::SeaBirdTargetLowering(const TargetMachine &TM,
     setOperationAction(ISD::UDIVREM, MVT::i64, Expand);
     setOperationAction(ISD::SDIVREM, MVT::i64, Expand);
     setOperationAction(ISD::ATOMIC_SWAP, MVT::i64, Legal);
-    setOperationAction(ISD::UINT_TO_FP, MVT::i64, Custom);
-    setOperationAction(ISD::FP_TO_UINT, MVT::i64, Custom);
+    setOperationAction(ISD::UINT_TO_FP, MVT::i64, Legal);
+    setOperationAction(ISD::FP_TO_UINT, MVT::i64, Legal);
+    setOperationAction(ISD::MULHU, MVT::i64, Legal);
     setOperationAction(ISD::UDIV, MVT::v2i64, Legal);
     setOperationAction(ISD::ABS, MVT::v2i64, Legal);
     setOperationAction(ISD::SMAX, MVT::v2i64, Legal);
@@ -107,6 +108,13 @@ SeaBirdTargetLowering::SeaBirdTargetLowering(const TargetMachine &TM,
     setLibcallImpl(RTLIB::SREM_I64, RTLIB::impl___moddi3);
     setLibcallImpl(RTLIB::UREM_I64, RTLIB::impl___umoddi3);
   }
+}
+
+EVT SeaBirdTargetLowering::getSetCCResultType(const DataLayout &,
+                                              LLVMContext &, EVT VT) const {
+  if (VT.isVector())
+    return VT.changeVectorElementTypeToInteger();
+  return Is64Bit ? MVT::i64 : MVT::i32;
 }
 
 const char *SeaBirdTargetLowering::getTargetNodeName(unsigned Opcode) const {
@@ -616,11 +624,17 @@ SDValue SeaBirdTargetLowering::LowerCall(
   SelectionDAG &DAG = CLI.DAG;
   SDLoc &DL = CLI.DL;
   CLI.IsTailCall = false;
+  const bool Windowed = DAG.getMachineFunction()
+                              .getSubtarget<SeaBirdSubtarget>()
+                              .hasRegisterWindows();
   SmallVector<CCValAssign, 16> ArgLocs;
   CCState CCInfo(CLI.CallConv, CLI.IsVarArg, DAG.getMachineFunction(), ArgLocs,
                  *DAG.getContext());
-  CCInfo.AnalyzeCallOperands(CLI.Outs,
-                             Is64Bit ? CC_SeaBird : CC_SeaBird32);
+  CCInfo.AnalyzeCallOperands(
+      CLI.Outs, Windowed
+                    ? (Is64Bit ? CC_SeaBirdWindowOut64
+                               : CC_SeaBirdWindowOut32)
+                    : (Is64Bit ? CC_SeaBird : CC_SeaBird32));
 
   const unsigned StackBytes = alignTo(CCInfo.getStackSize(), 16u);
   SDValue Chain = DAG.getCALLSEQ_START(CLI.Chain, StackBytes, 0, DL);
@@ -701,8 +715,14 @@ SDValue SeaBirdTargetLowering::LowerCallResult(
   SmallVector<CCValAssign, 4> RVLocs;
   CCState CCInfo(CallConv, IsVarArg, DAG.getMachineFunction(), RVLocs,
                  *DAG.getContext());
-  CCInfo.AnalyzeCallResult(Ins,
-                           Is64Bit ? RetCC_SeaBird : RetCC_SeaBird32);
+  const bool Windowed = DAG.getMachineFunction()
+                              .getSubtarget<SeaBirdSubtarget>()
+                              .hasRegisterWindows();
+  CCInfo.AnalyzeCallResult(
+      Ins, Windowed
+               ? (Is64Bit ? RetCC_SeaBirdWindowCaller64
+                          : RetCC_SeaBirdWindowCaller32)
+               : (Is64Bit ? RetCC_SeaBird : RetCC_SeaBird32));
   for (const CCValAssign &VA : RVLocs) {
     SDValue Copy = DAG.getCopyFromReg(Chain, DL, VA.getLocReg(), VA.getValVT(),
                                       Glue);
@@ -720,8 +740,13 @@ SDValue SeaBirdTargetLowering::LowerFormalArguments(
   SmallVector<CCValAssign, 16> ArgLocs;
   CCState CCInfo(CallConv, IsVarArg, DAG.getMachineFunction(), ArgLocs,
                  *DAG.getContext());
-  CCInfo.AnalyzeFormalArguments(Ins,
-                                Is64Bit ? CC_SeaBird : CC_SeaBird32);
+  const bool Windowed = DAG.getMachineFunction()
+                              .getSubtarget<SeaBirdSubtarget>()
+                              .hasRegisterWindows();
+  CCInfo.AnalyzeFormalArguments(
+      Ins, Windowed
+               ? (Is64Bit ? CC_SeaBirdWindowIn64 : CC_SeaBirdWindowIn32)
+               : (Is64Bit ? CC_SeaBird : CC_SeaBird32));
 
   if (IsVarArg) {
     MachineFunction &MF = DAG.getMachineFunction();
@@ -772,8 +797,13 @@ bool SeaBirdTargetLowering::CanLowerReturn(
     const Type *RetTy) const {
   SmallVector<CCValAssign, 16> RVLocs;
   CCState CCInfo(CallConv, IsVarArg, MF, RVLocs, Context);
-  return CCInfo.CheckReturn(Outs,
-                            Is64Bit ? RetCC_SeaBird : RetCC_SeaBird32);
+  const bool Windowed = MF.getSubtarget<SeaBirdSubtarget>()
+                            .hasRegisterWindows();
+  return CCInfo.CheckReturn(
+      Outs, Windowed
+                ? (Is64Bit ? RetCC_SeaBirdWindowCallee64
+                           : RetCC_SeaBirdWindowCallee32)
+                : (Is64Bit ? RetCC_SeaBird : RetCC_SeaBird32));
 }
 
 SDValue SeaBirdTargetLowering::LowerReturn(
@@ -784,8 +814,14 @@ SDValue SeaBirdTargetLowering::LowerReturn(
   SmallVector<CCValAssign, 16> RVLocs;
   CCState CCInfo(CallConv, IsVarArg, DAG.getMachineFunction(), RVLocs,
                  *DAG.getContext());
-  CCInfo.AnalyzeReturn(Outs,
-                       Is64Bit ? RetCC_SeaBird : RetCC_SeaBird32);
+  const bool Windowed = DAG.getMachineFunction()
+                              .getSubtarget<SeaBirdSubtarget>()
+                              .hasRegisterWindows();
+  CCInfo.AnalyzeReturn(
+      Outs, Windowed
+                ? (Is64Bit ? RetCC_SeaBirdWindowCallee64
+                           : RetCC_SeaBirdWindowCallee32)
+                : (Is64Bit ? RetCC_SeaBird : RetCC_SeaBird32));
 
   SDValue Glue;
   SmallVector<SDValue, 4> RetOps(1, Chain);

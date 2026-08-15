@@ -146,7 +146,7 @@ def story():
           P("A deterministic, safety-oriented 32-bit subset for the Tritium v1 processor",
             "CoverSub"), Spacer(1, 0.25 * inch)]
     cover_rows = [
-        ["Profile", "SB-TRITIUM32-v1"], ["Parent ISA", "SeaBird v3.0 RC2"],
+        ["Profile", "SB-TRITIUM32-v1"], ["Parent ISA", "SeaBird architecture 3.2"],
         ["Execution mode", "Tetra (32-bit), little-endian"],
         ["Target core", "In-order, single-issue, 5-stage, dual lockstep"],
         ["Memory model", "TCM + scratchpad + region MPU; no cache or paging"],
@@ -445,9 +445,9 @@ def story():
         "Select certification objectives and required diagnostic coverage for ISO 26262 or DO-178C programs.",
     ]: s.append(bullet(item))
     s += [Spacer(1, 10), P("Recommended profile identifier", "H2x"),
-          P("SB-TRITIUM32-v1 / SeaBird v3.0 RC2 / Tetra / deterministic safety subset", "Mono"),
+          P("SB-TRITIUM32-v1 / SeaBird 3.2 / Tetra / deterministic safety subset", "Mono"),
           Spacer(1, 8), P("Source basis", "H2x"),
-          P("Meisei Tritium Embedded Processor Preliminary Datasheet v1 Draft; SeaBird v3.0 RC2 "
+          P("Meisei Tritium Embedded Processor Preliminary Datasheet v1 Draft; SeaBird 3.2 "
             "machine-readable specification and architecture manuals in this repository. This "
             "document defines an implementation profile and does not override parent instruction semantics.")]
     return s

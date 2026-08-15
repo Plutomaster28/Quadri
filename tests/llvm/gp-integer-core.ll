@@ -8,6 +8,15 @@ define i64 @gp_mul(i64 %lhs, i64 %rhs) {
   ret i64 %result
 }
 
+define i64 @gp_umulh(i64 %lhs, i64 %rhs) {
+  %wide_lhs = zext i64 %lhs to i128
+  %wide_rhs = zext i64 %rhs to i128
+  %wide_product = mul i128 %wide_lhs, %wide_rhs
+  %high = lshr i128 %wide_product, 64
+  %result = trunc i128 %high to i64
+  ret i64 %result
+}
+
 define i64 @gp_sdiv(i64 %lhs, i64 %rhs) {
   %result = sdiv i64 %lhs, %rhs
   ret i64 %result

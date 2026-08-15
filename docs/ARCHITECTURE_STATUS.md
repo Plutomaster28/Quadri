@@ -5,6 +5,11 @@ Instruction-level counts are generated in `ISA_COVERAGE.md`.
 
 ## SDK Release Milestones
 
+- [x] **v1.0.0 Advanced Processor Edition (2026-08-14):** freeze PAE32,
+  register-window execution and ABI state, performance markers, the complete
+  instruction database, Axium M compiler behavior, and architecture-owned
+  conformance material.
+
 - [x] **v0.1.0 Foundation Edition (2026-07-21):** freeze and package the first
   developer baseline spanning Clang/LLVM, MC, ELF objects, the static linker,
   binary utilities, reference execution, and automated conformance.
@@ -19,6 +24,8 @@ Instruction-level counts are generated in `ISA_COVERAGE.md`.
 - [x] GPR, vector, mask, floating-point, IP, FLAGS, and system state
 - [x] Standard scalar/vector calling convention and C/C++ data models
 - [x] ModR/M, SIB, OREX, VectorCtl, XOP, immediate, and displacement encoding
+- [x] Architecturally inert `FD id` performance markers, capability discovery,
+  MC round-tripping, reference decoding, and high-confidence branch-weight emission
 - [x] Unique opcode allocation validation
 - [x] Precise exception priority, interrupt frames, privilege transitions, and reset state
 - [x] Hierarchical paging, PTE format, ASIDs, TLB invalidation, and shootdown rules
@@ -26,10 +33,14 @@ Instruction-level counts are generated in `ISA_COVERAGE.md`.
 - [x] SMP startup, IPIs, interrupt-controller contract, and timers
 - [x] FP/SIMD state, IEEE behavior, masks, and context save/restore
 - [x] Feature discovery and conformance profiles
+- [x] PAE32 36-bit physical addressing, 64-bit PTEs, ASID/TLB contracts, and
+  executable translation-walk vectors
+- [x] Opt-in register-window ABI, transparent spill/restore, precise exception
+  and context state, call markers, and compiler lowering
 - [x] Debug, PMU, power-state, machine-check, virtualization, and security contracts
-- [x] A-Z instruction ledger: 310 normative, 27 reserved, 5 aliases, 0 provisional
+- [x] A-Z instruction ledger: 325 normative, 27 reserved, 5 aliases, 0 provisional
 - [x] Generated C++17 opcode metadata consumed by the translator
-- [x] Split Volume 1-4 LaTeX and PDF manuals
+- [x] Generate and render Volume 1-5 LaTeX/PDF manuals
 
 ## Separate Platform ABI Work
 
@@ -49,7 +60,10 @@ one profile before binaries can be exchanged between operating systems.
 
 - [x] Define the SB-System64 LLVM register file and integer calling convention in TableGen
 - [x] Generate scalar-core LLVM opcode records from the normative ISA database
-- [x] Validate register, instruction, calling-convention, subtarget, and asm-writer tables with LLVM 22
+- [x] Validate the pre-v1 register, instruction, calling-convention, subtarget,
+  and asm-writer tables with LLVM 22
+- [x] Rebuild and validate the final v1.0 PAE32/register-window LLVM tables and
+  C++ target sources with LLVM 22.1.4 on Linux x86_64 with assertions enabled
 - [x] Register the `seabird64` triple and experimental target components in LLVM 22
 - [x] Register the `seabird32` triple and Tritium-v1 MC/ELF32 components in LLVM 22
 - [x] Register native Clang SB32/SB64 targets with ILP32/LP64 data models, CPU/profile macros, inline-assembly registers, and pointer `va_list`
@@ -78,16 +92,18 @@ one profile before binaries can be exchanged between operating systems.
 - [x] Lower SB32 software-pair ordered comparisons, branchless selections, and boolean-controlled branches
 - [x] Expose the Tritium binary R-type divide, saturation, logic, rotate, min/max, and SGT family and select its applicable native i32 operations
 - [x] Expose shared SeaBird/Tritium unary and bit-count encodings and select native SB32 NEG/INC/DEC/NOT/ABS/CLZ/CTZ/POPC operations
-- [x] Expose all 149 normative SeaBird BASE mnemonics in the generated MC layer
-- [x] Expose all 10 scalar FP and all 15 base SIMD mnemonics in the generated MC layer
-- [x] Expose all 23 architectural SYSX mnemonics, including PIO, XSTATE, MMU, SMP, virtualization, IBT, shadow-stack, PMU, RNG, context, and mode-control forms
+- [x] Expose all 152 normative SeaBird BASE mnemonics in the generated MC layer
+- [x] Expose all 12 scalar FP and all 15 base SIMD mnemonics in the generated MC layer
+- [x] Expose all 28 architectural SYSX mnemonics, including PIO, XSTATE, MMU, SMP, virtualization, IBT, shadow-stack, PMU, RNG, context, mode-control, and register-window forms
 - [x] Expose all 18 FPX mnemonics and select native SB64 fused multiply-add/subtract and floating minimum/maximum operations
 - [x] Expose all 10 normative CRYPTO mnemonics with high-register vector encodings
 - [x] Expose all 25 normative DSP mnemonics with GPR, immediate, multi-XOP, and mixed GPR/vector encodings
 - [x] Expose all 7 normative TXN entries, including both XABORT operand variants
 - [x] Expose all 14 normative ATOMICS entries and select native SB64 atomic exchange
-- [x] Expose all 39 normative AVX mnemonics with canonical `FF 01`, vector, immediate, gather, and scatter encodings
-- [x] Expose all 310 normative SeaBird instructions in the generated MC layer
+- [x] Expose all 44 normative AVX mnemonics with canonical `FF 01`, vector, immediate, gather, and scatter encodings
+- [x] Expose all 325 normative SeaBird instructions in the generated MC layer
+- [x] Add v3.1 audit primitives for carry/borrow arithmetic, unsigned high
+  multiply, unsigned FP conversion, and complete core vector predicates/NOT
 - [x] Implement documented ELF/GNU data, section, symbol, diagnostic, profile, CPU, and object-mode assembler directives
 - [x] Add SB32/SB64 global, external-symbol, and constant-pool address materialization with ABS32/ABS64 instruction relocations
 - [x] Add scalar and vector register spill/reload support across calls and under register pressure
@@ -101,7 +117,7 @@ one profile before binaries can be exchanged between operating systems.
 - [x] Lower and execute unsigned i64 conversions to/from binary32 and binary64 across the 2^63 boundary
 - [x] Lower and execute native IEEE binary128 arithmetic, memory, calls, signed conversions, comparisons, and selects with canonical `.q` assembly
 - [x] Qualify SeaBird ELF symbol, archive, raw/Intel-HEX conversion, and strip operations with LLVM's generic utilities
-- [x] Expose all 125 Tritium mandatory mnemonics, including immediate, stack, bitfield, atomic/ordering, system, and SYSX families
+- [x] Expose all 128 Tritium mandatory mnemonics, including immediate, stack, bitfield, atomic/ordering, system, and SYSX families
 - [x] Encode and disassemble active-width immediates, stack/control forms, scalar XOP operands, and SYSX `FF 04` streams
 - [x] Ratify `CMPXCHG Rexpected, Rdesired, [addr]` with ModR/M expected/address and XOP0 desired bindings and add its Tritium MC record
 - [x] Select native SB32 atomic loads/stores, compare-exchange (including its success result), fetch add/subtract/and/or/xor, and fence operations

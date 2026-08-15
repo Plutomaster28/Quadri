@@ -21,7 +21,7 @@ Copy these directories. Together they contain the project inputs:
 | `tools/` | Spec generators, validators, linker, and build/test scripts | Development tooling |
 | `docs/` | Current ISA manuals, status ledgers, and Tritium profile sources | Current documentation sources |
 | `generated/` | Generated C++ opcode metadata | Regenerable, but preserve for bootstrap/comparison |
-| `README.md` | Existing project overview and Windows-oriented commands | Project introduction |
+| `README.md` | Concise project overview and current documentation entry points | Project introduction |
 | `tritium_v1_datasheet.md` | Tritium embedded processor draft datasheet | Product/profile document |
 
 The following are generated or temporary. They may be copied for reference, but
@@ -44,7 +44,7 @@ be treated as equally authoritative.
 
 ### 1. Normative machine-readable ISA
 
-- `spec/seabird-isa.json` — SeaBird architecture version `3.0-rc2`
+- `spec/seabird-isa.json` — SeaBird architecture version `3.2`
   instruction database. This is the canonical instruction registry: encodings,
   operand bindings, operations, flags, privilege, modes, exceptions, and status.
 - `spec/isa.schema.json` — validation schema for the ISA database.
@@ -54,7 +54,7 @@ be treated as equally authoritative.
 When implementation code, generated manuals, and an old PDF disagree, start
 with `spec/`.
 
-### 2. Current generated/source manuals
+### 2. Current generated manuals and prose source
 
 - `docs/volume-1-basic-architecture.tex` — programming model, registers,
   calling convention, addressing, instruction formats, encoding, and flags.
@@ -65,14 +65,23 @@ with `spec/`.
 - `docs/volume-4-system-registers.tex` — system/control register reference.
 - `docs/volume-5-binary-interfaces.tex` — feature/control layouts, binary
   structures, ELF relocations, TLS, DWARF, and ABI ratification material.
-- `output/pdf/` — rendered versions of the current manuals. These are useful
-  reading copies, but the `.tex` and JSON inputs are the maintainable sources.
+- `main (3).tex` — maintainable monolithic prose source from which Volumes 1,
+  3, and 4 are extracted. Sections not selected by `tools/build_volumes.py`
+  are legacy design material and are non-normative.
+- `output/pdf/` — rendered versions of the current manuals. A PDF is current
+  only when rebuilt from the matching generated `.tex` during the release run.
 
 ### 3. ISA status and ratification
 
 - `docs/ARCHITECTURE_STATUS.md` — architecture-wide release gates and LLVM
   enablement status.
+- `docs/DOCUMENTATION_INDEX.md` — authority order, current/historical boundary,
+  and manual regeneration map.
+- `docs/PAE32_EXTENSION.md` and `docs/REGISTER_WINDOWING_EXTENSION.md` —
+  normative advanced-processor extension contracts.
 - `docs/ISA_COVERAGE.md` — instruction completion ledger.
+- `docs/V1_0_RATIFICATION_REPORT.md` — SDK 1.0 architecture and toolchain
+  qualification results.
 - `docs/RATIFICATION_REPORT.md` — v3.0 RC1 ratification results and reproduction
   notes.
 - `tests/golden-vectors.json`, `tests/edge-vectors.json`, and
@@ -92,8 +101,10 @@ does not replace the general SeaBird ISA volumes or the normative JSON database.
 
 - `SeaBird_Instruction_Set_Architecture (2) (2).pdf` — older imported ISA PDF.
 - `seabird_isa_extracted.txt` — text extracted from that older PDF.
-- `main (3).tex` and `main (3).pdf` — legacy monolithic LaTeX/PDF ISA source and
-  render.
+- `SeaBird_PAE_Reference.md` and `SeaBird_Register_Windowing_Reference.md` —
+  superseded design proposals retained for provenance; their banners point to
+  the ratified replacements.
+- `main (3).pdf` — historical monolithic render; use the current volume PDFs.
 
 Keep these for provenance and comparison. Do not use them as the current
 machine-readable authority when they differ from `spec/seabird-isa.json`.
@@ -118,8 +129,8 @@ machine-readable authority when they differ from `spec/seabird-isa.json`.
 - `clang/SeaBird.h` and `clang/SeaBird.cpp` — project-owned native Clang target
   implementation copied into `clang/lib/Basic/Targets/SeaBird.*`.
 
-The backend targets LLVM 22, specifically the existing scripts' tested
-`22.1.4` baseline. The first complete compiler profile is little-endian 64-bit
+The backend targets LLVM 22, specifically the selected `22.1.4` qualification
+baseline. The first complete compiler profile is little-endian 64-bit
 `SB-System64` using the `seabird64-unknown-none` triple. The MC layer also
 supports the Tritium bring-up identity `seabird32-unknown-none` with CPU
 `tritium-v1` and emits ELF32 objects. Native Clang uses the corresponding
@@ -143,18 +154,17 @@ find . -type f | wc -l
 find . -type f -size 0
 ```
 
-The `.git` directory visible in the Windows workspace is currently an empty
-OneDrive reparse-point placeholder, not a usable Git repository. Do not expect
-history to survive through it. After the copy, either clone the real upstream
-repository and copy these files into it, or initialize a new repository:
+If a copied `.git` entry is an empty OneDrive reparse-point placeholder rather
+than a usable repository, do not expect history to survive through it. Preserve
+it under a backup name before initializing a new repository:
 
 ```bash
-rm -rf .git
+mv .git .git.placeholder-backup
 git init
 ```
 
-Only run the removal after confirming you are in `~/src/pebble` and that `.git`
-is still the empty placeholder.
+Only rename it after confirming you are in the intended project directory and
+that it is not a usable Git repository.
 
 ## Linux prerequisites
 
@@ -162,13 +172,20 @@ Package names vary by distribution. On Ubuntu/Debian WSL, the basic toolset is:
 
 ```bash
 sudo apt update
-sudo apt install -y build-essential clang cmake ninja-build git python3 \
-  python3-pip texlive-xetex
+sudo apt install -y build-essential clang lld cmake ninja-build git python3 \
+  python3-pip zip unzip xz-utils texlive-xetex
 python3 -m pip install --user reportlab
 ```
 
 LLVM itself is a separate, large source checkout. Use LLVM 22.1.4 to match the
 patches and current backend.
+
+```bash
+mkdir -p /home/miyamii/llvm-src
+git clone --depth 1 --branch llvmorg-22.1.4 \
+  https://github.com/llvm/llvm-project.git \
+  /home/miyamii/llvm-src/llvm-project-22.1.4
+```
 
 ## Generate and validate project-owned files
 
@@ -197,9 +214,9 @@ The existing PowerShell scripts contain Windows/MSYS paths. Their equivalent
 native Linux installation is:
 
 ```bash
-export PEBBLE="$HOME/src/pebble"
-export LLVM_PROJECT="$HOME/src/llvm-project"
-export LLVM_BUILD="$HOME/build/llvm-seabird"
+export PEBBLE=/home/miyamii/pebble
+export LLVM_PROJECT=/home/miyamii/llvm-src/llvm-project-22.1.4
+export LLVM_BUILD=/home/miyamii/llvm-build-seabird
 
 mkdir -p "$LLVM_PROJECT/llvm/lib/Target/SeaBird"
 cp -a "$PEBBLE/llvm/SeaBird/." \
@@ -233,6 +250,7 @@ git -C "$LLVM_PROJECT" apply --reverse --check \
 ```bash
 cmake -S "$LLVM_PROJECT/llvm" -B "$LLVM_BUILD" -G Ninja \
   -DCMAKE_BUILD_TYPE=Release \
+  -DLLVM_ENABLE_ASSERTIONS=ON \
   -DCMAKE_C_COMPILER=clang \
   -DCMAKE_CXX_COMPILER=clang++ \
   -DLLVM_TARGETS_TO_BUILD= \
@@ -247,8 +265,9 @@ cmake -S "$LLVM_PROJECT/llvm" -B "$LLVM_BUILD" -G Ninja \
   -DLLVM_ENABLE_TERMINFO=OFF
 
 cmake --build "$LLVM_BUILD" \
-  --target clang llc llvm-mc llvm-readobj llvm-objdump \
-  --parallel "$(nproc)"
+  --target clang llc llvm-mc llvm-tblgen llvm-readobj llvm-objdump \
+    llvm-nm llvm-ar llvm-ranlib llvm-objcopy llvm-strip \
+  --parallel 8
 ```
 
 Basic registration check:
@@ -258,14 +277,25 @@ Basic registration check:
 "$LLVM_BUILD/bin/llc" --version | grep -i seabird
 "$LLVM_BUILD/bin/clang" -target seabird64-unknown-none -dM -E -x c /dev/null \
   | grep SEABIRD
+"$LLVM_BUILD/bin/clang" -target seabird32-unknown-none -mcpu=axium-m-v1 \
+  -dM -E -x c /dev/null | grep -E 'SEABIRD_(PAE32|REGISTER_WINDOWS)'
 ```
 
-The scripts `tools/build_llvm_backend.ps1`,
-`tools/install_llvm_backend.ps1`, `tools/test_llvm_backend.ps1`,
-`tools/validate_llvm_tablegen.ps1`, and
-`tools/compile_c_to_seabird.ps1` remain useful as executable documentation, but
-their hard-coded Windows paths must be ported to Bash or parameterized before
-they provide a fully native WSL workflow.
+After the integration suite passes, create the deterministic SDK archive with:
+
+```bash
+python3 tools/test_llvm_backend.py --llvm-build "$LLVM_BUILD"
+python3 tools/run_conformance.py
+python3 tools/record_toolchain_build.py \
+  --llvm-project "$LLVM_PROJECT" --llvm-build "$LLVM_BUILD"
+python3 tools/package_sdk.py --llvm-build "$LLVM_BUILD"
+python3 tools/verify_sdk_package.py \
+  dist/seabird-sdk-v1.0.0-marlin-linux-x86_64.zip
+```
+
+The portable `tools/install_llvm_backend.py`, `tools/build_llvm_backend.py`,
+`tools/test_llvm_backend.py`, and `tools/compile_c_to_seabird.py` are the native
+Linux/WSL workflow. The matching PowerShell scripts remain the Windows harness.
 
 ## Safe cleanup after a verified WSL build
 

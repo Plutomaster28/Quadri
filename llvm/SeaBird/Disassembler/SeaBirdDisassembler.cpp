@@ -1,4 +1,5 @@
 #include "MCTargetDesc/SeaBirdMCTargetDesc.h"
+#include "MCTargetDesc/SeaBirdBaseInfo.h"
 #include "TargetInfo/SeaBirdTargetInfo.h"
 #include "llvm/MC/MCDisassembler/MCDisassembler.h"
 #include "llvm/MC/MCInst.h"
@@ -82,6 +83,7 @@ class SeaBirdDisassembler final : public MCDisassembler {
     switch (Byte) {
 #define SEABIRD_FORM_CopyRR DecodeForm::CopyRR
 #define SEABIRD_FORM_ALURR DecodeForm::ALURR
+#define SEABIRD_FORM_CarryALURR DecodeForm::ALURR
 #define SEABIRD_FORM_CompareRR DecodeForm::CompareRR
 #define SEABIRD_FORM_RI64 DecodeForm::RI64
 #define SEABIRD_FORM_LoadQ DecodeForm::LoadQ
@@ -119,6 +121,7 @@ class SeaBirdDisassembler final : public MCDisassembler {
 #define SEABIRD_FORM_SysXWriteImm DecodeForm::SysXWriteImm
 #define SEABIRD_FORM_SysXMaskedMemory DecodeForm::SysXMaskedMemory
 #define SEABIRD_FORM_SysXNoOperand DecodeForm::NoOperand
+#define SEABIRD_FORM_WindowTransition DecodeForm::NoOperand
 #define SEABIRD_FORM_SysXPair DecodeForm::CompareRR
 #define SEABIRD_FORM_SysXTernary DecodeForm::TernaryRR
 #define SEABIRD_FORM_SysXReg DecodeForm::StackReg
@@ -129,6 +132,8 @@ class SeaBirdDisassembler final : public MCDisassembler {
 #define SEABIRD_FORM_AtomicMem DecodeForm::AtomicMem
 #define SEABIRD_FORM_AtomicLoad DecodeForm::AtomicLoad
 #define SEABIRD_FORM_TernaryRR DecodeForm::TernaryRR
+#define SEABIRD_FORM_StringCopy DecodeForm::TernaryRR
+#define SEABIRD_FORM_StringFill DecodeForm::TernaryRR
 #define SEABIRD_FORM_MemoryOnly DecodeForm::MemoryOnly
 #define SEABIRD_FORM_PairLoad DecodeForm::PairLoad
 #define SEABIRD_FORM_PairStore DecodeForm::PairStore
@@ -166,6 +171,7 @@ class SeaBirdDisassembler final : public MCDisassembler {
 #undef SEABIRD_OPCODE
 #undef SEABIRD_FORM_CopyRR
 #undef SEABIRD_FORM_ALURR
+#undef SEABIRD_FORM_CarryALURR
 #undef SEABIRD_FORM_CompareRR
 #undef SEABIRD_FORM_RI64
 #undef SEABIRD_FORM_LoadQ
@@ -203,6 +209,7 @@ class SeaBirdDisassembler final : public MCDisassembler {
 #undef SEABIRD_FORM_SysXWriteImm
 #undef SEABIRD_FORM_SysXMaskedMemory
 #undef SEABIRD_FORM_SysXNoOperand
+#undef SEABIRD_FORM_WindowTransition
 #undef SEABIRD_FORM_SysXPair
 #undef SEABIRD_FORM_SysXTernary
 #undef SEABIRD_FORM_SysXReg
@@ -213,6 +220,8 @@ class SeaBirdDisassembler final : public MCDisassembler {
 #undef SEABIRD_FORM_AtomicMem
 #undef SEABIRD_FORM_AtomicLoad
 #undef SEABIRD_FORM_TernaryRR
+#undef SEABIRD_FORM_StringCopy
+#undef SEABIRD_FORM_StringFill
 #undef SEABIRD_FORM_MemoryOnly
 #undef SEABIRD_FORM_PairLoad
 #undef SEABIRD_FORM_PairStore
@@ -244,6 +253,7 @@ class SeaBirdDisassembler final : public MCDisassembler {
 #define SEABIRD_FORM_SysXWriteImm DecodeForm::SysXWriteImm
 #define SEABIRD_FORM_SysXMaskedMemory DecodeForm::SysXMaskedMemory
 #define SEABIRD_FORM_SysXNoOperand DecodeForm::NoOperand
+#define SEABIRD_FORM_WindowTransition DecodeForm::NoOperand
 #define SEABIRD_FORM_SysXPair DecodeForm::CompareRR
 #define SEABIRD_FORM_SysXTernary DecodeForm::TernaryRR
 #define SEABIRD_FORM_SysXReg DecodeForm::StackReg
@@ -273,6 +283,7 @@ class SeaBirdDisassembler final : public MCDisassembler {
 #undef SEABIRD_FORM_SysXWriteImm
 #undef SEABIRD_FORM_SysXMaskedMemory
 #undef SEABIRD_FORM_SysXNoOperand
+#undef SEABIRD_FORM_WindowTransition
 #undef SEABIRD_FORM_SysXPair
 #undef SEABIRD_FORM_SysXTernary
 #undef SEABIRD_FORM_SysXReg
@@ -440,17 +451,30 @@ public:
     if (Bytes.empty())
       return Fail;
 
+    unsigned Marker = SeaBirdII::NoMarker;
+    unsigned MarkerBytes = 0;
+    if (Bytes[0] == SeaBirdII::PerformanceMarkerEscape) {
+      if (Bytes.size() < 3 || Bytes[1] == SeaBirdII::NoMarker ||
+          Bytes[1] > SeaBirdII::Leaf)
+        return Fail;
+      Marker = Bytes[1];
+      MarkerBytes = 2;
+    }
+
     bool Extended = false;
     bool HasVectorCtl = false;
     unsigned OperandWidth = 0;
     unsigned OpcodeOffset = 0;
-    if (Bytes[0] == 0xFE) {
-      if (Bytes.size() < 3 || (Bytes[1] & 0x07) != 0)
+    if (Bytes[MarkerBytes] == 0xFE) {
+      if (Bytes.size() < MarkerBytes + 3 ||
+          (Bytes[MarkerBytes + 1] & 0x07) != 0)
         return Fail;
-      Extended = (Bytes[1] & 0x80) != 0;
-      HasVectorCtl = (Bytes[1] & 0x40) != 0;
-      OperandWidth = (Bytes[1] >> 3) & 7;
-      OpcodeOffset = 2;
+      Extended = (Bytes[MarkerBytes + 1] & 0x80) != 0;
+      HasVectorCtl = (Bytes[MarkerBytes + 1] & 0x40) != 0;
+      OperandWidth = (Bytes[MarkerBytes + 1] >> 3) & 7;
+      OpcodeOffset = MarkerBytes + 2;
+    } else {
+      OpcodeOffset = MarkerBytes;
     }
 
     unsigned Opcode = 0;
@@ -485,6 +509,7 @@ public:
       return Fail;
     }
     Inst.setOpcode(Opcode);
+    Inst.setFlags(Marker);
     if (HasVectorCtl && Opcode == SeaBird::MOVrr) {
       Inst.setOpcode(SeaBird::MOVV128);
       Form = DecodeForm::CopyVV;
@@ -511,26 +536,30 @@ public:
       if (Extended || HasVectorCtl)
         return Fail;
       const unsigned ImmediateBytes = Is64Bit ? 8 : 4;
-      if (Bytes.size() < OpcodeBytes + ImmediateBytes)
+      const unsigned ImmediateOffset = OpcodeOffset + OpcodeBytes;
+      if (Bytes.size() < ImmediateOffset + ImmediateBytes)
         return Fail;
       std::uint64_t Immediate = 0;
       for (unsigned I = 0; I < ImmediateBytes; ++I)
-        Immediate |= std::uint64_t(Bytes[OpcodeBytes + I]) << (I * 8);
+        Immediate |= std::uint64_t(Bytes[ImmediateOffset + I]) << (I * 8);
       Inst.addOperand(MCOperand::createImm(
           static_cast<std::int64_t>(Immediate)));
-      Size = OpcodeBytes + ImmediateBytes;
+      Size = ImmediateOffset + ImmediateBytes;
       return Success;
     }
 
     if (Form == DecodeForm::Branch) {
-      if (Extended || HasVectorCtl || Bytes.size() < 5)
+      const unsigned ImmediateOffset = OpcodeOffset + OpcodeBytes;
+      if (Extended || HasVectorCtl ||
+          Bytes.size() < ImmediateOffset + 4)
         return Fail;
-      const std::uint32_t Raw = static_cast<std::uint32_t>(Bytes[1]) |
-                                (static_cast<std::uint32_t>(Bytes[2]) << 8) |
-                                (static_cast<std::uint32_t>(Bytes[3]) << 16) |
-                                (static_cast<std::uint32_t>(Bytes[4]) << 24);
+      const std::uint32_t Raw =
+          static_cast<std::uint32_t>(Bytes[ImmediateOffset]) |
+          (static_cast<std::uint32_t>(Bytes[ImmediateOffset + 1]) << 8) |
+          (static_cast<std::uint32_t>(Bytes[ImmediateOffset + 2]) << 16) |
+          (static_cast<std::uint32_t>(Bytes[ImmediateOffset + 3]) << 24);
       Inst.addOperand(MCOperand::createImm(static_cast<std::int32_t>(Raw)));
-      Size = 5;
+      Size = ImmediateOffset + 4;
       return Success;
     }
 
@@ -626,6 +655,8 @@ public:
       case SeaBird::FMAX64: Inst.setOpcode(SeaBird::FMAX32CG); break;
       case SeaBird::FCVTI64: Inst.setOpcode(SeaBird::FCVTI32CG); break;
       case SeaBird::FCVTS64: Inst.setOpcode(SeaBird::FCVTS32CG); break;
+      case SeaBird::FCVTU64: Inst.setOpcode(SeaBird::FCVTU32CG); break;
+      case SeaBird::FCVTUS64: Inst.setOpcode(SeaBird::FCVTUS32CG); break;
       default: break;
       }
     }
@@ -645,6 +676,8 @@ public:
       case SeaBird::FMAX64: Inst.setOpcode(SeaBird::FMAX128CG); break;
       case SeaBird::FCVTI64: Inst.setOpcode(SeaBird::FCVTI128CG); break;
       case SeaBird::FCVTS64: Inst.setOpcode(SeaBird::FCVTS128CG); break;
+      case SeaBird::FCVTU64: Inst.setOpcode(SeaBird::FCVTU128CG); break;
+      case SeaBird::FCVTUS64: Inst.setOpcode(SeaBird::FCVTUS128CG); break;
       default: break;
       }
     }

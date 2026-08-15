@@ -16,6 +16,10 @@ $llvmObjcopy = Join-Path $BuildRoot "bin/llvm-objcopy.exe"
 $llvmStrip = Join-Path $BuildRoot "bin/llvm-strip.exe"
 $smoke = Join-Path $root "tests/llvm/smoke.s"
 $roundtrip = Join-Path $root "tests/llvm/encoding-roundtrip.s"
+$invalidMarkers = Join-Path $root "tests/llvm/performance-markers-invalid.s"
+$markerCodegen = Join-Path $root "tests/llvm/performance-markers.ll"
+$windowing = Join-Path $root "tests/llvm/windowing.s"
+$windowedABI = Join-Path $root "tests/llvm/windowed-abi.ll"
 $external = Join-Path $root "tests/llvm/external-reloc.s"
 $tritium = Join-Path $root "tests/llvm/tritium-mc.s"
 $tritiumExcluded = Join-Path $root "tests/llvm/tritium-excluded.s"
@@ -224,6 +228,9 @@ $encoding = & $llvmMc -triple=seabird64-unknown-none -show-encoding $roundtrip `
     2>&1 | Out-String
 if ($LASTEXITCODE -ne 0) { throw "SeaBird encoding test failed`n$encoding" }
 foreach ($expected in
+    "[0xfd,0x06,0xfe,0x80,0x00,0xf8,0x0b]",
+    "[0xfd,0x07,0xfe,0x80,0x01,0xc0,0x04,0x88,0x77,0x66,0x55,0x44,0x33,0x22,0x11]",
+    "[0xfd,0x08,0xfe,0x80,0x20,0xc8,0x05]",
     "[0xfe,0x80,0x00,0xf8,0x0b]",
     "[0xfe,0x80,0x01,0xc0,0x04,0x88,0x77,0x66,0x55,0x44,0x33,0x22,0x11]",
     "[0xfe,0x80,0x20,0xc8,0x05]") {
@@ -255,6 +262,11 @@ foreach ($expected in "Format: elf64-seabird", "Arch: seabird64",
 $disassembly = & $llvmObjdump -d $roundtripObject 2>&1 | Out-String
 if ($LASTEXITCODE -ne 0) { throw "SeaBird disassembly failed`n$disassembly" }
 foreach ($expected in "mov`t", "movi`t", "add`t", "sub`t", "and`t", "or`t",
+    "adc`t", "sbb`t", "umulh`t", "fcvtu.s`t", "fcvtus.s`t", "fcvtu`t", "fcvtus`t",
+    "temporary.mov`t", "persistent.movi`t", "independent.add`t",
+    "likely.je`t", "unlikely.jne`t", "reuse.call`t", "leaf.call`t",
+    "assume.ld`t", "stream.st`t",
+    "prefetch.ld`t", "temporary.fcvt.s2d`t",
     "xor`t", "cmp`t", "je`t", "jne`t", "jmp`t", "call`t", "ret`t",
     "push`t", "pop`t", "pusha", "popa", "enter`t4294967296", "leave",
     "pushf", "popf", "pushq`t", "popq`t", "sysret", "getpid`t",
@@ -267,6 +279,62 @@ foreach ($expected in "mov`t", "movi`t", "add`t", "sub`t", "and`t", "or`t",
     "vdiv`t", "vshl`t", "vshr`t", "vdup`t", "vabs`t", "vmax`t", "vmin`t") {
     if ($disassembly -notmatch [regex]::Escape($expected)) {
         throw "SeaBird disassembly is missing '$expected'"
+    }
+}
+
+$invalidMarkerOutput = & $llvmMc -triple=seabird64-unknown-none `
+    $invalidMarkers 2>&1 | Out-String
+if ($LASTEXITCODE -eq 0 -or
+    $invalidMarkerOutput -notmatch "performance marker is not applicable") {
+    throw "invalid performance-marker pairing was not rejected"
+}
+
+$markerCodegenAssembly = Join-Path $testOutput "performance-markers.s"
+& $llc -mtriple=seabird64-unknown-none -O2 -filetype=asm `
+    $markerCodegen -o $markerCodegenAssembly
+if ($LASTEXITCODE -ne 0) { throw "performance-marker lowering failed" }
+$markerCodegenText = Get-Content $markerCodegenAssembly -Raw
+foreach ($expected in "likely.", "unlikely.") {
+    if ($markerCodegenText -notmatch [regex]::Escape($expected)) {
+        throw "weighted branch assembly is missing '$expected'"
+    }
+}
+
+$windowingObject = Join-Path $testOutput "windowing.o"
+& $llvmMc -triple=seabird32-unknown-none -mcpu=axium-m-v1 -filetype=obj `
+    $windowing -o $windowingObject
+if ($LASTEXITCODE -ne 0) { throw "register-window assembly failed" }
+$windowingDisassembly = & $llvmObjdump -d $windowingObject 2>&1 | Out-String
+foreach ($expected in "winnew", "winprev", "winreserve", "winpin",
+    "winrelease", "reuse.call`t", "leaf.call`t") {
+    if ($windowingDisassembly -notmatch [regex]::Escape($expected)) {
+        throw "register-window disassembly is missing '$expected'"
+    }
+}
+$windowingHeaders = & $llvmReadobj --file-headers $windowingObject `
+    2>&1 | Out-String
+if ($windowingHeaders -notmatch [regex]::Escape("Flags: 0x3")) {
+    throw "Axium M object is missing windowed-ABI/PAE32 ELF flags"
+}
+
+$windowedABIAssembly = Join-Path $testOutput "windowed-abi.s"
+& $llc -mtriple=seabird32-unknown-none -mcpu=axium-m-v1 -O2 `
+    -filetype=asm $windowedABI -o $windowedABIAssembly
+if ($LASTEXITCODE -ne 0) { throw "windowed ABI lowering failed" }
+$windowedABIGenerated = Get-Content $windowedABIAssembly -Raw
+foreach ($expected in "window_sum8:", "window_call8:", "call`twindow_sum8",
+    "r8", "r15", "r24", "r31") {
+    if ($windowedABIGenerated -notmatch [regex]::Escape($expected)) {
+        throw "windowed ABI assembly is missing '$expected'"
+    }
+}
+$axiumMacros = & $clang -target seabird32-unknown-none -mcpu=axium-m-v1 `
+    -dM -E $nativeTritium 2>&1 | Out-String
+foreach ($expected in "#define __SEABIRD_AXIUM_M__ 1",
+    "#define __SEABIRD_PAE32__ 1",
+    "#define __SEABIRD_REGISTER_WINDOWS__ 1") {
+    if ($axiumMacros -notmatch [regex]::Escape($expected)) {
+        throw "Axium M frontend macros are missing '$expected'"
     }
 }
 
@@ -383,7 +451,9 @@ foreach ($expected in "vfmadd`t", "vfmsub`t", "vfnmadd`t",
     "vpmul`t", "vperm2`t", "vcompress`t", "vexpand`t", "vround`t",
     "vrecip_est`t", "vrsqrt_est`t", "vfmadd_sub`t", "vzeroupper",
     "vzeroall", "vpmax`t", "vpmin`t", "vgatherq`t", "vscatterq`t",
-    "vfpclass`t", "vreduce_max`t", "vreduce_min`t", "vmuladdsub`t") {
+    "vfpclass`t", "vreduce_max`t", "vreduce_min`t", "vmuladdsub`t",
+    "vcompare_eq`t", "vcompare_ne`t", "vcompare_ult`t", "vcompare_ugt`t",
+    "vnot`t") {
     if ($avxDisassembly -notmatch [regex]::Escape($expected)) {
         throw "AVX disassembly is missing '$expected'"
     }
@@ -626,8 +696,8 @@ if ($LASTEXITCODE -ne 0) { throw "native unsigned FP conversion object failed" }
 $nativeFPUnsignedGenerated = Get-Content $nativeFPUnsignedAssembly -Raw
 foreach ($expected in "seabird_u64_to_f32:", "seabird_u64_to_f64:",
     "seabird_f32_to_u64:", "seabird_f64_to_u64:",
-    "seabird_fp_unsigned_call:", "fcvti.s`t", "fcvti`t", "fcvts.s`t",
-    "fcvts`t", "fcmp.s`t", "fcmp`t") {
+    "seabird_fp_unsigned_call:", "fcvtu.s`t", "fcvtu`t", "fcvtus.s`t",
+    "fcvtus`t") {
     if ($nativeFPUnsignedGenerated -notmatch [regex]::Escape($expected)) {
         throw "native unsigned FP conversion assembly is missing '$expected'"
     }
@@ -647,7 +717,7 @@ $fp128CoreDisassembly = & $llvmObjdump -d $fp128CoreObject 2>&1 | Out-String
 foreach ($expected in "fadd.q`t", "fsub.q`t", "fmul.q`t", "fdiv.q`t",
     "fneg.q`t", "fabs.q`t", "fsqrt.q`t", "fcmp.q`t", "fmadd.q`t",
     "fmsub.q`t", "fmin.q`t", "fmax.q`t", "fld.q`t", "fst.q`t",
-    "fcvti.q`t", "fcvts.q`t") {
+    "fcvti.q`t", "fcvts.q`t", "fcvtu.q`t", "fcvtus.q`t") {
     if ($fp128CoreDisassembly -notmatch [regex]::Escape($expected)) {
         throw "binary128 fixture disassembly is missing '$expected'"
     }
@@ -759,8 +829,8 @@ if ($LASTEXITCODE -ne 0) {
 }
 $gpIntegerGenerated = Get-Content $gpIntegerAssembly -Raw
 foreach ($expected in "gp_mul:", "gp_sdiv:", "gp_udiv:", "gp_srem:",
-    "gp_urem:", "gp_abs:", "gp_clz:", "gp_ctz:", "gp_popcount:",
-    "mul`t", "div`t", "udiv`t", "mod`t", "abs`t", "clz`t", "ctz`t",
+    "gp_umulh:", "gp_urem:", "gp_abs:", "gp_clz:", "gp_ctz:", "gp_popcount:",
+    "mul`t", "umulh`t", "div`t", "udiv`t", "mod`t", "abs`t", "clz`t", "ctz`t",
     "popc`t") {
     if ($gpIntegerGenerated -notmatch [regex]::Escape($expected)) {
         throw "GP integer-core assembly is missing '$expected'"

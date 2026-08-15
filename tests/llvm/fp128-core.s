@@ -14,3 +14,5 @@ fld.q v2, [r3 + 16]
 fst.q [r4 + 32], v5
 fcvti.q v6, r7
 fcvts.q r8, v9
+fcvtu.q v10, r11
+fcvtus.q r12, v13

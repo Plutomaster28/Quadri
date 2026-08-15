@@ -40,3 +40,8 @@ avx_extended:
   vreduce_max v31, v16
   vreduce_min v31, v16
   vmuladdsub v31, v16, v30
+  vcompare_eq v31, v16, v30
+  vcompare_ne v31, v16, v30
+  vcompare_ult v31, v16, v30
+  vcompare_ugt v31, v16, v30
+  vnot v31, v16

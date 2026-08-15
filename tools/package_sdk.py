@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build a deterministic SeaBird SDK v0.1 zip from a qualified LLVM build."""
+"""Build a deterministic SeaBird SDK zip from a qualified LLVM build."""
 
 import argparse
 import hashlib
@@ -15,7 +15,7 @@ TOOLS = (
     "clang", "llc", "llvm-mc", "llvm-objdump", "llvm-readobj", "llvm-nm",
     "llvm-ar", "llvm-ranlib", "llvm-objcopy", "llvm-strip",
 )
-FIXED_ZIP_TIME = (2026, 7, 21, 0, 0, 0)
+FIXED_ZIP_TIME = (2026, 8, 14, 0, 0, 0)
 
 
 def version():
@@ -23,6 +23,16 @@ def version():
     if not value or any(ch not in "0123456789." for ch in value):
         raise SystemExit("VERSION is not a numeric dotted release version")
     return value
+
+
+def release_tag():
+    fields = dict(line.split("=", 1) for line in
+                  (ROOT / "RELEASE").read_text(encoding="utf-8").splitlines()
+                  if "=" in line)
+    tag = fields.get("tag", "").strip()
+    if not tag or not tag.replace("-", "").isalnum():
+        raise SystemExit("RELEASE does not contain a valid tag")
+    return tag
 
 
 def host_tag():
@@ -88,7 +98,7 @@ def main():
     args = parser.parse_args()
 
     release = version()
-    package_name = f"seabird-sdk-v{release}-tuna-{args.platform_tag}"
+    package_name = f"seabird-sdk-v{release}-{release_tag()}-{args.platform_tag}"
     llvm_bin = args.llvm_build.resolve() / "bin"
     resource_root = args.llvm_build.resolve() / "lib" / "clang" / "22"
     resource_headers = resource_root / "include"
@@ -101,21 +111,50 @@ def main():
         for tool in TOOLS:
             source = find_tool(llvm_bin, tool)
             copy_file(source, stage / "bin" / source.name, executable=True)
+        copy_file(ROOT / "seabird-ref.exe", stage / "bin/seabird-ref",
+                  executable=True)
+        copy_file(ROOT / "pebble-xlate.exe", stage / "bin/pebble-xlate",
+                  executable=True)
         copy_file(ROOT / "tools/link_seabird.py", stage / "bin/link_seabird.py",
                   executable=True)
         shutil.copytree(resource_headers, stage / "lib/clang/22/include")
         shutil.copytree(ROOT / "runtime", stage / "runtime")
         shutil.copytree(ROOT / "spec", stage / "spec")
+        shutil.copytree(ROOT / "examples/isa-showcase",
+                        stage / "examples/isa-showcase")
         for source, target in (
             (ROOT / "VERSION", stage / "VERSION"),
             (ROOT / "RELEASE", stage / "RELEASE"),
             (ROOT / "LICENSE", stage / "LICENSE"),
             (ROOT / "CHANGELOG.md", stage / "CHANGELOG.md"),
             (ROOT / "packaging/SDK_README.md", stage / "README.md"),
-            (ROOT / "docs/releases/v0.1.0.md", stage / "RELEASE_NOTES.md"),
-            (ROOT / "docs/releases/v0.1.0-validation.md", stage / "VALIDATION.md"),
+            (ROOT / "docs/releases/v1.0.0.md", stage / "RELEASE_NOTES.md"),
+            (ROOT / "docs/releases/v1.0.0-validation.md", stage / "VALIDATION.md"),
             (ROOT / "docs/COMPILER_STATUS.md", stage / "COMPILER_STATUS.md"),
             (ROOT / "docs/ARCHITECTURE_STATUS.md", stage / "ARCHITECTURE_STATUS.md"),
+            (ROOT / "docs/TOOLCHAIN_GUIDE.md", stage / "docs/TOOLCHAIN_GUIDE.md"),
+            (ROOT / "docs/DOCUMENTATION_INDEX.md", stage / "docs/DOCUMENTATION_INDEX.md"),
+            (ROOT / "docs/PAE32_EXTENSION.md", stage / "docs/PAE32_EXTENSION.md"),
+            (ROOT / "docs/REGISTER_WINDOWING_EXTENSION.md", stage / "docs/REGISTER_WINDOWING_EXTENSION.md"),
+            (ROOT / "docs/V1_0_RATIFICATION_REPORT.md", stage / "docs/V1_0_RATIFICATION_REPORT.md"),
+            (ROOT / "output/toolchain-build.json", stage / "TOOLCHAIN_BUILD.json"),
+            (ROOT / "tests/golden-vectors.json", stage / "conformance/golden-vectors.json"),
+            (ROOT / "tests/edge-vectors.json", stage / "conformance/edge-vectors.json"),
+            (ROOT / "tests/ratification-vectors.json", stage / "conformance/ratification-vectors.json"),
+            (ROOT / "src/seabird_ref.cpp", stage / "reference/seabird_ref.cpp"),
+            (ROOT / "src/main.cpp", stage / "reference/translator.cpp"),
+            (ROOT / "generated/seabird_opcodes.hpp", stage / "generated/seabird_opcodes.hpp"),
+            (ROOT / "docs/volume-1-basic-architecture.tex", stage / "docs/source/volume-1-basic-architecture.tex"),
+            (ROOT / "docs/volume-2-instruction-reference.tex", stage / "docs/source/volume-2-instruction-reference.tex"),
+            (ROOT / "docs/volume-3-system-programming.tex", stage / "docs/source/volume-3-system-programming.tex"),
+            (ROOT / "docs/volume-4-system-registers.tex", stage / "docs/source/volume-4-system-registers.tex"),
+            (ROOT / "docs/volume-5-binary-interfaces.tex", stage / "docs/source/volume-5-binary-interfaces.tex"),
+            (ROOT / "output/pdf/volume-1-basic-architecture.pdf", stage / "docs/pdf/volume-1-basic-architecture.pdf"),
+            (ROOT / "output/pdf/volume-2-instruction-reference.pdf", stage / "docs/pdf/volume-2-instruction-reference.pdf"),
+            (ROOT / "output/pdf/volume-3-system-programming.pdf", stage / "docs/pdf/volume-3-system-programming.pdf"),
+            (ROOT / "output/pdf/volume-4-system-registers.pdf", stage / "docs/pdf/volume-4-system-registers.pdf"),
+            (ROOT / "output/pdf/volume-5-binary-interfaces.pdf", stage / "docs/pdf/volume-5-binary-interfaces.pdf"),
+            (ROOT / "output/pdf/manual-build.json", stage / "docs/pdf/manual-build.json"),
             (ROOT / "tests/llvm/c-smoke.c", stage / "examples/c-smoke.c"),
             (ROOT / "tests/llvm/c-native-fp128.c", stage / "examples/c-native-fp128.c"),
             (ROOT / "examples/seabird64/arithmetic.s", stage / "examples/seabird64/arithmetic.s"),

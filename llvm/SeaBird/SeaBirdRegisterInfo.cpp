@@ -18,11 +18,15 @@ SeaBirdRegisterInfo::SeaBirdRegisterInfo() : SeaBirdGenRegisterInfo(0) {}
 
 const std::uint16_t *
 SeaBirdRegisterInfo::getCalleeSavedRegs(const MachineFunction *MF) const {
+  if (MF && MF->getSubtarget<SeaBirdSubtarget>().hasRegisterWindows())
+    return CSR_SeaBirdWindowSpills_SaveList;
   return CSR_SeaBird_SaveList;
 }
 
 const std::uint32_t *SeaBirdRegisterInfo::getCallPreservedMask(
     const MachineFunction &MF, CallingConv::ID CC) const {
+  if (MF.getSubtarget<SeaBirdSubtarget>().hasRegisterWindows())
+    return CSR_SeaBirdWindowPreserved_RegMask;
   return CSR_SeaBird_RegMask;
 }
 
@@ -30,10 +34,13 @@ BitVector SeaBirdRegisterInfo::getReservedRegs(const MachineFunction &MF) const 
   BitVector Reserved(getNumRegs());
   Reserved.set(SeaBird::R6); // Frame pointer until frame lowering is enabled.
   Reserved.set(SeaBird::R7); // Stack pointer.
-  Reserved.set(SeaBird::R28);
-  Reserved.set(SeaBird::R29);
-  Reserved.set(SeaBird::R30);
-  Reserved.set(SeaBird::R31);
+  Reserved.set(SeaBird::NOIDX); // Non-architectural no-index encoding sentinel.
+  if (!MF.getSubtarget<SeaBirdSubtarget>().hasRegisterWindows()) {
+    Reserved.set(SeaBird::R28);
+    Reserved.set(SeaBird::R29);
+    Reserved.set(SeaBird::R30);
+    Reserved.set(SeaBird::R31);
+  }
   return Reserved;
 }
 

@@ -21,15 +21,22 @@ private:
     SDLoc DL(Addr);
     const MVT PtrVT =
         getTargetLowering()->getPointerTy(CurDAG->getDataLayout());
+    int64_t Displacement = 0;
+    if (Addr.getOpcode() == ISD::ADD) {
+      if (auto *Offset = dyn_cast<ConstantSDNode>(Addr.getOperand(1))) {
+        Displacement = Offset->getSExtValue();
+        Addr = Addr.getOperand(0);
+      }
+    }
     if (auto *FI = dyn_cast<FrameIndexSDNode>(Addr)) {
       Base = CurDAG->getTargetFrameIndex(
           FI->getIndex(), PtrVT);
     } else {
       Base = Addr;
     }
-    Index = CurDAG->getRegister(SeaBird::R4, PtrVT);
+    Index = CurDAG->getRegister(SeaBird::NOIDX, PtrVT);
     Scale = CurDAG->getTargetConstant(1, DL, PtrVT);
-    Disp = CurDAG->getTargetConstant(0, DL, PtrVT);
+    Disp = CurDAG->getTargetConstant(Displacement, DL, PtrVT);
     return true;
   }
 
@@ -47,7 +54,7 @@ private:
           getTargetLowering()->getPointerTy(CurDAG->getDataLayout());
       SDValue Ops[] = {
           CurDAG->getTargetFrameIndex(FI->getIndex(), PtrVT),
-          CurDAG->getRegister(SeaBird::R4, PtrVT),
+          CurDAG->getRegister(SeaBird::NOIDX, PtrVT),
           CurDAG->getTargetConstant(1, DL, PtrVT),
           CurDAG->getTargetConstant(0, DL, PtrVT)};
       const unsigned Opcode =

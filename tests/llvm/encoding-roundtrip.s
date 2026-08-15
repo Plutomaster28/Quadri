@@ -1,9 +1,23 @@
 .text
 .globl encoding_roundtrip
 encoding_roundtrip:
+  temporary.mov r31, r16
+  persistent.movi r8, 0x1122334455667788
+  independent.add r9, r8
+  likely.je local_target
+  unlikely.jne local_target
+  reuse.call local_target
+  leaf.call local_target
+  assume.ld r16, [r17]
+  stream.st [r17], r16
+  prefetch.ld r16, [r17]
+  temporary.fcvt.s2d v0, v1
   mov r31, r16
   movi r8, 0x1122334455667788
   add r9, r8
+  adc r9, r8
+  sbb r10, r11
+  umulh r12, r13
   sub r10, r11
   and r12, r13
   or r14, r15
@@ -59,6 +73,10 @@ local_target:
   stp [r16 + r17*8 - 32], r31, r30
   fsqrt v31, v16
   fcmp v31, v16
+  fcvtu.s v31, r16
+  fcvtus.s r31, v16
+  fcvtu v31, r16
+  fcvtus r31, v16
   fneg v31, v16
   fabs v31, v16
   vdiv v31, v16, v30

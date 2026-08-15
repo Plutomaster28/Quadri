@@ -38,7 +38,7 @@ def preamble(volume: str, subtitle: str) -> str:
 \AtBeginEnvironment{{longtable}}{{\footnotesize}}\AtBeginEnvironment{{table}}{{\footnotesize}}
 \lstset{{basicstyle=\ttfamily\small,breaklines=true,showstringspaces=false,frame=single,numbers=left,numberstyle=\tiny\color{{gray}},backgroundcolor=\color{{gray!8}}}}
 \pagestyle{{fancy}}\fancyhf{{}}
-\fancyhead[L]{{\small\sffamily SeaBird ISA {volume}}}\fancyhead[R]{{\small\sffamily Version 3.0 RC1}}
+\fancyhead[L]{{\small\sffamily SeaBird ISA {volume}}}\fancyhead[R]{{\small\sffamily Architecture 3.2 / SDK 1.0}}
 \fancyfoot[C]{{\thepage}}\setlength{{\headheight}}{{14pt}}
 \titleformat{{\section}}{{\Large\bfseries\sffamily}}{{\thesection}}{{0.8em}}{{}}
 \titleformat{{\subsection}}{{\large\bfseries\sffamily}}{{\thesubsection}}{{0.8em}}{{}}
@@ -48,8 +48,8 @@ def preamble(volume: str, subtitle: str) -> str:
 \begin{{document}}
 \begin{{titlepage}}\centering\vspace*{{2cm}}
 {{\Huge\bfseries SeaBird ISA\\[0.3cm]}}{{\LARGE {volume}: {subtitle}\\[0.5cm]}}
-{{\Large Version 3.0 Release Candidate 1}}\vfill
-{{\large Machine-readable architecture revision 1\\June 27, 2026}}\vfill
+{{\Large Architecture 3.2 / SDK 1.0}}\vfill
+{{\large Machine-readable architecture 3.2\\August 14, 2026}}\vfill
 \end{{titlepage}}
 \tableofcontents\clearpage
 """

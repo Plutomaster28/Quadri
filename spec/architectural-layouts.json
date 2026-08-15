@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "architecture_version": "3.0-rc2",
+  "architecture_version": "3.2",
   "feature_bits": {
     "basic_r0": {
       "CLOWNFISH": 0, "TETRA": 1, "DRAGONET": 2, "DROPLET": 3,
@@ -10,14 +10,15 @@
     "extended_r0": {
       "AVX": 0, "CRYPTO": 1, "DSP": 2, "TXN": 3, "VIRT": 4,
       "SHSTK": 5, "IBT": 6, "BCD": 7, "MLAUNCH": 8, "RNG": 9,
-      "ATOMIC128": 10, "RINGS12": 11
+      "ATOMIC128": 10, "RINGS12": 11, "PERF_MARKERS": 12,
+      "PAE32": 13, "REGISTER_WINDOWS": 14
     }
   },
   "control_registers": {
     "CR0": {"width": 64, "fields": {"PE": [0,1], "MP": [1,1], "EM": [2,1], "TS": [3,1], "NE": [5,1], "WP": [16,1], "AM": [18,1], "PG": [31,1]}},
-    "CR1": {"width": 64, "fields": {"FP": [0,1], "SIMD": [1,1], "AVX": [2,1], "CRYPTO": [3,1], "DSP": [4,1], "TXN": [5,1], "PIO": [6,1], "VIRT": [7,1], "PMU": [8,1], "SHSTK": [9,1], "IBT": [10,1], "RNG": [11,1]}},
+    "CR1": {"width": 64, "fields": {"FP": [0,1], "SIMD": [1,1], "AVX": [2,1], "CRYPTO": [3,1], "DSP": [4,1], "TXN": [5,1], "PIO": [6,1], "VIRT": [7,1], "PMU": [8,1], "SHSTK": [9,1], "IBT": [10,1], "RNG": [11,1], "PAE32": [12,1], "REGISTER_WINDOWS": [13,1]}},
     "CR3": {"width": 64, "fields": {"ASID": [0,12], "ROOT_PFN": [12,40], "NO_FLUSH": [63,1]}},
-    "CR4": {"width": 64, "fields": {"GLOBAL_PAGES": [0,1], "ASID_ENABLE": [1,1], "PKEY_ENABLE": [2,1], "USER_ALIGN": [3,1], "SHSTK_ENABLE": [4,1], "IBT_ENABLE": [5,1], "XSTATE_ENABLE": [6,1], "STAGE2_ENABLE": [7,1]}},
+    "CR4": {"width": 64, "fields": {"GLOBAL_PAGES": [0,1], "ASID_ENABLE": [1,1], "PKEY_ENABLE": [2,1], "USER_ALIGN": [3,1], "SHSTK_ENABLE": [4,1], "IBT_ENABLE": [5,1], "XSTATE_ENABLE": [6,1], "STAGE2_ENABLE": [7,1], "PAE_ENABLE": [8,1], "WINDOW_ENABLE": [9,1]}},
     "MODE": {"width": 64, "fields": {"EXECUTION_MODE": [0,2], "VA_LEVELS_MINUS_4": [2,1]}}
   },
   "query_leaves": {
@@ -27,13 +28,44 @@
     "0x0003": "extended feature bitmap in R0",
     "0x0004": "deterministic cache descriptor indexed by subleaf",
     "0x0005": "xstate component descriptor indexed by subleaf",
+    "0x0006": "performance-marker optimization bitmap in R0; bit (marker_id-1) reports that the implementation acts on that marker, while zero remains fully compliant",
+    "0x0007": "PAE32 and register-window parameters: R0[7:0]=PAE physical bits, R0[15:8]=PAE levels, R0[31:16]=window spill-record bytes; R1[7:0]=minimum resident windows (zero when undisclosed); R2-R3 reserved",
     "0x80000000": "maximum extended leaf",
     "0x80000001": "R0 architecture revision; R1 microarchitecture ID; R2 implementation revision; R3 reserved"
+  },
+  "translation_regimes": {
+    "PAE32": {
+      "virtual_bits": 32, "physical_bits": 36, "pte_bits": 64,
+      "base_page_bytes": 4096, "large_page_bytes": 2097152,
+      "indices": {"L1": [30,2], "L2": [21,9], "L3": [12,9], "OFFSET": [0,12]},
+      "pte_fields": {"P": [0,1], "W": [1,1], "U": [2,1], "R": [3,1], "MT": [4,2], "A": [6,1], "D": [7,1], "PS": [8,1], "G": [9,1], "SW_LOW": [10,2], "PFN36": [12,24], "RESERVED_HIGH": [36,16], "SW_HIGH": [52,7], "PKEY": [59,4], "XD": [63,1]},
+      "memory_types": {"WB": 0, "WT": 1, "UC": 2, "DEVICE": 3},
+      "page_fault_reasons": {"NOT_PRESENT": 1, "READ": 2, "WRITE": 3, "EXECUTE": 4, "USER": 5, "RESERVED": 6, "PHYSICAL_WIDTH": 7, "LARGE_PAGE": 8}
+    }
+  },
+  "register_windows": {
+    "visible_registers": 32, "global": [0,7], "incoming": [8,15],
+    "local": [16,23], "outgoing": [24,31], "overlap_count": 8,
+    "spill_payload_bytes_by_mode": {"Clownfish": 48, "Tetra": 96, "Dragonet": 192, "Droplet": 384},
+    "spill_record_bytes_by_mode": {"Clownfish": 64, "Tetra": 128, "Dragonet": 192, "Droplet": 384},
+    "spill_alignment": 64, "spill_register_order": [8,31],
+    "fresh_local_outgoing_value": 0,
+    "return_in_callee": [8,9], "return_in_caller": [24,25]
+  },
+  "system_registers": {
+    "WSPBR": 27, "WSP": 28, "WDEPTH": 29, "WSTATUS": 30
+  },
+  "system_register_layouts": {
+    "WSPBR": {"width": 64, "fields": {"BASE_63_6": [6,58]}},
+    "WSP": {"width": 64, "fields": {"NEXT_FREE_OFFSET_63_6": [6,58]}},
+    "WDEPTH": {"width": 64, "fields": {"ACTIVE_DEPTH": [0,32], "SPILLED_WINDOWS": [32,32]}},
+    "WSTATUS": {"width": 64, "fields": {"LIMIT_64B_UNITS": [0,32], "PIN_COUNT": [32,16], "ASSIST_PENDING": [48,1], "AREA_EXHAUSTED": [49,1], "AT_ROOT": [50,1]}}
   },
   "structures": {
     "IDT_ENTRY": {"size": 32, "alignment": 32, "fields": {"handler_low": [0,8], "handler_high": [8,8], "target_cpl": [16,1], "gate_type": [17,1], "stack_selector": [18,1], "caller_cpl": [19,1], "present": [20,1], "reserved": [21,11]}},
     "CORE_CONTEXT": {"size": 1024, "alignment": 64, "fields": {"magic": [0,4], "revision": [4,2], "mode": [6,1], "cpl": [7,1], "image_size": [8,4], "flags": [16,16], "ip": [32,16], "gpr_r0_r31": [64,512], "fpcr": [576,8], "fpsr": [584,8], "k0_k7": [592,64], "system_state": [656,112], "reserved": [768,256]}},
     "XSTATE_HEADER": {"size": 64, "alignment": 64, "fields": {"magic": [0,4], "revision": [4,2], "header_size": [6,2], "total_size": [8,4], "present_mask": [16,16], "enabled_mask": [32,16], "checksum": [48,8], "reserved": [56,8]}},
+    "WINDOW_STATE_HEADER": {"size": 64, "alignment": 64, "fields": {"magic": [0,4], "revision": [4,2], "header_size": [6,2], "active_depth": [8,4], "spilled_windows": [12,4], "spill_position": [16,8], "spill_limit": [24,8], "current_pin_count": [32,4], "flags": [36,4], "current_token": [40,8], "record_stride": [48,4], "mode": [52,1], "reserved": [53,11]}},
     "VMCB": {"size": 4096, "alignment": 4096, "fields": {"magic": [0,4], "revision": [4,2], "header_size": [6,2], "total_size": [8,4], "flags": [16,8], "stage2_root": [24,8], "guest_asid": [32,4], "intercept_bitmap": [64,64], "guest_context": [128,1024], "host_context": [1152,1024], "exit_reason": [2176,4], "exit_qualification": [2184,8], "exit_gpa": [2192,16], "injection": [2208,32], "reserved": [2240,1856]}}
   },
   "xstate_components": {
@@ -42,11 +74,13 @@
     "2": {"name": "DEBUG", "alignment": 64, "description": "DBGCTL and DB0-DB7"},
     "3": {"name": "PMU", "alignment": 64, "description": "enabled performance-monitor state"},
     "4": {"name": "TXN", "alignment": 64, "description": "transaction status; no live transaction may be saved"},
-    "5": {"name": "VIRT", "alignment": 64, "description": "virtualization host state"}
+    "5": {"name": "VIRT", "alignment": 64, "description": "virtualization host state"},
+    "6": {"name": "REGISTER_WINDOWS", "alignment": 64, "description": "logical window stack header and implementation-independent spilled-window image"}
   },
   "elf": {
     "class_by_abi": {"SB16": 32, "SB32": 32, "SB64": 64, "SB128": 64},
     "experimental_e_machine": 21314,
+    "flags": {"EF_SB_WINDOWED_ABI": 1, "EF_SB_PAE32_REQUIRED": 2},
     "relocations": {
       "R_SB_NONE": 0, "R_SB_ABS16": 1, "R_SB_ABS32": 2, "R_SB_ABS64": 3,
       "R_SB_ABS128": 4, "R_SB_PCREL8": 5, "R_SB_PCREL16": 6,

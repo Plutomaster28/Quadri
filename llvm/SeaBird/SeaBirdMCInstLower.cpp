@@ -1,4 +1,6 @@
 #include "SeaBirdMCInstLower.h"
+#include "MCTargetDesc/SeaBirdBaseInfo.h"
+#include "llvm/Support/BranchProbability.h"
 #include "llvm/CodeGen/AsmPrinter.h"
 #include "llvm/CodeGen/MachineBasicBlock.h"
 #include "llvm/CodeGen/MachineInstr.h"
@@ -11,8 +13,32 @@ using namespace llvm;
 
 void SeaBirdMCInstLower::lower(const MachineInstr *MI, MCInst &Out) const {
   Out.setOpcode(MI->getOpcode());
+  // Preserve high-confidence LLVM branch probabilities as optional SeaBird
+  // fetch/prediction hints.  The 80/20 threshold intentionally leaves ordinary
+  // and weakly biased branches unmarked.
+  if (MI->isConditionalBranch()) {
+    const MachineBasicBlock *MBB = MI->getParent();
+    const MachineBasicBlock *Target = nullptr;
+    for (const MachineOperand &MO : MI->operands())
+      if (MO.isMBB()) {
+        Target = MO.getMBB();
+        break;
+      }
+    if (Target) {
+      for (auto SI = MBB->succ_begin(), SE = MBB->succ_end(); SI != SE; ++SI) {
+        if (*SI != Target)
+          continue;
+        const BranchProbability Probability = MBB->getSuccProbability(SI);
+        if (Probability >= BranchProbability(4, 5))
+          Out.setFlags(SeaBirdII::Likely);
+        else if (Probability <= BranchProbability(1, 5))
+          Out.setFlags(SeaBirdII::Unlikely);
+        break;
+      }
+    }
+  }
   for (const MachineOperand &MO : MI->operands()) {
-    if (MO.isImplicit() || MO.isRegMask())
+    if (MO.isRegMask() || (MO.isReg() && MO.isImplicit()))
       continue;
     if (MO.isReg()) {
       Out.addOperand(MCOperand::createReg(MO.getReg()));

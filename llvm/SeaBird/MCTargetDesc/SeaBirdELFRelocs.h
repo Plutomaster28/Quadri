@@ -6,6 +6,8 @@
 namespace llvm::SeaBirdELF {
 
 constexpr std::uint16_t EM_SEABIRD = 0x5342;
+constexpr unsigned EF_SB_WINDOWED_ABI = 1U << 0;
+constexpr unsigned EF_SB_PAE32_REQUIRED = 1U << 1;
 enum Relocation : unsigned {
   R_SB_NONE = 0,
   R_SB_ABS16 = 1,

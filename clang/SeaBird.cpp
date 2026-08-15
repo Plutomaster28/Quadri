@@ -17,6 +17,7 @@ SeaBirdTargetInfo::SeaBirdTargetInfo(const llvm::Triple &Triple,
   LongLongWidth = LongLongAlign = 64;
   FloatWidth = FloatAlign = 32;
   DoubleWidth = DoubleAlign = 64;
+  Int128Align = 128;
   LongDoubleWidth = LongDoubleAlign = 128;
   LongDoubleFormat = &llvm::APFloat::IEEEquad();
   SuitableAlign = 128;
@@ -57,6 +58,11 @@ void SeaBirdTargetInfo::getTargetDefines(const LangOptions &Opts,
   }
   if (CPU == "tritium-v1")
     Builder.defineMacro("__SEABIRD_TRITIUM__");
+  if (CPU == "axium-m-v1") {
+    Builder.defineMacro("__SEABIRD_AXIUM_M__");
+    Builder.defineMacro("__SEABIRD_PAE32__", "1");
+    Builder.defineMacro("__SEABIRD_REGISTER_WINDOWS__", "1");
+  }
 }
 
 bool SeaBirdTargetInfo::hasFeature(StringRef Feature) const {
@@ -65,11 +71,15 @@ bool SeaBirdTargetInfo::hasFeature(StringRef Feature) const {
       .Case("seabird32", !Is64Bit)
       .Case("seabird64", Is64Bit)
       .Case("tritium", CPU == "tritium-v1")
+      .Case("pae32", CPU == "axium-m-v1")
+      .Case("register-windows", CPU == "axium-m-v1")
       .Default(false);
 }
 
 bool SeaBirdTargetInfo::isValidCPUName(StringRef Name) const {
   if (Name == "tritium-v1")
+    return !Is64Bit;
+  if (Name == "axium-m-v1")
     return !Is64Bit;
   return Name == "generic" || Name == "seabird-gold" ||
          Name == "seabird-platinum";
@@ -79,7 +89,7 @@ void SeaBirdTargetInfo::fillValidCPUList(
     SmallVectorImpl<StringRef> &Values) const {
   Values.append({"generic", "seabird-gold", "seabird-platinum"});
   if (!Is64Bit)
-    Values.push_back("tritium-v1");
+    Values.append({"tritium-v1", "axium-m-v1"});
 }
 
 bool SeaBirdTargetInfo::setCPU(const std::string &Name) {
